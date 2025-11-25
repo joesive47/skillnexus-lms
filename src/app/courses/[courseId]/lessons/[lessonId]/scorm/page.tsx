@@ -1,0 +1,97 @@
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma'
+import { ScormPlayer } from '@/components/scorm/scorm-player'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+
+interface ScormLessonPageProps {
+  params: Promise<{
+    courseId: string
+    lessonId: string
+  }>
+}
+
+export default async function ScormLessonPage({ params }: ScormLessonPageProps) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect('/login')
+  }
+
+  const { courseId, lessonId } = await params
+
+  // Get lesson and SCORM package
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    include: {
+      course: true,
+      scormPackage: true
+    }
+  })
+
+  if (!lesson) {
+    redirect('/courses')
+  }
+
+  // Check if user is enrolled
+  const enrollment = await prisma.enrollment.findUnique({
+    where: {
+      userId_courseId: {
+        userId: session.user.id,
+        courseId: lesson.courseId
+      }
+    }
+  })
+
+  if (!enrollment && session.user.role !== 'ADMIN') {
+    redirect(`/courses/${courseId}`)
+  }
+
+  if (!lesson.scormPackage) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Link href={`/courses/${courseId}`}>
+                <ArrowLeft className="w-5 h-5 hover:text-blue-600" />
+              </Link>
+              <span>SCORM Content Not Available</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">
+              This lesson does not have SCORM content available.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Link 
+          href={`/courses/${courseId}`}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Course</span>
+        </Link>
+      </div>
+
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">{lesson.title}</h1>
+        <p className="text-gray-600 mt-2">{lesson.course.title}</p>
+      </div>
+
+      <ScormPlayer
+        packagePath={lesson.scormPackage.packagePath}
+        lessonId={lesson.id}
+        userId={session.user.id}
+      />
+    </div>
+  )
+}

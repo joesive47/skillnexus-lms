@@ -1,0 +1,33 @@
+{
+  "layers": {
+    "redis": {
+      "enabled": true,
+      "ttl": {
+        "default": 3600,
+        "user_session": 1800,
+        "course_data": 7200,
+        "analytics": 300
+      }
+    },
+    "serviceWorker": {
+      "enabled": true,
+      "strategies": {
+        "static": "cache-first",
+        "api": "network-first",
+        "video": "cache-first"
+      }
+    },
+    "cdn": {
+      "enabled": true,
+      "maxAge": 86400,
+      "staleWhileRevalidate": 3600
+    }
+  },
+  "invalidation": {
+    "patterns": [
+      "/api/courses/*",
+      "/api/user/*",
+      "/api/analytics/*"
+    ]
+  }
+}

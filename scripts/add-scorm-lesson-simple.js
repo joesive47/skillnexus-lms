@@ -1,0 +1,100 @@
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+async function addScormLesson() {
+  try {
+    console.log('🚀 Adding SCORM lesson to existing course...')
+
+    // Find the existing course
+    const course = await prisma.course.findFirst({
+      where: { title: 'Introduction to Programming' },
+      include: { modules: true }
+    })
+
+    if (!course) {
+      console.error('❌ Course not found')
+      return
+    }
+
+    console.log(`✅ Found course: ${course.title}`)
+
+    // Create a SCORM lesson
+    const scormLesson = await prisma.lesson.create({
+      data: {
+        title: 'Interactive SCORM Demo',
+        courseId: course.id,
+        lessonType: 'SCORM',
+        type: 'SCORM',
+        order: 4,
+        moduleId: course.modules[1]?.id || course.modules[0]?.id, // Add to second or first module
+        content: 'Interactive SCORM content with quiz and progress tracking',
+        duration: 900, // 15 minutes
+        requiredCompletionPercentage: 100
+      }
+    })
+
+    console.log(`✅ Created SCORM lesson: ${scormLesson.title} (ID: ${scormLesson.id})`)
+
+    // Create SCORM package entry
+    const scormPackage = await prisma.scormPackage.create({
+      data: {
+        lessonId: scormLesson.id,
+        packagePath: '/scorm-sample',
+        title: 'Sample SCORM Course',
+        identifier: 'com.example.scorm.sample',
+        version: '2004 4th Edition',
+        manifest: JSON.stringify({
+          identifier: 'com.example.scorm.sample',
+          title: 'Sample SCORM Course',
+          version: '2004 4th Edition',
+          organizations: {
+            organization: [{
+              identifier: 'ORG-001',
+              title: 'Sample SCORM Course',
+              item: [{
+                identifier: 'ITEM-001',
+                title: 'Introduction to SCORM',
+                identifierref: 'RES-001'
+              }]
+            }]
+          },
+          resources: {
+            resource: [{
+              identifier: 'RES-001',
+              type: 'webcontent',
+              href: 'index.html'
+            }]
+          }
+        })
+      }
+    })
+      
+    console.log(`✅ SCORM package created: ${scormPackage.id}`)
+
+    // Check existing enrollments
+    const enrollments = await prisma.enrollment.findMany({
+      where: { courseId: course.id },
+      include: { user: true }
+    })
+
+    console.log(`📚 Found ${enrollments.length} existing enrollments`)
+
+    console.log('✅ SCORM lesson setup complete!')
+    console.log('\n📋 Summary:')
+    console.log(`- Course: ${course.title}`)
+    console.log(`- SCORM Lesson: ${scormLesson.title}`)
+    console.log(`- Lesson ID: ${scormLesson.id}`)
+    console.log(`- Package ID: ${scormPackage.id}`)
+    console.log(`- Students enrolled: ${enrollments.length}`)
+    console.log('\n🎯 Students can now access the SCORM content in their dashboard!')
+    console.log('📍 SCORM content is available at: /scorm-sample/index.html')
+
+  } catch (error) {
+    console.error('❌ Error adding SCORM lesson:', error)
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+addScormLesson()

@@ -1,0 +1,270 @@
+// Phase 3: Advanced Features Schema
+// 🎮 Gamification, 🏆 Achievements, 📊 Analytics, 🤝 Collaboration
+
+// 🎮 Gamification Models
+model UserProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  level           Int      @default(1)
+  experience      Int      @default(0)
+  totalPoints     Int      @default(0)
+  streak          Int      @default(0)
+  longestStreak   Int      @default(0)
+  lastActivity    DateTime @default(now())
+  avatar          String?
+  title           String?  @default("Learner")
+  badges          Badge[]
+  achievements    UserAchievement[]
+  leaderboards    LeaderboardEntry[]
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_profiles")
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  icon        String?
+  color       String?  @default("#3B82F6")
+  rarity      String   @default("COMMON") // COMMON, RARE, EPIC, LEGENDARY
+  points      Int      @default(10)
+  criteria    String?  // JSON criteria for earning
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  profiles    UserProfile[]
+  achievements UserAchievement[]
+  
+  @@map("badges")
+}
+
+model UserAchievement {
+  id          String      @id @default(cuid())
+  userId      String
+  badgeId     String
+  earnedAt    DateTime    @default(now())
+  progress    Int         @default(100)
+  metadata    String?     // JSON for additional data
+  profile     UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       Badge       @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, badgeId])
+  @@map("user_achievements")
+}
+
+model LeaderboardEntry {
+  id          String      @id @default(cuid())
+  userId      String
+  category    String      // "weekly", "monthly", "all_time", "course_specific"
+  points      Int         @default(0)
+  rank        Int?
+  period      String?     // "2024-W01", "2024-01", etc.
+  courseId    String?
+  updatedAt   DateTime    @updatedAt
+  profile     UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course?     @relation(fields: [courseId], references: [id])
+  
+  @@unique([userId, category, period])
+  @@map("leaderboard_entries")
+}
+
+// 📊 Advanced Analytics Models
+model LearningAnalytics {
+  id                String   @id @default(cuid())
+  userId            String
+  courseId          String?
+  lessonId          String?
+  sessionDuration   Int      // in seconds
+  completionRate    Float    @default(0)
+  engagementScore   Float    @default(0)
+  difficultyRating  Int?     // 1-5 scale
+  satisfactionScore Int?     // 1-5 scale
+  deviceType        String?  // "mobile", "desktop", "tablet"
+  browserType       String?
+  location          String?  // country/region
+  timeOfDay         Int?     // hour 0-23
+  dayOfWeek         Int?     // 0-6
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course?  @relation(fields: [courseId], references: [id])
+  lesson            Lesson?  @relation(fields: [lessonId], references: [id])
+  
+  @@map("learning_analytics")
+}
+
+model SystemMetrics {
+  id              String   @id @default(cuid())
+  metricType      String   // "user_activity", "course_completion", "system_performance"
+  metricName      String
+  value           Float
+  unit            String?  // "percentage", "count", "seconds", etc.
+  period          String   // "hourly", "daily", "weekly", "monthly"
+  periodValue     String   // "2024-01-15", "2024-W03", etc.
+  metadata        String?  // JSON for additional context
+  createdAt       DateTime @default(now())
+  
+  @@index([metricType, periodValue])
+  @@map("system_metrics")
+}
+
+model UserBehavior {
+  id            String   @id @default(cuid())
+  userId        String
+  action        String   // "login", "course_start", "lesson_complete", "quiz_attempt"
+  target        String?  // courseId, lessonId, etc.
+  duration      Int?     // time spent on action
+  result        String?  // "success", "failure", "abandoned"
+  metadata      String?  // JSON for additional data
+  ipAddress     String?
+  userAgent     String?
+  referrer      String?
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@map("user_behaviors")
+}
+
+// 🤝 Collaboration Models
+model StudyGroup {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  courseId    String?
+  creatorId   String
+  isPublic    Boolean           @default(false)
+  maxMembers  Int               @default(10)
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  course      Course?           @relation(fields: [courseId], references: [id])
+  creator     User              @relation("CreatedGroups", fields: [creatorId], references: [id])
+  members     StudyGroupMember[]
+  discussions GroupDiscussion[]
+  sessions    StudySession[]
+  
+  @@map("study_groups")
+}
+
+model StudyGroupMember {
+  id        String     @id @default(cuid())
+  groupId   String
+  userId    String
+  role      String     @default("MEMBER") // "ADMIN", "MODERATOR", "MEMBER"
+  joinedAt  DateTime   @default(now())
+  isActive  Boolean    @default(true)
+  group     StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([groupId, userId])
+  @@map("study_group_members")
+}
+
+model GroupDiscussion {
+  id        String            @id @default(cuid())
+  groupId   String
+  title     String
+  content   String
+  authorId  String
+  isPinned  Boolean           @default(false)
+  isLocked  Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  group     StudyGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  author    User              @relation(fields: [authorId], references: [id])
+  replies   DiscussionReply[]
+  
+  @@map("group_discussions")
+}
+
+model DiscussionReply {
+  id           String          @id @default(cuid())
+  discussionId String
+  content      String
+  authorId     String
+  parentId     String?         // for nested replies
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  discussion   GroupDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  author       User            @relation(fields: [authorId], references: [id])
+  parent       DiscussionReply? @relation("ReplyThread", fields: [parentId], references: [id])
+  replies      DiscussionReply[] @relation("ReplyThread")
+  
+  @@map("discussion_replies")
+}
+
+model StudySession {
+  id          String               @id @default(cuid())
+  groupId     String
+  title       String
+  description String?
+  scheduledAt DateTime
+  duration    Int                  @default(60) // minutes
+  status      String               @default("SCHEDULED") // "SCHEDULED", "ACTIVE", "COMPLETED", "CANCELLED"
+  meetingUrl  String?
+  createdBy   String
+  createdAt   DateTime             @default(now())
+  group       StudyGroup           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creator     User                 @relation(fields: [createdBy], references: [id])
+  attendees   SessionAttendance[]
+  
+  @@map("study_sessions")
+}
+
+model SessionAttendance {
+  id        String       @id @default(cuid())
+  sessionId String
+  userId    String
+  status    String       @default("REGISTERED") // "REGISTERED", "ATTENDED", "ABSENT"
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  session   StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id])
+  
+  @@unique([sessionId, userId])
+  @@map("session_attendance")
+}
+
+model PeerReview {
+  id          String   @id @default(cuid())
+  reviewerId  String
+  revieweeId  String
+  courseId    String?
+  lessonId    String?
+  rating      Int      // 1-5 scale
+  comment     String?
+  isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee    User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  course      Course?  @relation(fields: [courseId], references: [id])
+  lesson      Lesson?  @relation(fields: [lessonId], references: [id])
+  
+  @@unique([reviewerId, revieweeId, courseId, lessonId])
+  @@map("peer_reviews")
+}
+
+// Extend existing User model with new relations
+// Add these to the existing User model:
+// userProfile         UserProfile?
+// createdGroups       StudyGroup[]         @relation("CreatedGroups")
+// groupMemberships    StudyGroupMember[]
+// discussions         GroupDiscussion[]
+// discussionReplies   DiscussionReply[]
+// createdSessions     StudySession[]
+// sessionAttendances  SessionAttendance[]
+// reviewsGiven        PeerReview[]         @relation("ReviewsGiven")
+// reviewsReceived     PeerReview[]         @relation("ReviewsReceived")
+// analytics           LearningAnalytics[]
+// behaviors           UserBehavior[]
+
+// Extend existing Course model with new relations:
+// leaderboards        LeaderboardEntry[]
+// analytics           LearningAnalytics[]
+// studyGroups         StudyGroup[]
+// peerReviews         PeerReview[]
+
+// Extend existing Lesson model with new relations:
+// analytics           LearningAnalytics[]
+// peerReviews         PeerReview[]

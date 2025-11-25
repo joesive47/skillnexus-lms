@@ -1,0 +1,93 @@
+// Enhanced schema for new features
+
+model XAPIStatement {
+  id           String   @id @default(cuid())
+  actorName    String
+  actorEmail   String
+  verbId       String
+  verbDisplay  String
+  objectId     String
+  objectName   String
+  result       String?
+  timestamp    DateTime
+  rawStatement String
+  createdAt    DateTime @default(now())
+
+  @@map("xapi_statements")
+}
+
+model GamificationProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  totalXP    Int      @default(0)
+  level      Int      @default(1)
+  streak     Int      @default(0)
+  badges     String   @default("[]")
+  lastActive DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("gamification_profiles")
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  xpReward    Int               @default(0)
+  criteria    String
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  users       UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievementNew {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements_new")
+}
+
+model PredictiveModel {
+  id         String   @id @default(cuid())
+  userId     String
+  modelType  String
+  prediction String
+  confidence Float
+  createdAt  DateTime @default(now())
+  validUntil DateTime
+
+  @@map("predictive_models")
+}
+
+model LearningAnalytics {
+  id              String   @id @default(cuid())
+  userId          String
+  sessionDuration Int
+  completionRate  Float
+  engagementScore Float
+  difficultyLevel String
+  timestamp       DateTime @default(now())
+
+  @@map("learning_analytics")
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  quizId    String
+  score     Float
+  maxScore  Float
+  passed    Boolean
+  timeSpent Int
+  createdAt DateTime @default(now())
+
+  @@map("quiz_attempts")
+}

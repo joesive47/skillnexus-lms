@@ -1,0 +1,60 @@
+// Gamification Schema Extension - เพิ่มเติมใน schema.prisma เดิม
+// ไม่แก้โครงสร้างเดิม เพิ่มเติมเท่านั้น
+
+model User {
+  // ... existing fields ...
+  
+  // Gamification fields (เพิ่มเติม)
+  points        Int      @default(0)
+  level         Int      @default(1)
+  streak        Int      @default(0)
+  lastActiveDate DateTime?
+  
+  // Relations (เพิ่มเติม)
+  badges        UserBadge[]
+  pointHistory  PointTransaction[]
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?
+  condition   String   // JSON condition
+  points      Int      @default(0)
+  createdAt   DateTime @default(now())
+  
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, badgeId])
+}
+
+model PointTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  points    Int
+  type      String   // EARNED, SPENT, BONUS
+  source    String   // LESSON_COMPLETE, QUIZ_PASS
+  sourceId  String?
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  enabled     Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+}

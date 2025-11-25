@@ -1,0 +1,206 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { Play, Pause, RotateCcw, ExternalLink } from 'lucide-react'
+
+interface ScormPlayerProps {
+  packagePath: string
+  lessonId: string
+  userId: string
+  onComplete?: () => void
+}
+
+export function ScormPlayer({ packagePath, lessonId, userId, onComplete }: ScormPlayerProps) {
+  const [isLoading, setIsLoading] = useState(true)
+  const [progress, setProgress] = useState(0)
+  const [completionStatus, setCompletionStatus] = useState('incomplete')
+  const [score, setScore] = useState<number | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => {
+    // Load existing progress
+    loadProgress()
+  }, [lessonId, userId])
+
+  async function loadProgress() {
+    try {
+      const response = await fetch(`/api/scorm/progress?lessonId=${lessonId}&userId=${userId}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.progress) {
+          setProgress(data.progress.scoreRaw || 0)
+          setCompletionStatus(data.progress.completionStatus || 'incomplete')
+          setScore(data.progress.scoreRaw)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading progress:', error)
+    }
+  }
+
+  async function saveProgress(cmiData: any) {
+    try {
+      await fetch('/api/scorm/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lessonId,
+          userId,
+          cmiData,
+        }),
+      })
+
+      // Update local state
+      if (cmiData['cmi.score.raw']) {
+        setScore(parseFloat(cmiData['cmi.score.raw']))
+        setProgress(parseFloat(cmiData['cmi.score.raw']))
+      }
+
+      if (cmiData['cmi.completion_status']) {
+        setCompletionStatus(cmiData['cmi.completion_status'])
+        if (cmiData['cmi.completion_status'] === 'completed') {
+          // Handle completion internally
+          console.log('SCORM lesson completed!')
+          onComplete?.()
+        }
+      }
+    } catch (error) {
+      console.error('Error saving progress:', error)
+    }
+  }
+
+  function handleIframeLoad() {
+    setIsLoading(false)
+    
+    // Set up SCORM API communication
+    if (iframeRef.current?.contentWindow) {
+      const iframe = iframeRef.current.contentWindow as any
+      
+      // Provide SCORM API to the content
+      iframe.API = {
+        LMSInitialize: () => 'true',
+        LMSFinish: () => 'true',
+        LMSGetValue: (element: string) => {
+          // Return stored values based on element
+          switch (element) {
+            case 'cmi.completion_status':
+              return completionStatus
+            case 'cmi.score.raw':
+              return score?.toString() || ''
+            default:
+              return ''
+          }
+        },
+        LMSSetValue: (element: string, value: string) => {
+          // Handle setting values
+          const cmiData: any = {}
+          cmiData[element] = value
+          saveProgress(cmiData)
+          return 'true'
+        },
+        LMSCommit: () => 'true',
+        LMSGetLastError: () => '0',
+        LMSGetErrorString: () => '',
+        LMSGetDiagnostic: () => ''
+      }
+
+      // Also provide API_1484_11 for SCORM 2004
+      iframe.API_1484_11 = iframe.API
+    }
+  }
+
+  function resetProgress() {
+    setProgress(0)
+    setScore(null)
+    setCompletionStatus('incomplete')
+    
+    // Reload iframe
+    if (iframeRef.current) {
+      iframeRef.current.src = iframeRef.current.src
+    }
+  }
+
+  function openInNewWindow() {
+    const scormUrl = `${packagePath}/index.html`
+    window.open(scormUrl, '_blank', 'width=1024,height=768,scrollbars=yes,resizable=yes')
+  }
+
+  const scormUrl = `${packagePath}/index.html`
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>SCORM Content</span>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetProgress}
+              disabled={isLoading}
+            >
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Reset
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openInNewWindow}
+            >
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Open in New Window
+            </Button>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Progress Information */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Progress:</span>
+            <span>{completionStatus === 'completed' ? 'Completed' : 'In Progress'}</span>
+          </div>
+          {score !== null && (
+            <div className="flex justify-between text-sm">
+              <span>Score:</span>
+              <span>{score}%</span>
+            </div>
+          )}
+          <Progress value={progress} className="w-full" />
+        </div>
+
+        {/* SCORM Content Frame */}
+        <div className="relative">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Loading SCORM content...</p>
+              </div>
+            </div>
+          )}
+          <iframe
+            ref={iframeRef}
+            src={scormUrl}
+            className="w-full h-[600px] border rounded-lg"
+            onLoad={handleIframeLoad}
+            title="SCORM Content"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          />
+        </div>
+
+        {/* Instructions */}
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>• This SCORM content will automatically save your progress</p>
+          <p>• Complete all activities to mark this lesson as finished</p>
+          <p>• Use "Open in New Window" for better experience if needed</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test RAG Upload</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 20px 0; }
+        .result { margin: 20px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+        .error { background: #ffe6e6; color: #d00; }
+        .success { background: #e6ffe6; color: #060; }
+        button { padding: 10px 20px; background: #007cba; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test RAG Document Upload</h1>
+        
+        <div class="upload-area">
+            <input type="file" id="fileInput" accept=".pdf,.txt,.docx,.doc" />
+            <br><br>
+            <button onclick="uploadFile()">Upload Document</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <div>
+            <h3>📋 Test Files:</h3>
+            <button onclick="createTestFile('txt')">Create Test TXT</button>
+            <button onclick="createTestFile('docx')">Test DOCX Upload</button>
+            <button onclick="testAPI()">Test API Status</button>
+        </div>
+    </div>
+
+    <script>
+        function showResult(message, isError = false) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = isError ? 'result error' : 'result success';
+            result.style.display = 'block';
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('Please select a file first', true);
+                return;
+            }
+
+            showResult('Uploading... Please wait...');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/test-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Success: ${result.message || 'File uploaded successfully'}`);
+                } else {
+                    showResult(`❌ Error: ${result.error || 'Upload failed'}`, true);
+                }
+            } catch (error) {
+                showResult(`❌ Network Error: ${error.message}`, true);
+            }
+        }
+
+        function createTestFile(type) {
+            const content = `This is a test document for RAG upload.
+            
+This document contains sample text to test the document processing functionality.
+It includes multiple paragraphs and should be processed correctly by the system.
+
+Key points:
+- Document processing test
+- RAG system validation  
+- Upload functionality check
+
+The system should extract this text and create embeddings for semantic search.`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const file = new File([blob], `test-document.${type}`, { type: 'text/plain' });
+            
+            const fileInput = document.getElementById('fileInput');
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            
+            showResult(`📄 Test ${type.toUpperCase()} file created and selected`);
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch('/api/chatbot/documents');
+                const result = await response.json();
+                showResult(`📊 API Status: ${response.status} - Found ${result.length || 0} documents`);
+            } catch (error) {
+                showResult(`❌ API Error: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
