@@ -110,7 +110,19 @@ export default async function LessonPage({ params }: LessonPageProps) {
           )}
         </CardHeader>
         <CardContent>
-          {lesson.lessonType === 'VIDEO' && youtubeId ? (
+          {lesson.lessonType === 'VOICE_PRACTICE' ? (
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 p-6 rounded-lg">
+                <h3 className="text-xl font-semibold mb-2">🎤 Voice Practice</h3>
+                <p className="text-muted-foreground mb-4">
+                  ฝึกทักษะการพูดและรับ Feedback จาก AI
+                </p>
+                <Button asChild size="lg">
+                  <Link href={`/lesson/${lesson.id}/voice-practice`}>เริ่มฝึกพูด</Link>
+                </Button>
+              </div>
+            </div>
+          ) : lesson.lessonType === 'VIDEO' && youtubeId ? (
             <VideoPlayerWrapper
               youtubeId={youtubeId}
               lessonId={lesson.id}

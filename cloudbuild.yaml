@@ -1,0 +1,18 @@
+steps:
+  # Install dependencies
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['install']
+
+  # Build Next.js app
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['run', 'build']
+
+  # Generate Prisma Client
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['run', 'db:generate']
+
+  # Deploy to App Engine
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy', '--quiet']
+
+timeout: '1600s'

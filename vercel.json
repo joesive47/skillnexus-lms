@@ -1,48 +1,9 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
+  "buildCommand": "prisma generate && next build",
   "env": {
-    "DATABASE_URL": "@database_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url"
-  },
-  "build": {
-    "env": {
-      "DATABASE_URL": "@database_url",
-      "NEXTAUTH_SECRET": "@nextauth_secret",
-      "NEXTAUTH_URL": "@nextauth_url"
-    }
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/scorm/:path*",
-      "destination": "/api/scorm/:path*"
-    }
-  ]
+    "DATABASE_URL": "postgresql://skillnexus-user:SkillNexus2025!Secure@34.124.203.250:5432/skillnexus?sslmode=require",
+    "NEXTAUTH_URL": "https://uppowerskill.com",
+    "NEXTAUTH_SECRET": "rmQnCNXy9qxpobw61k3E2HWAcRezvfgt",
+    "JWT_SECRET": "jUng2EDA3aWX80GsJwkyCML1rQSVpPbN"
+  }
 }

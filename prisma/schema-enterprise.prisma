@@ -1,0 +1,193 @@
+// Phase 6: Enterprise Multi-Tenant Schema Extension
+
+model Tenant {
+  id                String              @id @default(cuid())
+  name              String
+  domain            String              @unique
+  subdomain         String?             @unique
+  status            String              @default("active") // active, suspended, inactive
+  plan              String              @default("basic") // basic, professional, enterprise
+  maxUsers          Int                 @default(100)
+  maxStorage        Int                 @default(10240) // MB
+  maxBandwidth      Int                 @default(100000) // MB/month
+  features          String?             // JSON array of enabled features
+  customBranding    String?             // JSON: logo, colors, etc.
+  settings          String?             // JSON: tenant-specific settings
+  billingEmail      String?
+  contactName       String?
+  contactEmail      String?
+  contactPhone      String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  expiresAt         DateTime?
+  lastActivityAt    DateTime            @default(now())
+  
+  users             TenantUser[]
+  courses           TenantCourse[]
+  usage             TenantUsage[]
+  subscriptions     TenantSubscription[]
+  auditLogs         AuditLog[]
+  
+  @@map("tenants")
+}
+
+model TenantUser {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  role        String   @default("member") // owner, admin, manager, member
+  status      String   @default("active") // active, suspended, invited
+  permissions String?  // JSON array of custom permissions
+  joinedAt    DateTime @default(now())
+  invitedBy   String?
+  
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, userId])
+  @@map("tenant_users")
+}
+
+model TenantCourse {
+  id        String   @id @default(cuid())
+  tenantId  String
+  courseId  String
+  isShared  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, courseId])
+  @@map("tenant_courses")
+}
+
+model TenantUsage {
+  id              String   @id @default(cuid())
+  tenantId        String
+  date            DateTime @default(now())
+  activeUsers     Int      @default(0)
+  totalUsers      Int      @default(0)
+  totalCourses    Int      @default(0)
+  storageUsed     Int      @default(0) // MB
+  bandwidthUsed   Int      @default(0) // MB
+  apiCalls        Int      @default(0)
+  videoMinutes    Int      @default(0)
+  
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, date])
+  @@map("tenant_usage")
+}
+
+model TenantSubscription {
+  id              String    @id @default(cuid())
+  tenantId        String
+  plan            String    // basic, professional, enterprise
+  status          String    @default("active") // active, cancelled, expired
+  billingCycle    String    @default("monthly") // monthly, yearly
+  amount          Int       // in cents
+  currency        String    @default("USD")
+  startDate       DateTime  @default(now())
+  endDate         DateTime?
+  autoRenew       Boolean   @default(true)
+  paymentMethod   String?
+  stripeSubId     String?   @unique
+  
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@map("tenant_subscriptions")
+}
+
+model CustomRole {
+  id          String   @id @default(cuid())
+  tenantId    String?  // null for system roles
+  name        String
+  description String?
+  permissions String   // JSON array of permissions
+  isSystem    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  assignments RoleAssignment[]
+  
+  @@unique([tenantId, name])
+  @@map("custom_roles")
+}
+
+model RoleAssignment {
+  id         String    @id @default(cuid())
+  userId     String
+  roleId     String
+  scope      String    @default("global") // global, department, team
+  scopeId    String?   // department/team ID
+  assignedBy String
+  assignedAt DateTime  @default(now())
+  expiresAt  DateTime?
+  
+  role       CustomRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId, scope])
+  @@map("role_assignments")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  userId      String?
+  action      String   // create, update, delete, login, etc.
+  resource    String   // user, course, tenant, etc.
+  resourceId  String?
+  details     String?  // JSON with additional details
+  ipAddress   String?
+  userAgent   String?
+  status      String   @default("success") // success, failed
+  createdAt   DateTime @default(now())
+  
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  parentId    String?
+  managerId   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("departments")
+}
+
+model Team {
+  id           String   @id @default(cuid())
+  tenantId     String
+  departmentId String?
+  name         String
+  description  String?
+  leaderId     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("teams")
+}
+
+model BusinessMetric {
+  id          String   @id @default(cuid())
+  tenantId    String
+  metricType  String   // completion_rate, engagement, roi, etc.
+  value       Float
+  period      String   // daily, weekly, monthly
+  date        DateTime
+  metadata    String?  // JSON with additional data
+  createdAt   DateTime @default(now())
+  
+  @@index([tenantId, metricType, date])
+  @@map("business_metrics")
+}

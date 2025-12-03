@@ -68,6 +68,15 @@ export default async function AdminDashboard() {
       count: "156"
     },
     {
+      title: "BARD Certificates",
+      description: "จัดการใบรับรอง BARD (Behavioral, Aptitude, Role-specific, Development)",
+      icon: Award,
+      href: "/dashboard/admin/bard-certificates",
+      gradient: "from-pink-500 to-pink-600",
+      bgGradient: "from-pink-50 to-pink-100",
+      count: "89"
+    },
+    {
       title: "Skills Assessment System",
       description: "ระบบประเมินทักษะและการจัดการข้อสอบ",
       icon: Shield,

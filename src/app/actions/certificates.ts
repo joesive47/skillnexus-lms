@@ -42,18 +42,22 @@ export async function generateCertificate(courseId: string) {
     })
 
     if (existingCertificate) {
-      return { success: true, certificateId: existingCertificate.uniqueId }
+      return { success: true, certificateId: existingCertificate.verificationToken }
     }
 
     // สร้างใบประกาศนียบัตรใหม่
     const certificate = await prisma.certificate.create({
       data: {
+        certificateNumber: `CERT-${Date.now()}`,
         userId: session.user.id,
-        courseId: courseId
+        courseId: courseId,
+        verificationToken: require('crypto').randomBytes(16).toString('hex'),
+        digitalSignature: 'legacy-cert',
+        bardData: '{}'
       }
     })
 
-    return { success: true, certificateId: certificate.uniqueId }
+    return { success: true, certificateId: certificate.verificationToken }
   } catch (error) {
     console.error('Error generating certificate:', error)
     return { 
@@ -110,7 +114,7 @@ export async function getUserCertificates() {
 
 export async function verifyCertificate(certificateId: string) {
   const certificate = await prisma.certificate.findUnique({
-    where: { uniqueId: certificateId },
+    where: { verificationToken: certificateId },
     include: {
       user: {
         select: {

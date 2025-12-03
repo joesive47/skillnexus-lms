@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from '@/components/providers'
 import { ErrorBoundary } from '@/components/error-boundary'
-import { ChatWidget } from '@/components/chatbot/ChatWidget'
-import AIVirtualAssistant from '@/components/ai/AIVirtualAssistant'
+import UnifiedChatWidget from '@/components/chatbot/UnifiedChatWidget'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -24,8 +23,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>
             {children}
-            <ChatWidget />
-            <AIVirtualAssistant />
+            <UnifiedChatWidget />
           </Providers>
         </ErrorBoundary>
       </body>

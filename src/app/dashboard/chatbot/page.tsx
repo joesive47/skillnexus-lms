@@ -27,7 +27,7 @@ export default function ChatbotPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'สวัสดีครับ! ผมเป็น AI Assistant ของ SkillNexus LMS พร้อมช่วยเหลือคุณเรื่องหลักสูตรและการเรียนรู้ มีอะไรให้ช่วยไหมครับ?',
+      text: 'สวัสดีครับ! ผมคือ SkillNexus Assistant ผู้ช่วยการเรียนรู้ AI ของ SkillNexus LMS พร้อมช่วยเหลือคุณเรื่องหลักสูตรและการเรียนรู้ มีอะไรให้ช่วยไหมครับ?',
       isBot: true,
       timestamp: new Date()
     }
@@ -241,7 +241,7 @@ export default function ChatbotPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
           <Bot className="w-8 h-8 text-blue-500" />
-          SkillNexus AI Chatbot
+          SkillNexus Assistant
         </h1>
         <p className="text-gray-600">ระบบ AI Assistant สำหรับตอบคำถามเกี่ยวกับ SkillNexus LMS</p>
       </div>

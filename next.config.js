@@ -1,9 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons']
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
-  serverExternalPackages: ['@xenova/transformers', 'pdf-parse', 'mammoth'],
+  experimental: {
+    outputFileTracingExcludes: {
+      '*': ['node_modules/@swc/core-linux-x64-gnu', 'node_modules/@swc/core-linux-x64-musl'],
+    },
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    serverComponentsExternalPackages: ['@xenova/transformers', 'pdf-parse', 'mammoth']
+  },
   images: {
     remotePatterns: [
       {

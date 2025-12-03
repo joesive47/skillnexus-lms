@@ -126,7 +126,8 @@ export function LearningInsights({ userId }: LearningInsightsProps) {
                     cy="50%"
                     outerRadius={80}
                     dataKey="value"
-                    label={({ skill, value }) => `${skill}: ${value}%`}
+                    label={({ name, value }) => `${name}: ${value}%`}
+                    nameKey="skill"
                   >
                     {insights.skillDistribution.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -14,7 +14,7 @@ interface CertificatePageProps {
 
 async function getCertificate(certificateId: string) {
   const certificate = await prisma.certificate.findUnique({
-    where: { uniqueId: certificateId },
+    where: { certificateNumber: certificateId },
     include: {
       user: {
         select: {
@@ -96,7 +96,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                     <FileText className="w-6 h-6 mx-auto mb-2 text-gray-600" />
                     <p className="text-sm text-muted-foreground">Certificate ID</p>
                     <p className="font-mono text-sm font-medium">
-                      {certificate.uniqueId}
+                      {certificate.certificateNumber}
                     </p>
                   </div>
                 </div>
@@ -136,13 +136,13 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
           {/* Action Buttons */}
           <div className="flex justify-center gap-4 mt-8">
             <Button variant="outline" asChild>
-              <a href={`/api/certificates/${certificate.uniqueId}/download`} download>
+              <a href={`/api/certificates/${certificate.certificateNumber}/download`} download>
                 <Download className="w-4 h-4 mr-2" />
                 Download HTML
               </a>
             </Button>
             <Button variant="outline" onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/certificates/${certificate.uniqueId}`)
+              navigator.clipboard.writeText(`${window.location.origin}/certificates/${certificate.certificateNumber}`)
               alert('ลิงก์ใบประกาศนียบัตรถูกคัดลอกแล้ว!')
             }}>
               <Share className="w-4 h-4 mr-2" />
@@ -167,7 +167,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                 <div className="flex justify-center gap-4 text-xs text-muted-foreground">
                   <span>Issued by: SkillNexus LMS</span>
                   <span>•</span>
-                  <span>Verification ID: {certificate.uniqueId}</span>
+                  <span>Verification ID: {certificate.certificateNumber}</span>
                   <span>•</span>
                   <span>Blockchain Verified</span>
                 </div>

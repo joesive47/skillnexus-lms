@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -71,6 +71,7 @@ model Lesson {
   interactiveResults           InteractiveResults[]
   scormPackage                 ScormPackage?
   peerReviews                  PeerReview[]
+  voiceAssignments             VoiceAssignment[]
 
   @@map("lessons")
 }
@@ -118,14 +119,15 @@ model Quiz {
 }
 
 model Question {
-  id            String         @id @default(cuid())
+  id            String                @id @default(cuid())
   text          String
-  type          String         @default("MULTIPLE_CHOICE")
+  type          String                @default("MULTIPLE_CHOICE")
   quizId        String
-  order         Int            @default(0)
+  order         Int                   @default(0)
   correctAnswer String?
   options       AnswerOption[]
-  quiz          Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  bardSkills    QuestionBARDSkill[]
+  quiz          Quiz                  @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@map("questions")
 }
@@ -179,16 +181,47 @@ model SkillAssessment {
 }
 
 model Certificate {
-  id       String   @id @default(cuid())
-  uniqueId String   @unique @default(cuid())
-  userId   String
-  courseId String
-  issuedAt DateTime @default(now())
-  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String   @id @default(cuid())
+  certificateNumber String   @unique
+  userId            String
+  courseId          String
+  verificationToken String   @unique
+  digitalSignature  String
+  qrCodeUrl         String?
+  pdfUrl            String?
+  status            String   @default("ACTIVE")
+  issuedAt          DateTime @default(now())
+  expiresAt         DateTime?
+  bardData          String
+  course            Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+  @@index([userId, verificationToken])
   @@map("certificates")
+}
+
+model BARDSkill {
+  id          String                @id @default(cuid())
+  name        String
+  category    String
+  description String?
+  createdAt   DateTime              @default(now())
+  questions   QuestionBARDSkill[]
+
+  @@unique([name, category])
+  @@map("bard_skills")
+}
+
+model QuestionBARDSkill {
+  id         String    @id @default(cuid())
+  questionId String
+  bardSkillId String
+  question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  bardSkill  BARDSkill @relation(fields: [bardSkillId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, bardSkillId])
+  @@map("question_bard_skills")
 }
 
 model Classroom {
@@ -337,6 +370,8 @@ model User {
   certificateTemplate  Int?                       @default(1)
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime                   @updatedAt
+  apiKeys              ApiKey[]
+  webhooks             Webhook[]
   assessmentResults    AssessmentResult[]
   certificates         Certificate[]
   chatSessions         ChatSession[]
@@ -363,6 +398,7 @@ model User {
   givenReviews         PeerReview[]           @relation("GivenReviews")
   receivedReviews      PeerReview[]           @relation("ReceivedReviews")
   profile              UserProfile?
+  voiceSubmissions     VoiceSubmission[]      @relation("VoiceSubmissions")
 
   @@map("users")
 }
@@ -853,4 +889,104 @@ model LeaderboardEntry {
 
   @@unique([userId, category, period])
   @@map("leaderboard_entries")
+}
+
+model VoiceAssignment {
+  id            String            @id @default(cuid())
+  lessonId      String
+  title         String
+  instruction   String
+  targetText    String?
+  keywords      String?
+  minWords      Int               @default(50)
+  maxDuration   Int               @default(120)
+  passingScore  Int               @default(70)
+  aiMode        String            @default("FREE")
+  maxAttempts   Int               @default(3)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  lesson        Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  submissions   VoiceSubmission[]
+
+  @@map("voice_assignments")
+}
+
+model VoiceSubmission {
+  id             String          @id @default(cuid())
+  assignmentId   String
+  studentId      String
+  audioUrl       String
+  duration       Int
+  transcription  String
+  analysis       String?
+  score          Int
+  feedback       String
+  attempt        Int
+  status         String
+  aiMode         String
+  creditsUsed    Int             @default(0)
+  createdAt      DateTime        @default(now())
+  assignment     VoiceAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student        User            @relation("VoiceSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("voice_submissions")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  name        String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("api_keys")
+}
+
+model ApiLog {
+  id           String   @id @default(cuid())
+  method       String
+  path         String
+  statusCode   Int
+  responseTime Int
+  userId       String?
+  apiKeyId     String?
+  ip           String?
+  createdAt    DateTime @default(now())
+
+  @@map("api_logs")
+}
+
+model Webhook {
+  id               String    @id @default(cuid())
+  url              String
+  events           String
+  secret           String?
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive         Boolean   @default(true)
+  lastTriggeredAt  DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("webhooks")
+}
+
+model Organization {
+  id             String   @id @default(cuid())
+  name           String
+  domain         String?  @unique
+  logo           String?
+  primaryColor   String   @default("#3b82f6")
+  secondaryColor String   @default("#8b5cf6")
+  favicon        String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("organizations")
 }

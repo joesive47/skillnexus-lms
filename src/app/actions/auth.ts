@@ -23,10 +23,24 @@ export async function authenticate(
 
     const { email, password } = validatedFields.data
 
+    // Get user to determine role-based redirect
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { role: true }
+    })
+
+    const redirectMap: Record<string, string> = {
+      'ADMIN': '/admin/dashboard',
+      'TEACHER': '/teacher/dashboard',
+      'STUDENT': '/student/dashboard'
+    }
+
+    const redirectTo = redirectMap[user?.role || 'STUDENT'] || '/student/dashboard'
+
     await signIn('credentials', {
       email,
       password,
-      redirectTo: '/dashboard',
+      redirectTo,
     })
     
   } catch (error) {

@@ -20,25 +20,32 @@ export default async function DashboardLayout({
   const navigationItems = [
     { name: "หน้าแรก", href: "/", icon: Home },
     { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-    { name: "ประเมินทักษะ", href: "/skills-assessment", icon: Award },
-    { name: "ใบประกาศนียบัตร", href: "/dashboard/certificates", icon: FileText },
-    { name: "เครดิตของฉัน", href: "/dashboard/credits", icon: Coins },
-    { name: "ห้องเรียน", href: "/dashboard/classrooms", icon: School },
+    
+    // Student Menu
     ...(session.user.role === UserRole.STUDENT ? [
-      { name: "Student Dashboard", href: "/dashboard/student", icon: User },
+      { name: "คอร์สของฉัน", href: "/dashboard/student", icon: BookOpen },
+      { name: "ใบประกาศนียบัตร BARD", href: "/dashboard/student/bard-certificates", icon: Award },
+      { name: "ห้องเรียน", href: "/dashboard/classrooms", icon: School },
+      { name: "เครดิตของฉัน", href: "/dashboard/credits", icon: Coins },
     ] : []),
-    ...(session.user.role === UserRole.TEACHER || session.user.role === UserRole.ADMIN ? [
-      { name: "Teacher Dashboard", href: "/dashboard/teacher", icon: GraduationCap },
+    
+    // Teacher Menu
+    ...(session.user.role === UserRole.TEACHER ? [
+      { name: "สอนคอร์ส", href: "/dashboard/teacher", icon: GraduationCap },
+      { name: "ห้องเรียน", href: "/dashboard/classrooms", icon: School },
+      { name: "ใบประกาศนียบัตร", href: "/dashboard/certificates", icon: FileText },
     ] : []),
+    
+    // Admin Menu
     ...(session.user.role === UserRole.ADMIN ? [
       { name: "จัดการผู้ใช้", href: "/dashboard/admin/users", icon: Users },
-      { name: "การเงิน", href: "/dashboard/admin/payments", icon: DollarSign },
       { name: "จัดการคอร์ส", href: "/dashboard/admin/courses", icon: BookOpen },
+      { name: "การเงิน", href: "/dashboard/admin/payments", icon: DollarSign },
+      { name: "ใบประกาศนียบัตร BARD", href: "/dashboard/admin/bard-certificates", icon: Award },
       { name: "การจัดการข้อสอบ", href: "/dashboard/admin/quizzes", icon: ClipboardList },
+      { name: "ห้องเรียน", href: "/dashboard/classrooms", icon: School },
       { name: "จัดการไฟล์", href: "/dashboard/admin/files", icon: FolderOpen },
       { name: "จัดการ Chatbot", href: "/dashboard/chatbot", icon: Bot },
-      { name: "RAG Management", href: "/dashboard/rag-management", icon: FileText },
-      { name: "RAG Knowledge Base", href: "/dashboard/rag-knowledge-base", icon: Bot },
       { name: "ทักษะ & การประเมิน", href: "/dashboard/admin/skills", icon: GraduationCap },
       { name: "ตั้งค่าระบบ", href: "/dashboard/admin/settings", icon: Settings },
     ] : [])

@@ -17,15 +17,11 @@ interface Course {
 
 interface BadgeProgram {
   id: string
-  title: string
-  description: string
-  logoUrl?: string
-  autoIssue: boolean
-  requirements: Array<{
-    courseId: string
-    minScore: number
-    course: Course
-  }>
+  name: string
+  description: string | null
+  icon?: string | null
+  color?: string | null
+  points: number
   _count: { userBadges: number }
 }
 
@@ -34,11 +30,11 @@ export default function BadgeAdminPage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [formData, setFormData] = useState({
-    title: '',
+    name: '',
     description: '',
-    logoUrl: '',
-    autoIssue: true,
-    requirements: [{ courseId: '', minScore: 60 }]
+    icon: '',
+    color: '#3b82f6',
+    points: 100
   })
 
   useEffect(() => {
@@ -77,11 +73,11 @@ export default function BadgeAdminPage() {
       if (response.ok) {
         setIsCreateOpen(false)
         setFormData({
-          title: '',
+          name: '',
           description: '',
-          logoUrl: '',
-          autoIssue: true,
-          requirements: [{ courseId: '', minScore: 60 }]
+          icon: '',
+          color: '#3b82f6',
+          points: 100
         })
         fetchBadges()
       }
@@ -90,18 +86,7 @@ export default function BadgeAdminPage() {
     }
   }
 
-  const addRequirement = () => {
-    setFormData({
-      ...formData,
-      requirements: [...formData.requirements, { courseId: '', minScore: 60 }]
-    })
-  }
 
-  const updateRequirement = (index: number, field: string, value: any) => {
-    const newRequirements = [...formData.requirements]
-    newRequirements[index] = { ...newRequirements[index], [field]: value }
-    setFormData({ ...formData, requirements: newRequirements })
-  }
 
   const exportBadges = () => {
     const dataStr = JSON.stringify(badges, null, 2)
@@ -138,9 +123,9 @@ export default function BadgeAdminPage() {
               </DialogHeader>
               <div className="space-y-4">
                 <Input
-                  placeholder="Badge Title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Badge Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
                 <Textarea
                   placeholder="Description"
@@ -148,46 +133,27 @@ export default function BadgeAdminPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
                 <Input
-                  placeholder="Logo URL (optional)"
-                  value={formData.logoUrl}
-                  onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                  placeholder="Icon (emoji or URL)"
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                 />
-                
-                <div className="space-y-2">
-                  <h3 className="font-medium">Course Requirements</h3>
-                  {formData.requirements.map((req, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Select
-                        value={req.courseId}
-                        onValueChange={(value) => updateRequirement(index, 'courseId', value)}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select Course" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {courses.map((course) => (
-                            <SelectItem key={course.id} value={course.id}>
-                              {course.title}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        type="number"
-                        placeholder="Min Score"
-                        value={req.minScore}
-                        onChange={(e) => updateRequirement(index, 'minScore', parseInt(e.target.value))}
-                        className="w-24"
-                      />
-                    </div>
-                  ))}
-                  <Button variant="outline" onClick={addRequirement}>
-                    Add Course Requirement
-                  </Button>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={formData.color}
+                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                    className="w-20"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Points"
+                    value={formData.points}
+                    onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
+                  />
                 </div>
 
                 <Button onClick={handleCreateBadge} className="w-full">
-                  Create Badge Program
+                  Create Badge
                 </Button>
               </div>
             </DialogContent>
@@ -196,36 +162,40 @@ export default function BadgeAdminPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {badges.map((badge) => (
-          <Card key={badge.id}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                {badge.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">{badge.description}</p>
-              
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm">{badge._count.userBadges} earned</span>
-                </div>
+        {badges.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <Award className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-muted-foreground">No badges created yet</p>
+          </div>
+        ) : (
+          badges.map((badge) => (
+            <Card key={badge.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {badge.icon ? (
+                    <span className="text-2xl">{badge.icon}</span>
+                  ) : (
+                    <Award className="h-5 w-5" style={{ color: badge.color || '#3b82f6' }} />
+                  )}
+                  {badge.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">{badge.description || 'No description'}</p>
                 
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Requirements:</p>
-                  {badge.requirements.map((req, index) => (
-                    <div key={index} className="flex items-center justify-between text-xs">
-                      <span>{req.course.title}</span>
-                      <Badge variant="secondary">{req.minScore}% min</Badge>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span className="text-sm">{badge._count.userBadges} earned</span>
                     </div>
-                  ))}
+                    <Badge variant="secondary">{badge.points} pts</Badge>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   )

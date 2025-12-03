@@ -1,0 +1,19 @@
+runtime: nodejs20
+
+instance_class: F2
+
+env_variables:
+  NODE_ENV: "production"
+  DATABASE_URL: "postgresql://skillnexus-user:SkillNexus2025!Secure@34.124.203.250:5432/skillnexus?sslmode=require"
+  NEXTAUTH_URL: "https://skillnexus-lms-2025.appspot.com"
+  NEXTAUTH_SECRET: "rmQnCNXy9qxpobw61k3E2HWAcRezvfgt"
+  JWT_SECRET: "jUng2EDA3aWX80GsJwkyCML1rQSVpPbN"
+  NEXT_PUBLIC_APP_URL: "https://skillnexus-lms-2025.appspot.com"
+  NEXT_PUBLIC_API_URL: "https://skillnexus-lms-2025.appspot.com/api"
+  CERT_SIGNING_KEY: "bard-cert-signing-key-2024-change-in-production"
+  PORT: "8080"
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 5
+  target_cpu_utilization: 0.65

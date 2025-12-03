@@ -1,0 +1,47 @@
+// Performance & Scale Schema Extensions
+
+// Performance Metrics Log
+model PerformanceMetric {
+  id            String   @id @default(cuid())
+  timestamp     DateTime @default(now())
+  metricType    String   // request, query, cache, system
+  value         Float
+  metadata      Json?
+  
+  @@index([timestamp])
+  @@index([metricType])
+}
+
+// Query Performance Log
+model QueryLog {
+  id            String   @id @default(cuid())
+  query         String
+  duration      Int      // milliseconds
+  timestamp     DateTime @default(now())
+  slow          Boolean  @default(false)
+  
+  @@index([timestamp])
+  @@index([slow])
+}
+
+// Cache Statistics
+model CacheStats {
+  id            String   @id @default(cuid())
+  key           String
+  hits          Int      @default(0)
+  misses        Int      @default(0)
+  lastAccessed  DateTime @default(now())
+  
+  @@index([key])
+  @@index([lastAccessed])
+}
+
+// Add indexes to existing models for performance
+// Run: npx prisma db push
+
+// Recommended indexes:
+// - User: email, role, createdAt
+// - Course: published, createdAt, categoryId
+// - Enrollment: userId, courseId, completed
+// - Lesson: courseId, order
+// - Progress: userId, lessonId, completed

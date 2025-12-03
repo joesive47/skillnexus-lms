@@ -73,6 +73,12 @@ export default function MobileLearningPage() {
 
 export const metadata = {
   title: 'Mobile Learning - SkillNexus LMS',
-  description: 'Immersive mobile learning experience with vertical videos',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+  description: 'Immersive mobile learning experience with vertical videos'
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false
 }

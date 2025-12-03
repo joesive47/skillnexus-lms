@@ -193,14 +193,18 @@ export async function attemptFinalCertification(userId: string, courseId: string
       if (!existingCertificate) {
         const certificate = await prisma.certificate.create({
           data: {
+            certificateNumber: `CERT-${Date.now()}`,
             userId,
-            courseId
+            courseId,
+            verificationToken: require('crypto').randomBytes(16).toString('hex'),
+            digitalSignature: 'legacy-cert',
+            bardData: '{}'
           }
         })
 
         return {
           id: certificate.id,
-          uniqueId: certificate.uniqueId,
+          uniqueId: certificate.verificationToken,
           courseTitle: course.title,
           issuedAt: certificate.issuedAt
         }

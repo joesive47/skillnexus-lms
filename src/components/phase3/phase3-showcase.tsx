@@ -66,11 +66,11 @@ export function Phase3Showcase() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <Badge className="mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30">
+        <Badge className="mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold">
           🚀 Phase 3: Future Technology
         </Badge>
-        <h2 className="text-3xl font-bold text-white mb-4">เทคโนโลยีแห่งอนาคต</h2>
-        <p className="text-gray-300 max-w-2xl mx-auto">
+        <h2 className="text-4xl font-extrabold text-slate-900 mb-4">เทคโนโลยีแห่งอนาคต</h2>
+        <p className="text-slate-700 max-w-2xl mx-auto text-lg font-medium">
           สัมผัสประสบการณ์การเรียนรู้ที่ล้ำสมัยด้วยเทคโนโลยีที่จะเปลี่ยนแปลงโลกการศึกษา
         </p>
       </div>
@@ -82,16 +82,16 @@ export function Phase3Showcase() {
           return (
             <Card 
               key={feature.id}
-              className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+              className="bg-white border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
               onClick={() => setActiveDemo(feature.demo)}
             >
               <CardContent className="p-6 text-center">
-                <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                   <IconComponent className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-300 text-sm mb-3">{feature.description}</p>
-                <Badge className="bg-white/10 text-white border-white/20">
+                <h3 className="text-lg font-bold text-slate-900 mb-2">{feature.title}</h3>
+                <p className="text-slate-700 text-sm mb-3 font-medium">{feature.description}</p>
+                <Badge className="bg-slate-100 text-slate-800 border-0 font-bold">
                   {feature.stats}
                 </Badge>
               </CardContent>
@@ -102,51 +102,51 @@ export function Phase3Showcase() {
 
       {/* Interactive Demos */}
       <Tabs value={activeDemo || 'overview'} onValueChange={setActiveDemo} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-white/5 border-white/10">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white/20">Overview</TabsTrigger>
-          <TabsTrigger value="vr-demo" className="data-[state=active]:bg-purple-500/20">VR Demo</TabsTrigger>
-          <TabsTrigger value="blockchain-demo" className="data-[state=active]:bg-blue-500/20">Blockchain</TabsTrigger>
-          <TabsTrigger value="enterprise-demo" className="data-[state=active]:bg-green-500/20">Enterprise</TabsTrigger>
-          <TabsTrigger value="social-demo" className="data-[state=active]:bg-orange-500/20">Social</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 bg-white border-gray-200 shadow-md">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 text-slate-700 font-semibold">Overview</TabsTrigger>
+          <TabsTrigger value="vr-demo" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-900 text-slate-700 font-semibold">VR Demo</TabsTrigger>
+          <TabsTrigger value="blockchain-demo" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 text-slate-700 font-semibold">Blockchain</TabsTrigger>
+          <TabsTrigger value="enterprise-demo" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-900 text-slate-700 font-semibold">Enterprise</TabsTrigger>
+          <TabsTrigger value="social-demo" className="data-[state=active]:bg-orange-100 data-[state=active]:text-orange-900 text-slate-700 font-semibold">Social</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+          <Card className="bg-white border-gray-200 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Sparkles className="w-5 h-5 mr-2" />
+              <CardTitle className="text-slate-900 flex items-center text-xl font-bold">
+                <Sparkles className="w-6 h-6 mr-2 text-purple-600" />
                 Phase 3 Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="text-lg font-semibold text-white mb-3">Revolutionary Features</h4>
-                  <ul className="space-y-2 text-gray-300">
-                    <li className="flex items-center"><Eye className="w-4 h-4 mr-2 text-purple-400" /> VR/AR Immersive Learning</li>
-                    <li className="flex items-center"><Shield className="w-4 h-4 mr-2 text-blue-400" /> Blockchain Security</li>
-                    <li className="flex items-center"><Users className="w-4 h-4 mr-2 text-green-400" /> Enterprise Scale</li>
-                    <li className="flex items-center"><MessageSquare className="w-4 h-4 mr-2 text-orange-400" /> Social Collaboration</li>
+                  <h4 className="text-lg font-bold text-slate-900 mb-3">Revolutionary Features</h4>
+                  <ul className="space-y-2 text-slate-700 font-medium">
+                    <li className="flex items-center"><Eye className="w-5 h-5 mr-2 text-purple-600" /> VR/AR Immersive Learning</li>
+                    <li className="flex items-center"><Shield className="w-5 h-5 mr-2 text-blue-600" /> Blockchain Security</li>
+                    <li className="flex items-center"><Users className="w-5 h-5 mr-2 text-green-600" /> Enterprise Scale</li>
+                    <li className="flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-orange-600" /> Social Collaboration</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-white mb-3">Expected Impact</h4>
+                  <h4 className="text-lg font-bold text-slate-900 mb-3">Expected Impact</h4>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Learning Retention</span>
-                      <span className="text-purple-400 font-bold">+400%</span>
+                      <span className="text-slate-700 font-medium">Learning Retention</span>
+                      <span className="text-purple-700 font-extrabold text-lg">+400%</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Security Level</span>
-                      <span className="text-blue-400 font-bold">100%</span>
+                      <span className="text-slate-700 font-medium">Security Level</span>
+                      <span className="text-blue-700 font-extrabold text-lg">100%</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Enterprise Users</span>
-                      <span className="text-green-400 font-bold">100K+</span>
+                      <span className="text-slate-700 font-medium">Enterprise Users</span>
+                      <span className="text-green-700 font-extrabold text-lg">100K+</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Social Engagement</span>
-                      <span className="text-orange-400 font-bold">+600%</span>
+                      <span className="text-slate-700 font-medium">Social Engagement</span>
+                      <span className="text-orange-700 font-extrabold text-lg">+600%</span>
                     </div>
                   </div>
                 </div>

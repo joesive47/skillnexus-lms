@@ -1,0 +1,80 @@
+// Enhanced Schema with Encrypted Fields
+// Add these fields to your existing User model
+
+model User {
+  // ... existing fields ...
+  
+  // Encrypted sensitive data
+  phoneNumberEncrypted String? // Encrypted phone number
+  ssnEncrypted         String? // Encrypted SSN (if needed)
+  
+  // 2FA fields
+  twoFactorEnabled     Boolean  @default(false)
+  twoFactorSecret      String?  // TOTP secret (encrypted)
+  twoFactorBackupCodes String?  // Backup codes (encrypted JSON array)
+  
+  // Device trust
+  trustedDevices       TrustedDevice[]
+  
+  // Security metadata
+  lastPasswordChange   DateTime?
+  passwordHistory      String?  // Last 5 password hashes (encrypted)
+  failedLoginAttempts  Int      @default(0)
+  lockedUntil          DateTime?
+  
+  // Session tracking
+  sessions             UserSession[]
+}
+
+model TrustedDevice {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  deviceName   String
+  fingerprint  String   @unique
+  ipAddress    String
+  userAgent    String
+  
+  trusted      Boolean  @default(false)
+  lastUsed     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([fingerprint])
+}
+
+model UserSession {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  sessionToken String   @unique
+  fingerprint  String
+  ipAddress    String
+  userAgent    String
+  
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  lastActivity DateTime @default(now())
+  
+  @@index([userId])
+  @@index([sessionToken])
+}
+
+model SecurityAuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  resource  String
+  ipAddress String
+  userAgent String
+  status    String   // success, failure, suspicious
+  details   Json?
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([status])
+  @@index([createdAt])
+}

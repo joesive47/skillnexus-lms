@@ -10,15 +10,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, description, logoUrl, autoIssue, requirements } = await request.json()
+    const { name, description, icon, color, points } = await request.json()
 
     const badge = await prisma.badge.create({
       data: {
-        name: title,
+        name,
         description,
-        icon: logoUrl,
-        points: 100, // Default points
-        criteria: JSON.stringify(requirements)
+        icon,
+        color,
+        points: points || 100
       }
     })
 
