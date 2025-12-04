@@ -2,7 +2,13 @@ import { createClient } from 'redis'
 
 let redis: ReturnType<typeof createClient> | null = null
 
-if (process.env.REDIS_URL && !process.env.REDIS_URL.includes('xxxxx')) {
+// Only connect if REDIS_URL is valid (not placeholder)
+const isValidRedisUrl = process.env.REDIS_URL && 
+  !process.env.REDIS_URL.includes('[password]') && 
+  !process.env.REDIS_URL.includes('[host]') &&
+  !process.env.REDIS_URL.includes('xxxxx')
+
+if (isValidRedisUrl) {
   redis = createClient({
     url: process.env.REDIS_URL
   })
