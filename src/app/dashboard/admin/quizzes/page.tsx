@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trash2, Edit } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminQuizzesPage() {
   const result = await getQuizzes()
   

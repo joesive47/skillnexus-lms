@@ -2,6 +2,9 @@
 const nextConfig = {
   output: 'standalone',
   experimental: {
+    appDir: true,
+  },
+  experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },

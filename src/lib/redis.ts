@@ -2,12 +2,16 @@ import { createClient } from 'redis'
 
 let redis: ReturnType<typeof createClient> | null = null
 
-if (process.env.REDIS_URL) {
+if (process.env.REDIS_URL && !process.env.REDIS_URL.includes('xxxxx')) {
   redis = createClient({
     url: process.env.REDIS_URL
   })
-  redis.on('error', (err) => console.log('Redis Client Error', err))
+  redis.on('error', (err) => {
+    console.log('Redis Client Error', err)
+    redis = null
+  })
   redis.connect().catch(() => {
+    console.log('Redis connection failed, running without cache')
     redis = null
   })
 }
