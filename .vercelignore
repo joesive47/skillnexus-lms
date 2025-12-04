@@ -1,23 +1,17 @@
 # Dependencies
 node_modules
-npm-debug.log
-yarn-error.log
+.pnp
+.pnp.js
 
 # Testing
 coverage
-.nyc_output
 
 # Production
-.next
-out
 build
-dist
 
 # Misc
 .DS_Store
 *.pem
-.env
-.env*.local
 
 # Debug
 npm-debug.log*
@@ -25,10 +19,13 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local env files
+.env
+.env*.local
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.backup.*
 
 # Vercel
 .vercel
@@ -44,7 +41,32 @@ prisma/dev.db-journal
 .idea
 *.swp
 *.swo
-*~
 
-# OS
-Thumbs.db
+# Uploads
+/public/uploads
+/uploads
+
+# Logs
+logs
+*.log
+
+# Documentation (optional - remove if you want to deploy docs)
+*.md
+!README.md
+
+# Scripts
+scripts/load-test.js
+scripts/stress-test.js
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Kubernetes
+k8s/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/

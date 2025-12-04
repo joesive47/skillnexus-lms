@@ -139,6 +139,52 @@ SkillNexus LMS พร้อม Deploy ไปยัง Vercel แล้ว!
    npm run dev
    ```
 
+## 🗄️ Production Database Setup
+
+### Quick Switch to Production Database
+
+**Windows:**
+```bash
+scripts\switch-to-production.bat
+```
+
+**Linux/Mac:**
+```bash
+chmod +x scripts/switch-to-production.sh
+./scripts/switch-to-production.sh
+```
+
+### Manual Setup
+
+1. **Choose Database Provider** (see [PRODUCTION-DATABASE-SETUP.md](./PRODUCTION-DATABASE-SETUP.md))
+   - ✅ Vercel Postgres (recommended for Vercel)
+   - ✅ Supabase (free tier available)
+   - ✅ Neon (serverless)
+   - ✅ Railway (full-stack)
+   - ✅ AWS RDS (enterprise)
+
+2. **Update Environment Variables**
+   ```bash
+   # Copy production template
+   cp .env.production .env
+   
+   # Update DATABASE_URL with your production database
+   # Generate secrets: openssl rand -base64 32
+   ```
+
+3. **Run Migrations**
+   ```bash
+   npx prisma migrate deploy
+   npm run db:seed
+   ```
+
+4. **Verify Connection**
+   ```bash
+   npx prisma db pull
+   ```
+
+📖 **Full Guide:** [PRODUCTION-DATABASE-SETUP.md](./PRODUCTION-DATABASE-SETUP.md)
+
 ## Phase 8 Performance Features
 
 ### ⚡ Performance Optimization
@@ -165,25 +211,23 @@ npm run performance:check
 
 ## Authentication
 
-### ข้อมูลการเข้าสู่ระบบตัวอย่าง
+### 🔐 Test Accounts
 
-**ผู้ดูแลระบบ (Admin):**
-- อีเมล: admin@skillnexus.com / รหัสผ่าน: admin123
-- ชื่อ: นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)
-- อีเมล: admin@bizsolve-ai.com / รหัสผ่าน: admin123
+**Admin:**
+- admin@skillnexus.com / Admin@123!
+- admin@bizsolve-ai.com / Admin@123!
 
-**ครู (Teacher):**
-- อีเมล: teacher@skillnexus.com / รหัสผ่าน: teacher123
-- ชื่อ: นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)
+**Teacher:**
+- teacher@skillnexus.com / Teacher@123!
 
-**นักเรียน (Student):**
-- อีเมล: student@skillnexus.com / รหัสผ่าน: student123
-- อีเมล: joesive47@gmail.com / รหัสผ่าน: student123 (เครดิต: 1000)
-- อีเมล: john@example.com / รหัสผ่าน: student123
-- อีเมล: alice@example.com / รหัสผ่าน: student123
+**Student:**
+- student@skillnexus.com / Student@123!
+- joesive47@gmail.com / Student@123! (1000 credits)
+- john@example.com / Student@123!
+- alice@example.com / Student@123!
 
-**หน้าเข้าสู่ระบบ:** `/login`  
-**หน้าที่ต้องเข้าสู่ระบบ:** `/dashboard`
+**Login:** http://localhost:3000/login  
+**Full List:** [TEST-ACCOUNTS.md](./TEST-ACCOUNTS.md)
 
 ## 🛠️ Tech Stack
 
