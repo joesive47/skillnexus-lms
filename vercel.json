@@ -1,9 +1,7 @@
 {
-  "buildCommand": "prisma generate && next build",
-  "env": {
-    "DATABASE_URL": "postgresql://skillnexus-user:SkillNexus2025!Secure@34.124.203.250:5432/skillnexus?sslmode=require",
-    "NEXTAUTH_URL": "https://uppowerskill.com",
-    "NEXTAUTH_SECRET": "rmQnCNXy9qxpobw61k3E2HWAcRezvfgt",
-    "JWT_SECRET": "jUng2EDA3aWX80GsJwkyCML1rQSVpPbN"
-  }
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next"
 }
