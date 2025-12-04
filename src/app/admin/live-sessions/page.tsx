@@ -2,10 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Video, Plus, Play } from 'lucide-react'
-import { InvitationManager } from '@/lib/streaming/invitation-manager'
+import { Plus, Play } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LiveSessionsPage() {
@@ -21,15 +18,8 @@ export default function LiveSessionsPage() {
   })
 
   const handleCreate = async () => {
-    const invitation = InvitationManager.createInvitation({
-      ...formData,
-      hostId: 'admin-id',
-      hostName: 'Admin',
-      scheduledAt: new Date(formData.scheduledAt),
-      meetingLink: InvitationManager.generateLink('event-123', 'invitee-456')
-    })
-
-    await InvitationManager.sendInvitation(invitation)
+    // TODO: Implement invitation creation
+    console.log('Creating invitation:', formData)
     setShowCreate(false)
   }
 
@@ -38,16 +28,14 @@ export default function LiveSessionsPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Live Sessions</h1>
         <div className="flex gap-2">
-          <Link href="/live-classroom/meeting">
-            <Button variant="outline">
-              <Play className="mr-2 h-4 w-4" />
-              Start Live
-            </Button>
+          <Link href="/live-classroom/meeting" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+            <Play className="mr-2 h-4 w-4" />
+            Start Live
           </Link>
-          <Button onClick={() => setShowCreate(!showCreate)}>
+          <button onClick={() => setShowCreate(!showCreate)} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
             <Plus className="mr-2 h-4 w-4" />
             Schedule
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -86,14 +74,15 @@ export default function LiveSessionsPage() {
             <CardTitle>Schedule Live Session</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Session Title"
               value={formData.eventTitle}
               onChange={(e) => setFormData({ ...formData, eventTitle: e.target.value })}
             />
             
             <select
-              className="w-full p-2 border rounded"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               value={formData.eventType}
               onChange={(e) => setFormData({ ...formData, eventType: e.target.value as any })}
             >
@@ -103,35 +92,39 @@ export default function LiveSessionsPage() {
               <option value="TUTORING">Tutoring</option>
             </select>
 
-            <Input
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Student Name"
               value={formData.inviteeName}
               onChange={(e) => setFormData({ ...formData, inviteeName: e.target.value })}
             />
 
-            <Input
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Student Email"
               type="email"
               value={formData.inviteeEmail}
               onChange={(e) => setFormData({ ...formData, inviteeEmail: e.target.value })}
             />
 
-            <Input
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               type="datetime-local"
               value={formData.scheduledAt}
               onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
             />
 
-            <Input
+            <input
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               type="number"
               placeholder="Duration (minutes)"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
             />
 
-            <Button onClick={handleCreate} className="w-full">
+            <button onClick={handleCreate} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
               Schedule & Send Invitation
-            </Button>
+            </button>
           </CardContent>
         </Card>
       )}
