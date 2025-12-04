@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="com.skillnexus.webdev.fundamentals" version="1.0"
+          xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+    <lom xmlns="http://ltsc.ieee.org/xsd/LOM">
+      <general>
+        <title>
+          <string language="th">Web Development Fundamentals</string>
+        </title>
+        <description>
+          <string language="th">หลักสูตรพื้นฐานการพัฒนาเว็บไซต์ครบวงจร</string>
+        </description>
+      </general>
+    </lom>
+  </metadata>
+
+  <organizations default="ORG-WEBDEV">
+    <organization identifier="ORG-WEBDEV" structure="hierarchical">
+      <title>Web Development Fundamentals Course</title>
+      
+      <item identifier="ITEM-HTML" identifierref="RES-HTML">
+        <title>1. HTML Basics - Structure and Elements</title>
+        <adlcp:maxtimeallowed>PT45M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>75</adlcp:masteryscore>
+        <adlcp:prerequisites type="aicc_prerequisite">
+          <adlcp:prerequisite>none</adlcp:prerequisite>
+        </adlcp:prerequisites>
+      </item>
+
+      <item identifier="ITEM-CSS" identifierref="RES-CSS">
+        <title>2. CSS Styling and Layout</title>
+        <adlcp:maxtimeallowed>PT60M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>80</adlcp:masteryscore>
+        <adlcp:prerequisites type="aicc_prerequisite">
+          <adlcp:prerequisite>ITEM-HTML</adlcp:prerequisite>
+        </adlcp:prerequisites>
+      </item>
+
+      <item identifier="ITEM-JS" identifierref="RES-JS">
+        <title>3. JavaScript Interactivity</title>
+        <adlcp:maxtimeallowed>PT75M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>85</adlcp:masteryscore>
+        <adlcp:prerequisites type="aicc_prerequisite">
+          <adlcp:prerequisite>ITEM-CSS</adlcp:prerequisite>
+        </adlcp:prerequisites>
+      </item>
+    </organization>
+  </organizations>
+
+  <resources>
+    <resource identifier="RES-HTML" type="webcontent" adlcp:scormType="sco" href="html-basics/index.html">
+      <file href="html-basics/index.html"/>
+      <file href="html-basics/script.js"/>
+      <file href="html-basics/style.css"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+
+    <resource identifier="RES-CSS" type="webcontent" adlcp:scormType="sco" href="css-styling/index.html">
+      <file href="css-styling/index.html"/>
+      <file href="css-styling/script.js"/>
+      <file href="css-styling/style.css"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+
+    <resource identifier="RES-JS" type="webcontent" adlcp:scormType="sco" href="javascript-basics/index.html">
+      <file href="javascript-basics/index.html"/>
+      <file href="javascript-basics/script.js"/>
+      <file href="javascript-basics/style.css"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+  </resources>
+</manifest>

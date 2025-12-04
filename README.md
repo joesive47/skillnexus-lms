@@ -92,7 +92,29 @@ Global Learning Management System with Anti-Skip Technology
 - **🏆 Verified Skill Certificates** - Industry-recognized certifications
 - **🔐 Secure Authentication** - NextAuth.js v5 with server actions
 
-## Quick Start
+## 🚀 Deployment to Vercel
+
+### ✅ Ready to Deploy!
+SkillNexus LMS พร้อม Deploy ไปยัง Vercel แล้ว!
+
+**เลือกคู่มือที่เหมาะกับคุณ:**
+
+- 🚀 **[QUICK-DEPLOY.md](./QUICK-DEPLOY.md)** - Deploy ใน 5 นาที (แนะนำสำหรับมือใหม่)
+- 📖 **[DEPLOYMENT.md](./DEPLOYMENT.md)** - คำแนะนำละเอียดครบถ้วน
+- ✅ **[DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)** - Checklist สำหรับ Production
+- 🗺️ **[DEPLOY-README.md](./DEPLOY-README.md)** - ภาพรวมและ Navigation
+- 🎯 **[VERCEL-READY.md](./VERCEL-READY.md)** - สรุปความพร้อม Deploy
+
+**Quick Deploy (5 นาที):**
+```bash
+# 1. เตรียม Database (Vercel Postgres/Supabase/Neon)
+# 2. Generate Secret: openssl rand -base64 32
+# 3. Push to GitHub: git push origin main
+# 4. Deploy: https://vercel.com/new
+# 5. Setup DB: npx prisma migrate deploy
+```
+
+## Quick Start (Local Development)
 
 1. **Install Dependencies**
    ```bash

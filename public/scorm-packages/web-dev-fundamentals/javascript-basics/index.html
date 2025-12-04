@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Interactivity</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../shared/scorm-api.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="lesson-header">
+            <h1>⚡ JavaScript Interactivity</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <p class="lesson-subtitle">เพิ่มความโต้ตอบให้เว็บไซต์ด้วย JavaScript</p>
+        </header>
+
+        <main class="lesson-content">
+            <!-- Section 1: JavaScript Introduction -->
+            <section class="content-section" id="section1">
+                <h2>⚡ JavaScript คืออะไร?</h2>
+                <div class="content-card">
+                    <p><strong>JavaScript</strong> เป็นภาษาโปรแกรมที่ทำให้เว็บไซต์มีความโต้ตอบและเคลื่อนไหว</p>
+                    
+                    <div class="highlight-box">
+                        <h3>🎯 ความสามารถของ JavaScript:</h3>
+                        <ul>
+                            <li>เปลี่ยนแปลงเนื้อหาแบบ Dynamic</li>
+                            <li>ตอบสนองต่อการกระทำของผู้ใช้</li>
+                            <li>สร้างแอนิเมชันและเอฟเฟกต์</li>
+                            <li>ติดต่อกับเซิร์ฟเวอร์</li>
+                        </ul>
+                    </div>
+
+                    <div class="demo-box">
+                        <h4>ตัวอย่าง JavaScript:</h4>
+                        <div class="js-demo">
+                            <button onclick="showAlert()">แสดง Alert</button>
+                            <button onclick="changeText()">เปลี่ยนข้อความ</button>
+                            <button onclick="getCurrentTime()">เวลาปัจจุบัน</button>
+                            <div id="demoOutput" class="demo-output">
+                                <p id="demoText">คลิกปุ่มเพื่อดูผลลัพธ์</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(2)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 2: Variables and Functions -->
+            <section class="content-section hidden" id="section2">
+                <h2>📦 Variables และ Functions</h2>
+                <div class="content-card">
+                    <div class="code-examples">
+                        <div class="code-block">
+                            <h4>Variables (ตัวแปร):</h4>
+                            <pre><code>let name = "SkillNexus";
+const age = 25;
+var score = 100;</code></pre>
+                        </div>
+                        
+                        <div class="code-block">
+                            <h4>Functions (ฟังก์ชัน):</h4>
+                            <pre><code>function greet(name) {
+    return "สวัสดี " + name;
+}
+
+const result = greet("นักเรียน");</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="interactive-js">
+                        <h3>🎮 ลองเขียน JavaScript:</h3>
+                        <textarea id="jsEditor" rows="8" cols="50">
+// ลองเขียนโค้ด JavaScript ที่นี่
+let message = "Hello SkillNexus!";
+console.log(message);
+
+function calculate(a, b) {
+    return a + b;
+}
+
+let result = calculate(5, 3);
+document.getElementById('jsOutput').innerHTML = 
+    "ผลลัพธ์: " + result;</textarea>
+                        <button onclick="runJavaScript()">รันโค้ด</button>
+                        <div id="jsOutput" class="js-output">ผลลัพธ์จะแสดงที่นี่</div>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(3)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 3: DOM Manipulation -->
+            <section class="content-section hidden" id="section3">
+                <h2>🎛️ DOM Manipulation</h2>
+                <div class="content-card">
+                    <div class="dom-demo">
+                        <h3>การจัดการ DOM Elements:</h3>
+                        
+                        <div class="dom-playground">
+                            <div class="controls-panel">
+                                <h4>ควบคุม Elements:</h4>
+                                <button onclick="addElement()">เพิ่ม Element</button>
+                                <button onclick="changeStyle()">เปลี่ยนสไตล์</button>
+                                <button onclick="removeElement()">ลบ Element</button>
+                                <button onclick="animateElement()">แอนิเมชัน</button>
+                            </div>
+                            
+                            <div id="playground" class="playground-area">
+                                <div class="sample-element" id="sampleElement">
+                                    <p>Element ตัวอย่าง</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="event-demo">
+                            <h3>Event Handling:</h3>
+                            <div class="event-buttons">
+                                <button onmouseover="handleMouseOver(this)" onmouseout="handleMouseOut(this)">
+                                    Hover Me
+                                </button>
+                                <button onclick="handleClick(this)">Click Me</button>
+                                <input type="text" id="textInput" onkeyup="handleKeyUp()" placeholder="พิมพ์ข้อความ...">
+                            </div>
+                            <div id="eventOutput" class="event-output">
+                                Event ผลลัพธ์จะแสดงที่นี่
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(4)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 4: Quiz -->
+            <section class="content-section hidden" id="section4">
+                <h2>🎯 แบบทดสอบ JavaScript</h2>
+                <div class="content-card">
+                    <div class="quiz-container">
+                        <div class="question" id="question1">
+                            <h3>คำถามที่ 1: JavaScript ใช้สำหรับอะไร?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q1" value="a"> เพิ่มความโต้ตอบให้เว็บไซต์</label>
+                                <label><input type="radio" name="q1" value="b"> จัดรูปแบบการแสดงผล</label>
+                                <label><input type="radio" name="q1" value="c"> สร้างโครงสร้างเว็บไซต์</label>
+                                <label><input type="radio" name="q1" value="d"> จัดการฐานข้อมูล</label>
+                            </div>
+                        </div>
+
+                        <div class="question" id="question2">
+                            <h3>คำถามที่ 2: คำสั่งใดใช้สำหรับประกาศตัวแปรใน JavaScript?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q2" value="a"> var, let, const</label>
+                                <label><input type="radio" name="q2" value="b"> int, string, float</label>
+                                <label><input type="radio" name="q2" value="c"> define, declare, set</label>
+                                <label><input type="radio" name="q2" value="d"> create, make, new</label>
+                            </div>
+                        </div>
+
+                        <div class="question" id="question3">
+                            <h3>คำถามที่ 3: DOM ย่อมาจากอะไร?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q3" value="a"> Data Object Model</label>
+                                <label><input type="radio" name="q3" value="b"> Document Object Model</label>
+                                <label><input type="radio" name="q3" value="c"> Dynamic Object Management</label>
+                                <label><input type="radio" name="q3" value="d"> Digital Object Method</label>
+                            </div>
+                        </div>
+
+                        <button class="submit-btn" onclick="submitQuiz()">ส่งคำตอบ</button>
+                        <div id="quizResult" class="quiz-result hidden"></div>
+                    </div>
+                </div>
+                <button class="complete-btn hidden" onclick="completeLesson()">เสร็จสิ้นบทเรียน ✅</button>
+            </section>
+        </main>
+
+        <footer class="lesson-footer">
+            <div class="lesson-info">
+                <span>📚 บทเรียนที่ 3/3</span>
+                <span>⏱️ เวลาโดยประมาณ: 75 นาที</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

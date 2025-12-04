@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Interactive Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        .question {
+            font-size: 24px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .option {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .option.selected {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+        .option.correct {
+            background: rgba(76, 175, 80, 0.5);
+            border-color: #4CAF50;
+        }
+        .option.incorrect {
+            background: rgba(244, 67, 54, 0.5);
+            border-color: #f44336;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .score {
+            font-size: 20px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .result {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .result.pass {
+            color: #4CAF50;
+        }
+        .result.fail {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎯 Interactive Learning Game</h1>
+        
+        <div id="game-content">
+            <div class="question" id="question">
+                What is the capital of Thailand?
+            </div>
+            
+            <div class="options" id="options">
+                <div class="option" onclick="selectOption(0)">Bangkok</div>
+                <div class="option" onclick="selectOption(1)">Chiang Mai</div>
+                <div class="option" onclick="selectOption(2)">Phuket</div>
+                <div class="option" onclick="selectOption(3)">Pattaya</div>
+            </div>
+            
+            <button class="btn" id="submit-btn" onclick="submitAnswer()" disabled>
+                Submit Answer
+            </button>
+        </div>
+        
+        <div id="result-content" style="display: none;">
+            <div class="result" id="result-text"></div>
+            <div class="score" id="final-score"></div>
+            <button class="btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of Thailand?",
+                options: ["Bangkok", "Chiang Mai", "Phuket", "Pattaya"],
+                correct: 0
+            },
+            {
+                question: "Which programming language is used for web development?",
+                options: ["Python", "JavaScript", "C++", "Java"],
+                correct: 1
+            },
+            {
+                question: "What does HTML stand for?",
+                options: ["Hyper Text Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlink and Text Markup Language"],
+                correct: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let selectedOption = -1;
+        let score = 0;
+        let totalQuestions = questions.length;
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question').textContent = q.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            selectedOption = -1;
+            document.getElementById('submit-btn').disabled = true;
+        }
+
+        function selectOption(index) {
+            selectedOption = index;
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, i) => {
+                option.classList.remove('selected');
+                if (i === index) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        function submitAnswer() {
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, i) => {
+                if (i === q.correct) {
+                    option.classList.add('correct');
+                } else if (i === selectedOption && i !== q.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedOption === q.correct) {
+                score++;
+            }
+            
+            document.getElementById('submit-btn').disabled = true;
+            
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < totalQuestions) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 2000);
+        }
+
+        function showResult() {
+            const percentage = Math.round((score / totalQuestions) * 100);
+            const passed = percentage >= 70;
+            
+            document.getElementById('game-content').style.display = 'none';
+            document.getElementById('result-content').style.display = 'block';
+            
+            const resultText = document.getElementById('result-text');
+            const finalScore = document.getElementById('final-score');
+            
+            resultText.textContent = passed ? '🎉 Congratulations! You Passed!' : '😔 Sorry, You Failed';
+            resultText.className = `result ${passed ? 'pass' : 'fail'}`;
+            finalScore.textContent = `Score: ${score}/${totalQuestions} (${percentage}%)`;
+            
+            // Send result to parent LMS
+            if (window.parent) {
+                window.parent.postMessage({
+                    score: percentage,
+                    passed: passed
+                }, "*");
+            }
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedOption = -1;
+            
+            document.getElementById('game-content').style.display = 'block';
+            document.getElementById('result-content').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        // Initialize game
+        loadQuestion();
+    </script>
+</body>
+</html>

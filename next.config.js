@@ -1,15 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  experimental: {
-    appDir: true,
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-  },
-  experimental: {
     outputFileTracingExcludes: {
       '*': ['node_modules/@swc/core-linux-x64-gnu', 'node_modules/@swc/core-linux-x64-musl'],
     },
@@ -25,6 +19,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'skillnexus-videos.s3.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.vercel.app',
       }
     ],
   },

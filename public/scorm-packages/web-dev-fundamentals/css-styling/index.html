@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Styling and Layout</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../shared/scorm-api.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="lesson-header">
+            <h1>🎨 CSS Styling and Layout</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <p class="lesson-subtitle">เรียนรู้การจัดรูปแบบและ Layout ด้วย CSS</p>
+        </header>
+
+        <main class="lesson-content">
+            <!-- Section 1: CSS Introduction -->
+            <section class="content-section" id="section1">
+                <h2>🎨 CSS คืออะไร?</h2>
+                <div class="content-card">
+                    <p><strong>CSS (Cascading Style Sheets)</strong> เป็นภาษาที่ใช้จัดรูปแบบการแสดงผลของ HTML</p>
+                    
+                    <div class="highlight-box">
+                        <h3>🎯 หน้าที่ของ CSS:</h3>
+                        <ul>
+                            <li>กำหนดสี ฟอนต์ และขนาด</li>
+                            <li>จัดวางตำแหน่งและ Layout</li>
+                            <li>สร้างเอฟเฟกต์และแอนิเมชัน</li>
+                            <li>ทำให้เว็บไซต์สวยงาม</li>
+                        </ul>
+                    </div>
+
+                    <div class="demo-box">
+                        <h4>ตัวอย่าง CSS:</h4>
+                        <div class="css-demo">
+                            <div class="demo-element" id="demoBox">
+                                <p>กล่องตัวอย่าง</p>
+                            </div>
+                            <div class="controls">
+                                <button onclick="changeColor()">เปลี่ยนสี</button>
+                                <button onclick="changeSize()">เปลี่ยนขนาด</button>
+                                <button onclick="addBorder()">เพิ่มขอบ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(2)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 2: CSS Selectors -->
+            <section class="content-section hidden" id="section2">
+                <h2>🎯 CSS Selectors</h2>
+                <div class="content-card">
+                    <div class="selector-examples">
+                        <div class="selector-item">
+                            <h4>Element Selector</h4>
+                            <code>p { color: blue; }</code>
+                            <p class="example-text">ข้อความสีน้ำเงิน</p>
+                        </div>
+                        
+                        <div class="selector-item">
+                            <h4>Class Selector</h4>
+                            <code>.highlight { background: yellow; }</code>
+                            <p class="highlight">ข้อความไฮไลต์</p>
+                        </div>
+                        
+                        <div class="selector-item">
+                            <h4>ID Selector</h4>
+                            <code>#special { font-weight: bold; }</code>
+                            <p id="special">ข้อความตัวหนา</p>
+                        </div>
+                    </div>
+
+                    <div class="interactive-css">
+                        <h3>🎮 ลองเขียน CSS:</h3>
+                        <textarea id="cssEditor" rows="6" cols="50">
+.my-style {
+    color: red;
+    font-size: 20px;
+    background: lightblue;
+    padding: 10px;
+}</textarea>
+                        <button onclick="applyCss()">ใช้ CSS</button>
+                        <div id="cssTarget" class="css-target">
+                            <p>ข้อความทดสอบ CSS</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(3)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 3: Layout -->
+            <section class="content-section hidden" id="section3">
+                <h2>📐 CSS Layout</h2>
+                <div class="content-card">
+                    <div class="layout-demo">
+                        <h3>Flexbox Layout:</h3>
+                        <div class="flex-container">
+                            <div class="flex-item">Item 1</div>
+                            <div class="flex-item">Item 2</div>
+                            <div class="flex-item">Item 3</div>
+                        </div>
+                        
+                        <h3>Grid Layout:</h3>
+                        <div class="grid-container">
+                            <div class="grid-item">1</div>
+                            <div class="grid-item">2</div>
+                            <div class="grid-item">3</div>
+                            <div class="grid-item">4</div>
+                        </div>
+                    </div>
+
+                    <div class="layout-controls">
+                        <h3>🎛️ ควบคุม Layout:</h3>
+                        <button onclick="toggleFlexDirection()">เปลี่ยนทิศทาง Flex</button>
+                        <button onclick="toggleGridColumns()">เปลี่ยน Grid Columns</button>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(4)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 4: Quiz -->
+            <section class="content-section hidden" id="section4">
+                <h2>🎯 แบบทดสอบ CSS</h2>
+                <div class="content-card">
+                    <div class="quiz-container">
+                        <div class="question" id="question1">
+                            <h3>คำถามที่ 1: CSS ย่อมาจากอะไร?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q1" value="a"> Cascading Style Sheets</label>
+                                <label><input type="radio" name="q1" value="b"> Computer Style System</label>
+                                <label><input type="radio" name="q1" value="c"> Creative Style Syntax</label>
+                                <label><input type="radio" name="q1" value="d"> Colorful Style Sheets</label>
+                            </div>
+                        </div>
+
+                        <div class="question" id="question2">
+                            <h3>คำถามที่ 2: Selector ใดใช้สำหรับเลือก Class?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q2" value="a"> #classname</label>
+                                <label><input type="radio" name="q2" value="b"> .classname</label>
+                                <label><input type="radio" name="q2" value="c"> @classname</label>
+                                <label><input type="radio" name="q2" value="d"> classname</label>
+                            </div>
+                        </div>
+
+                        <div class="question" id="question3">
+                            <h3>คำถามที่ 3: Property ใดใช้สำหรับเปลี่ยนสีข้อความ?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q3" value="a"> background-color</label>
+                                <label><input type="radio" name="q3" value="b"> text-color</label>
+                                <label><input type="radio" name="q3" value="c"> color</label>
+                                <label><input type="radio" name="q3" value="d"> font-color</label>
+                            </div>
+                        </div>
+
+                        <button class="submit-btn" onclick="submitQuiz()">ส่งคำตอบ</button>
+                        <div id="quizResult" class="quiz-result hidden"></div>
+                    </div>
+                </div>
+                <button class="complete-btn hidden" onclick="completeLesson()">เสร็จสิ้นบทเรียน ✅</button>
+            </section>
+        </main>
+
+        <footer class="lesson-footer">
+            <div class="lesson-info">
+                <span>📚 บทเรียนที่ 2/3</span>
+                <span>⏱️ เวลาโดยประมาณ: 60 นาที</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

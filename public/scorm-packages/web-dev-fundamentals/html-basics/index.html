@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Basics - Structure and Elements</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../shared/scorm-api.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="lesson-header">
+            <h1>🏗️ HTML Basics - Structure and Elements</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <p class="lesson-subtitle">เรียนรู้โครงสร้างพื้นฐานของ HTML และ Elements สำคัญ</p>
+        </header>
+
+        <main class="lesson-content">
+            <!-- Section 1: Introduction -->
+            <section class="content-section" id="section1">
+                <h2>📖 HTML คืออะไร?</h2>
+                <div class="content-card">
+                    <p><strong>HTML (HyperText Markup Language)</strong> เป็นภาษามาร์กอัปที่ใช้สร้างโครงสร้างของเว็บเพจ</p>
+                    
+                    <div class="highlight-box">
+                        <h3>🎯 จุดประสงค์ของ HTML:</h3>
+                        <ul>
+                            <li>กำหนดโครงสร้างเนื้อหา (Structure)</li>
+                            <li>จัดระเบียบข้อมูล (Organization)</li>
+                            <li>เชื่อมโยงเนื้อหา (Linking)</li>
+                            <li>แสดงผลบนเว็บเบราว์เซอร์</li>
+                        </ul>
+                    </div>
+
+                    <div class="code-example">
+                        <h4>ตัวอย่าง HTML พื้นฐาน:</h4>
+                        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="th"&gt;
+&lt;head&gt;
+    &lt;title&gt;หน้าแรกของฉัน&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;ยินดีต้อนรับ&lt;/h1&gt;
+    &lt;p&gt;นี่คือเว็บไซต์แรกของฉัน&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(2)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 2: HTML Structure -->
+            <section class="content-section hidden" id="section2">
+                <h2>🏗️ โครงสร้าง HTML</h2>
+                <div class="content-card">
+                    <div class="structure-diagram">
+                        <div class="html-element">
+                            <div class="tag-name">&lt;html&gt;</div>
+                            <div class="nested">
+                                <div class="html-element">
+                                    <div class="tag-name">&lt;head&gt;</div>
+                                    <div class="nested">
+                                        <div class="tag-content">Meta information, Title, CSS, JS</div>
+                                    </div>
+                                </div>
+                                <div class="html-element">
+                                    <div class="tag-name">&lt;body&gt;</div>
+                                    <div class="nested">
+                                        <div class="tag-content">Visible content</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h3>🎮 ลองเปลี่ยน HTML:</h3>
+                        <textarea id="htmlEditor" rows="8" cols="50">
+&lt;h1&gt;หัวข้อใหญ่&lt;/h1&gt;
+&lt;h2&gt;หัวข้อรอง&lt;/h2&gt;
+&lt;p&gt;ย่อหน้าข้อความ&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li&gt;รายการที่ 1&lt;/li&gt;
+    &lt;li&gt;รายการที่ 2&lt;/li&gt;
+&lt;/ul&gt;</textarea>
+                        <button onclick="previewHTML()">ดูตัวอย่าง</button>
+                        <div id="htmlPreview" class="preview-area"></div>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(3)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 3: Common Elements -->
+            <section class="content-section hidden" id="section3">
+                <h2>🧩 Elements ที่ใช้บ่อย</h2>
+                <div class="content-card">
+                    <div class="elements-grid">
+                        <div class="element-card" onclick="showElementDemo('heading')">
+                            <h3>&lt;h1&gt; - &lt;h6&gt;</h3>
+                            <p>หัวข้อ 6 ระดับ</p>
+                        </div>
+                        <div class="element-card" onclick="showElementDemo('paragraph')">
+                            <h3>&lt;p&gt;</h3>
+                            <p>ย่อหน้าข้อความ</p>
+                        </div>
+                        <div class="element-card" onclick="showElementDemo('link')">
+                            <h3>&lt;a&gt;</h3>
+                            <p>ลิงก์เชื่อมโยง</p>
+                        </div>
+                        <div class="element-card" onclick="showElementDemo('image')">
+                            <h3>&lt;img&gt;</h3>
+                            <p>รูปภาพ</p>
+                        </div>
+                        <div class="element-card" onclick="showElementDemo('list')">
+                            <h3>&lt;ul&gt;, &lt;ol&gt;</h3>
+                            <p>รายการ</p>
+                        </div>
+                        <div class="element-card" onclick="showElementDemo('div')">
+                            <h3>&lt;div&gt;</h3>
+                            <p>กล่องจัดกลุ่ม</p>
+                        </div>
+                    </div>
+
+                    <div id="elementDemo" class="demo-area">
+                        <p>👆 คลิกที่ Element เพื่อดูตัวอย่าง</p>
+                    </div>
+                </div>
+                <button class="next-btn" onclick="nextSection(4)">ถัดไป →</button>
+            </section>
+
+            <!-- Section 4: Quiz -->
+            <section class="content-section hidden" id="section4">
+                <h2>🎯 แบบทดสอบ HTML Basics</h2>
+                <div class="content-card">
+                    <div class="quiz-container">
+                        <div class="question" id="question1">
+                            <h3>คำถามที่ 1: HTML ย่อมาจากอะไร?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q1" value="a"> HyperText Markup Language</label>
+                                <label><input type="radio" name="q1" value="b"> High Tech Modern Language</label>
+                                <label><input type="radio" name="q1" value="c"> Home Tool Markup Language</label>
+                                <label><input type="radio" name="q1" value="d"> Hyperlink Text Markup Language</label>
+                            </div>
+                        </div>
+
+                        <div class="question" id="question2">
+                            <h3>คำถามที่ 2: Element ใดใช้สำหรับสร้างหัวข้อใหญ่ที่สุด?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q2" value="a"> &lt;h6&gt;</label>
+                                <label><input type="radio" name="q2" value="b"> &lt;h1&gt;</label>
+                                <label><input type="radio" name="q2" value="c"> &lt;header&gt;</label>
+                                <label><input type="radio" name="q2" value="d"> &lt;title&gt;</label>
+                            </div>
+                        </div>
+
+                        <div class="question" id="question3">
+                            <h3>คำถามที่ 3: Element ใดใช้สำหรับสร้างลิงก์?</h3>
+                            <div class="options">
+                                <label><input type="radio" name="q3" value="a"> &lt;link&gt;</label>
+                                <label><input type="radio" name="q3" value="b"> &lt;a&gt;</label>
+                                <label><input type="radio" name="q3" value="c"> &lt;href&gt;</label>
+                                <label><input type="radio" name="q3" value="d"> &lt;url&gt;</label>
+                            </div>
+                        </div>
+
+                        <button class="submit-btn" onclick="submitQuiz()">ส่งคำตอบ</button>
+                        <div id="quizResult" class="quiz-result hidden"></div>
+                    </div>
+                </div>
+                <button class="complete-btn hidden" onclick="completeLesson()">เสร็จสิ้นบทเรียน ✅</button>
+            </section>
+        </main>
+
+        <footer class="lesson-footer">
+            <div class="lesson-info">
+                <span>📚 บทเรียนที่ 1/3</span>
+                <span>⏱️ เวลาโดยประมาณ: 45 นาที</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

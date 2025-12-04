@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Assessment - แบบทดสอบรวม</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            margin: -20px -20px 30px -20px;
+            border-radius: 0 0 20px 20px;
+        }
+        .timer {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545, #c82333);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .question-container {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .question-number {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .question-type {
+            background: #6c757d;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #495057;
+        }
+        .options {
+            list-style: none;
+        }
+        .options li {
+            margin: 12px 0;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .options li:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+            border-color: #dc3545;
+        }
+        .options li.selected {
+            background: #cce5ff;
+            border-color: #007bff;
+        }
+        .code-question {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220,53,69,0.3);
+        }
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #5a6268);
+        }
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 20px 0;
+        }
+        .score-breakdown {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .question-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .nav-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
+            background: white;
+        }
+        .nav-item.answered {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .nav-item.current {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 JavaScript Assessment</h1>
+            <h2>แบบทดสอบรวม JavaScript Fundamentals</h2>
+        </div>
+
+        <div class="timer" id="timer">
+            ⏰ เวลาที่เหลือ: <span id="timeLeft">45:00</span>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="question-nav" id="questionNav"></div>
+
+        <!-- Question 1 -->
+        <div class="question-container active" data-question="1">
+            <div class="question-header">
+                <div class="question-number">คำถามที่ 1</div>
+                <div class="question-type">Multiple Choice</div>
+            </div>
+            <div class="question-text">JavaScript ถูกสร้างขึ้นโดยใครและในปีใด?</div>
+            <ul class="options">
+                <li onclick="selectAnswer(1, 'A')">A) Tim Berners-Lee ในปี 1990</li>
+                <li onclick="selectAnswer(1, 'B')">B) Brendan Eich ในปี 1995</li>
+                <li onclick="selectAnswer(1, 'C')">C) James Gosling ในปี 1995</li>
+                <li onclick="selectAnswer(1, 'D')">D) Dennis Ritchie ในปี 1972</li>
+            </ul>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container" data-question="2">
+            <div class="question-header">
+                <div class="question-number">คำถามที่ 2</div>
+                <div class="question-type">Code Analysis</div>
+            </div>
+            <div class="question-text">ผลลัพธ์ของโค้ดนี้คืออะไร?</div>
+            <div class="code-question">
+let x = "5";
+let y = 3;
+console.log(x + y);
+            </div>
+            <ul class="options">
+                <li onclick="selectAnswer(2, 'A')">A) 8</li>
+                <li onclick="selectAnswer(2, 'B')">B) "53"</li>
+                <li onclick="selectAnswer(2, 'C')">C) 53</li>
+                <li onclick="selectAnswer(2, 'D')">D) Error</li>
+            </ul>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container" data-question="3">
+            <div class="question-header">
+                <div class="question-number">คำถามที่ 3</div>
+                <div class="question-type">Variable Declaration</div>
+            </div>
+            <div class="question-text">ข้อใดคือวิธีที่ถูกต้องในการประกาศตัวแปรที่ไม่สามารถเปลี่ยนค่าได้?</div>
+            <ul class="options">
+                <li onclick="selectAnswer(3, 'A')">A) var PI = 3.14;</li>
+                <li onclick="selectAnswer(3, 'B')">B) let PI = 3.14;</li>
+                <li onclick="selectAnswer(3, 'C')">C) const PI = 3.14;</li>
+                <li onclick="selectAnswer(3, 'D')">D) final PI = 3.14;</li>
+            </ul>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-container" data-question="4">
+            <div class="question-header">
+                <div class="question-number">คำถามที่ 4</div>
+                <div class="question-type">Data Types</div>
+            </div>
+            <div class="question-text">typeof [] จะให้ผลลัพธ์เป็นอะไร?</div>
+            <ul class="options">
+                <li onclick="selectAnswer(4, 'A')">A) "array"</li>
+                <li onclick="selectAnswer(4, 'B')">B) "object"</li>
+                <li onclick="selectAnswer(4, 'C')">C) "list"</li>
+                <li onclick="selectAnswer(4, 'D')">D) "undefined"</li>
+            </ul>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-container" data-question="5">
+            <div class="question-header">
+                <div class="question-number">คำถามที่ 5</div>
+                <div class="question-type">Code Completion</div>
+            </div>
+            <div class="question-text">เติมโค้ดให้สมบูรณ์เพื่อสร้างฟังก์ชันที่คืนค่าผลรวมของ a และ b:</div>
+            <div class="code-question">
+function addNumbers(a, b) {
+    _____ a + b;
+}
+            </div>
+            <ul class="options">
+                <li onclick="selectAnswer(5, 'A')">A) print</li>
+                <li onclick="selectAnswer(5, 'B')">B) return</li>
+                <li onclick="selectAnswer(5, 'C')">C) output</li>
+                <li onclick="selectAnswer(5, 'D')">D) display</li>
+            </ul>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>← ก่อนหน้า</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()">ถัดไป →</button>
+            <button class="btn" id="submitBtn" onclick="submitAssessment()" style="display: none;">ส่งคำตอบ 📤</button>
+        </div>
+
+        <div class="results" id="results">
+            <h2>🎉 ผลการทดสอบ</h2>
+            <div class="score-display" id="scoreDisplay">0%</div>
+            <div class="score-breakdown" id="scoreBreakdown"></div>
+            <button class="btn" onclick="reviewAnswers()">ดูเฉลย 📖</button>
+        </div>
+    </div>
+
+    <script src="../../shared/scorm-api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
