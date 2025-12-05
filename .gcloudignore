@@ -1,55 +1,16 @@
-# Node modules
-node_modules/
-npm-debug.log
-
-# Environment files
-.env.local
-.env.development
-.env.test
-.env*.backup
-.env*.remote
-
-# Next.js
-.next/
-out/
-
-# Build files
-*.log
-*.pid
-*.seed
-*.pid.lock
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Git
-.git/
+.git
 .gitignore
-
-# Testing
-coverage/
-.nyc_output/
-
-# Misc
-*.md
-!README.md
-docs/
-scripts/load-test.js
-scripts/stress-test.js
-
-# Database
-*.db
-*.db-journal
-prisma/migrations/
-
-# Docker
-Dockerfile
-docker-compose*.yml
-.dockerignore
+node_modules
+.next
+.env
+.env.local
+.env.production
+.env.development
+*.log
+npm-debug.log*
+yarn-debug.log*
+.DS_Store
+coverage
+.vscode
+.idea
+README.md

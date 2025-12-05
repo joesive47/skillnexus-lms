@@ -1,276 +1,433 @@
-# ☁️ Google Cloud Platform Deployment Guide
+# 🚀 Google Cloud Deployment Guide - SkillNexus LMS
 
-## 🎯 Project: upPowerSkill LMS
-
----
-
-## 📋 Step 1: Install Google Cloud SDK
-
-### Windows Installation:
-```powershell
-# Download and install Google Cloud SDK
-# https://cloud.google.com/sdk/docs/install
-
-# Or use Chocolatey
-choco install gcloudsdk
-
-# Verify installation
-gcloud --version
-```
+Google Cloud มี 2 ทางเลือกหลัก:
 
 ---
 
-## 🚀 Step 2: Initialize & Create Project
+## ⭐ Option 1: Cloud Run (แนะนำ - ง่ายและถูก!)
+
+**ข้อดี:**
+- ✅ ง่ายที่สุด (Deploy ใน 5 นาที)
+- ✅ Pay-per-use (จ่ายเฉพาะเวลาใช้งาน)
+- ✅ Auto-scaling (0 → 1000 instances)
+- ✅ HTTPS ฟรี
+- ✅ Custom domain ฟรี
+- ✅ ถูกมาก ($0-10/เดือน สำหรับ traffic ปานกลาง)
+
+**ราคา:** $0-20/เดือน (ขึ้นกับ traffic)
+
+### ขั้นตอน:
+
+#### 1. Setup Google Cloud Project
 
 ```bash
-# Login to Google Cloud
+# ติดตั้ง Google Cloud CLI
+# Windows: https://cloud.google.com/sdk/docs/install
+# หรือใช้ Cloud Shell ใน Console
+
+# Login
 gcloud auth login
 
-# Set your account
-gcloud config set account YOUR_EMAIL@gmail.com
+# สร้าง project (หรือใช้ที่มีอยู่)
+gcloud projects create skillnexus-lms --name="SkillNexus LMS"
 
-# Create project
-gcloud projects create uppowerskill --name="upPowerSkill LMS"
+# Set project
+gcloud config set project skillnexus-lms
 
-# Set as default project
-gcloud config set project uppowerskill
-
-# Enable billing (required)
-gcloud billing accounts list
-gcloud billing projects link uppowerskill --billing-account=BILLING_ACCOUNT_ID
-```
-
----
-
-## 🔧 Step 3: Enable Required APIs
-
-```bash
-# Enable Cloud Run (for containers)
+# Enable APIs
 gcloud services enable run.googleapis.com
-
-# Enable Cloud SQL (for PostgreSQL)
-gcloud services enable sqladmin.googleapis.com
-
-# Enable Cloud Storage (for files)
-gcloud services enable storage.googleapis.com
-
-# Enable Cloud CDN
-gcloud services enable compute.googleapis.com
-
-# Enable Secret Manager
-gcloud services enable secretmanager.googleapis.com
-
-# Enable Cloud Build
 gcloud services enable cloudbuild.googleapis.com
+gcloud services enable sqladmin.googleapis.com
 ```
 
----
-
-## 🗄️ Step 4: Setup Cloud SQL (PostgreSQL)
+#### 2. Setup Cloud SQL (PostgreSQL)
 
 ```bash
-# Create PostgreSQL instance
+# สร้าง Cloud SQL instance
 gcloud sql instances create skillnexus-db \
   --database-version=POSTGRES_15 \
   --tier=db-f1-micro \
   --region=asia-southeast1 \
-  --root-password=YOUR_SECURE_PASSWORD
+  --root-password=[YOUR_PASSWORD]
 
-# Create database
-gcloud sql databases create skillnexus \
+# สร้าง database
+gcloud sql databases create skillnexus_lms \
   --instance=skillnexus-db
 
+# สร้าง user
+gcloud sql users create skillnexus \
+  --instance=skillnexus-db \
+  --password=[YOUR_PASSWORD]
+
 # Get connection name
-gcloud sql instances describe skillnexus-db \
-  --format="value(connectionName)"
+gcloud sql instances describe skillnexus-db --format="value(connectionName)"
+# Output: skillnexus-lms:asia-southeast1:skillnexus-db
 ```
 
----
+**Connection String:**
+```
+postgresql://skillnexus:[password]@/skillnexus_lms?host=/cloudsql/skillnexus-lms:asia-southeast1:skillnexus-db
+```
 
-## 📦 Step 5: Build & Deploy to Cloud Run
+#### 3. Build & Deploy to Cloud Run
 
 ```bash
-# Build Docker image
-gcloud builds submit --tag gcr.io/uppowerskill/skillnexus-lms
+# ไปที่ project directory
+cd c:\API\The-SkillNexus
 
-# Deploy to Cloud Run
+# Build และ Deploy (วิธีที่ 1 - ง่ายที่สุด)
 gcloud run deploy skillnexus-lms \
-  --image gcr.io/uppowerskill/skillnexus-lms \
-  --platform managed \
-  --region asia-southeast1 \
+  --source . \
+  --region=asia-southeast1 \
+  --platform=managed \
   --allow-unauthenticated \
-  --memory 2Gi \
-  --cpu 2 \
-  --min-instances 1 \
-  --max-instances 10 \
-  --set-env-vars "NODE_ENV=production" \
-  --add-cloudsql-instances uppowerskill:asia-southeast1:skillnexus-db
+  --memory=1Gi \
+  --cpu=1 \
+  --max-instances=10 \
+  --min-instances=0 \
+  --add-cloudsql-instances=skillnexus-lms:asia-southeast1:skillnexus-db
+
+# หรือ Build Docker แล้ว Deploy (วิธีที่ 2)
+# Build image
+gcloud builds submit --tag gcr.io/skillnexus-lms/skillnexus-lms
+
+# Deploy
+gcloud run deploy skillnexus-lms \
+  --image gcr.io/skillnexus-lms/skillnexus-lms \
+  --region=asia-southeast1 \
+  --platform=managed \
+  --allow-unauthenticated \
+  --memory=1Gi \
+  --cpu=1 \
+  --add-cloudsql-instances=skillnexus-lms:asia-southeast1:skillnexus-db
 ```
 
----
-
-## 🔐 Step 6: Setup Secrets
+#### 4. Set Environment Variables
 
 ```bash
-# Store database URL
-echo -n "postgresql://user:pass@/skillnexus?host=/cloudsql/CONNECTION_NAME" | \
-  gcloud secrets create DATABASE_URL --data-file=-
-
-# Store NextAuth secret
-echo -n "your-nextauth-secret" | \
-  gcloud secrets create NEXTAUTH_SECRET --data-file=-
-
-# Store encryption key
-echo -n "your-encryption-key" | \
-  gcloud secrets create ENCRYPTION_KEY --data-file=-
-
-# Grant access to Cloud Run
-gcloud secrets add-iam-policy-binding DATABASE_URL \
-  --member="serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor"
+# Set secrets
+gcloud run services update skillnexus-lms \
+  --region=asia-southeast1 \
+  --update-env-vars="DATABASE_URL=postgresql://skillnexus:[password]@/skillnexus_lms?host=/cloudsql/skillnexus-lms:asia-southeast1:skillnexus-db,\
+NEXTAUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=,\
+AUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=,\
+NEXTAUTH_URL=https://skillnexus-lms-xxxxx-as.a.run.app,\
+AUTH_URL=https://skillnexus-lms-xxxxx-as.a.run.app,\
+NEXT_PUBLIC_URL=https://skillnexus-lms-xxxxx-as.a.run.app,\
+AUTH_TRUST_HOST=true,\
+NODE_ENV=production"
 ```
 
----
-
-## 🌐 Step 7: Setup Custom Domain
+#### 5. Run Migrations
 
 ```bash
-# Map custom domain
+# Option A: ใช้ Cloud Shell
+gcloud sql connect skillnexus-db --user=skillnexus
+# รัน migrations ผ่าน psql
+
+# Option B: ใช้ Cloud SQL Proxy (แนะนำ)
+# Download proxy
+curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.8.0/cloud-sql-proxy.windows.amd64.exe
+
+# Run proxy
+cloud-sql-proxy skillnexus-lms:asia-southeast1:skillnexus-db
+
+# ใน terminal อื่น
+DATABASE_URL="postgresql://skillnexus:[password]@localhost:5432/skillnexus_lms" npx prisma migrate deploy
+DATABASE_URL="postgresql://skillnexus:[password]@localhost:5432/skillnexus_lms" npm run db:seed
+```
+
+#### 6. Custom Domain (Optional)
+
+```bash
+# Map domain
 gcloud run domain-mappings create \
-  --service skillnexus-lms \
-  --domain uppowerskill.com \
-  --region asia-southeast1
+  --service=skillnexus-lms \
+  --domain=www.uppowerskill.com \
+  --region=asia-southeast1
 
-# Get DNS records to configure
-gcloud run domain-mappings describe \
-  --domain uppowerskill.com \
-  --region asia-southeast1
+# Update DNS records ตามที่ Google แนะนำ
 ```
+
+**เวลา Deploy:** 5-10 นาที  
+**URL:** https://skillnexus-lms-xxxxx-as.a.run.app
 
 ---
 
-## 📊 Step 8: Setup Monitoring
+## 🚀 Option 2: App Engine (Alternative)
+
+**ข้อดี:**
+- ✅ Managed platform
+- ✅ Auto-scaling
+- ✅ ไม่ต้องจัดการ container
+
+**ราคา:** $20-50/เดือน
+
+### ขั้นตอน:
+
+#### 1. Setup Database
+```bash
+# เหมือน Option 1
+```
+
+#### 2. Deploy to App Engine
 
 ```bash
-# Enable Cloud Monitoring
-gcloud services enable monitoring.googleapis.com
+# Create app
+gcloud app create --region=asia-southeast1
 
-# Enable Cloud Logging
-gcloud services enable logging.googleapis.com
+# Deploy
+gcloud app deploy
 
-# Create uptime check
-gcloud monitoring uptime create uppowerskill-health \
-  --resource-type=uptime-url \
-  --host=uppowerskill.com \
-  --path=/api/health
+# Set environment variables
+gcloud app deploy --set-env-vars="DATABASE_URL=postgresql://...,NEXTAUTH_SECRET=...,AUTH_SECRET=..."
 ```
 
----
-
-## 💰 Cost Estimation
-
-### Free Tier (First 2M requests/month)
-- **Cloud Run:** $0 (within free tier)
-- **Cloud SQL:** ~$10/month (db-f1-micro)
-- **Cloud Storage:** ~$5/month (50GB)
-- **Cloud CDN:** ~$10/month
-- **Total:** ~$25/month
-
-### Production Tier (100K users)
-- **Cloud Run:** ~$100/month (2 vCPU, 2GB RAM)
-- **Cloud SQL:** ~$200/month (db-n1-standard-2)
-- **Cloud Storage:** ~$50/month (500GB)
-- **Cloud CDN:** ~$100/month
-- **Total:** ~$450/month
-
----
-
-## 🔄 Step 9: CI/CD Setup
-
-```yaml
-# .github/workflows/deploy-gcp.yml
-name: Deploy to Google Cloud
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: uppowerskill
-          
-      - name: Build and Deploy
-        run: |
-          gcloud builds submit --tag gcr.io/uppowerskill/skillnexus-lms
-          gcloud run deploy skillnexus-lms \
-            --image gcr.io/uppowerskill/skillnexus-lms \
-            --region asia-southeast1
+#### 3. Run Migrations
+```bash
+# เหมือน Option 1
 ```
 
+**เวลา Deploy:** 10-15 นาที  
+**URL:** https://skillnexus-lms.as.r.appspot.com
+
 ---
 
-## 🎯 Quick Deploy Commands
+## 💰 ราคา Google Cloud
+
+### Cloud Run (Pay-per-use)
+```
+Free Tier (ทุกเดือน):
+- 2 million requests
+- 360,000 GB-seconds
+- 180,000 vCPU-seconds
+
+หลัง Free Tier:
+- $0.00002400 per request
+- $0.00000250 per GB-second
+- $0.00001000 per vCPU-second
+
+ประมาณการ:
+- 10,000 requests/วัน: ~$5/เดือน
+- 50,000 requests/วัน: ~$15/เดือน
+- 100,000 requests/วัน: ~$30/เดือน
+```
+
+### Cloud SQL
+```
+db-f1-micro (Free Tier eligible):
+- 0.6 GB RAM
+- Shared CPU
+- $0 (ใน Free Tier)
+- หรือ ~$7/เดือน
+
+db-g1-small (Production):
+- 1.7 GB RAM
+- 1 shared vCPU
+- ~$25/เดือน
+```
+
+**รวม:** $0-10/เดือน (Free Tier) หรือ $15-40/เดือน (Production)
+
+---
+
+## 📊 เปรียบเทียบ
+
+| Feature | Cloud Run | App Engine |
+|---------|-----------|------------|
+| ราคา | $0-20/เดือน | $20-50/เดือน |
+| Scaling | 0 → 1000 | Auto |
+| Cold Start | ~1-2 วินาที | ~5-10 วินาที |
+| Deploy Time | 3-5 นาที | 10-15 นาที |
+| ความยาก | ⭐⭐ ง่าย | ⭐⭐⭐ ปานกลาง |
+
+---
+
+## 🎯 Quick Start (Cloud Run - แนะนำ!)
+
+### วิธีที่ 1: ใช้ Cloud Console (ง่ายที่สุด!)
 
 ```bash
-# One-command deploy
-./deploy-gcp.sh
+1. ไปที่ https://console.cloud.google.com
+2. เปิด Cloud Shell (ปุ่มด้านบนขวา)
+3. Clone repository:
+   git clone https://github.com/YOUR_USERNAME/The-SkillNexus.git
+   cd The-SkillNexus
 
-# Check status
-gcloud run services describe skillnexus-lms --region asia-southeast1
+4. Deploy:
+   gcloud run deploy skillnexus-lms \
+     --source . \
+     --region=asia-southeast1 \
+     --allow-unauthenticated
 
-# View logs
-gcloud run services logs read skillnexus-lms --region asia-southeast1
+5. เสร็จแล้ว! 🎉
+```
 
-# Scale up
+### วิธีที่ 2: ใช้ Local CLI
+
+```bash
+# 1. Install Google Cloud CLI
+# https://cloud.google.com/sdk/docs/install
+
+# 2. Login
+gcloud auth login
+
+# 3. Set project
+gcloud config set project YOUR_PROJECT_ID
+
+# 4. Deploy
+cd c:\API\The-SkillNexus
+gcloud run deploy skillnexus-lms \
+  --source . \
+  --region=asia-southeast1 \
+  --allow-unauthenticated
+
+# 5. Setup Database
+gcloud sql instances create skillnexus-db \
+  --database-version=POSTGRES_15 \
+  --tier=db-f1-micro \
+  --region=asia-southeast1
+
+# 6. Add environment variables
 gcloud run services update skillnexus-lms \
-  --max-instances 50 \
-  --region asia-southeast1
+  --region=asia-southeast1 \
+  --update-env-vars="DATABASE_URL=...,NEXTAUTH_SECRET=..."
+
+# 7. Run migrations
+# ใช้ Cloud SQL Proxy
 ```
 
 ---
 
-## 📝 Environment Variables
+## 🔧 CI/CD with Cloud Build
+
+### Setup Automatic Deployment
 
 ```bash
-# Set all environment variables
-gcloud run services update skillnexus-lms \
-  --set-env-vars "
-    NODE_ENV=production,
-    NEXTAUTH_URL=https://uppowerskill.com,
-    NEXT_PUBLIC_APP_URL=https://uppowerskill.com
-  " \
-  --region asia-southeast1
+# 1. Connect GitHub
+gcloud builds triggers create github \
+  --repo-name=The-SkillNexus \
+  --repo-owner=YOUR_USERNAME \
+  --branch-pattern="^main$" \
+  --build-config=cloudbuild.yaml
+
+# 2. Push to GitHub
+git push origin main
+
+# 3. Auto deploy! 🚀
 ```
 
 ---
 
-## 🛡️ Security Checklist
+## 💡 Tips & Best Practices
 
-- [x] Enable Cloud Armor (DDoS protection)
-- [x] Setup Cloud CDN
-- [x] Configure SSL/TLS
-- [x] Enable Secret Manager
-- [x] Setup IAM roles
-- [x] Enable audit logging
-- [x] Configure VPC
-- [x] Setup Cloud SQL proxy
+### Performance
+```bash
+# เพิ่ม memory สำหรับ performance ดีขึ้น
+gcloud run services update skillnexus-lms \
+  --memory=2Gi \
+  --cpu=2
+
+# เพิ่ม min instances เพื่อลด cold start
+gcloud run services update skillnexus-lms \
+  --min-instances=1
+```
+
+### Cost Optimization
+```bash
+# ใช้ min-instances=0 สำหรับ dev/staging
+# ใช้ min-instances=1-2 สำหรับ production
+
+# Set max instances เพื่อควบคุมค่าใช้จ่าย
+gcloud run services update skillnexus-lms \
+  --max-instances=5
+```
+
+### Monitoring
+```bash
+# ดู logs
+gcloud run logs read skillnexus-lms --region=asia-southeast1
+
+# ดู metrics
+gcloud run services describe skillnexus-lms --region=asia-southeast1
+```
 
 ---
 
-## 📞 Support
+## 🔒 Security
 
-**Google Cloud Console:** https://console.cloud.google.com  
-**Project ID:** uppowerskill  
-**Region:** asia-southeast1 (Singapore)  
-**Service:** Cloud Run + Cloud SQL
+### Use Secret Manager (แนะนำ!)
+
+```bash
+# สร้าง secrets
+echo -n "hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=" | \
+  gcloud secrets create nextauth-secret --data-file=-
+
+echo -n "postgresql://..." | \
+  gcloud secrets create database-url --data-file=-
+
+# ใช้ secrets ใน Cloud Run
+gcloud run services update skillnexus-lms \
+  --update-secrets=NEXTAUTH_SECRET=nextauth-secret:latest,\
+DATABASE_URL=database-url:latest
+```
 
 ---
 
-**Ready to deploy to Google Cloud! ☁️🚀**
+## 📈 Scaling Configuration
+
+### Development
+```bash
+--min-instances=0
+--max-instances=2
+--memory=512Mi
+--cpu=1
+```
+
+### Production
+```bash
+--min-instances=1
+--max-instances=10
+--memory=1Gi
+--cpu=2
+```
+
+### High Traffic
+```bash
+--min-instances=2
+--max-instances=50
+--memory=2Gi
+--cpu=2
+```
+
+---
+
+## 🎉 ข้อดีของ Google Cloud Run
+
+- ✅ **ถูกที่สุด**: จ่ายเฉพาะเวลาใช้งาน
+- ✅ **ง่ายที่สุด**: Deploy ใน 5 นาที
+- ✅ **Scale อัตโนมัติ**: 0 → 1000 instances
+- ✅ **HTTPS ฟรี**: SSL certificate อัตโนมัติ
+- ✅ **Global CDN**: ใช้ Google's network
+- ✅ **Free Tier**: 2M requests/เดือน ฟรี
+
+---
+
+## 🚀 Deploy Now!
+
+```bash
+# One-line deploy!
+gcloud run deploy skillnexus-lms \
+  --source . \
+  --region=asia-southeast1 \
+  --allow-unauthenticated \
+  --memory=1Gi
+
+# เสร็จแล้ว! 🎉
+```
+
+**URL:** https://skillnexus-lms-xxxxx-as.a.run.app
+
+---
+
+**Google Cloud Run = ง่าย + ถูก + Scalable! 🚀**
