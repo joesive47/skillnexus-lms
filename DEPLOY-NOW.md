@@ -1,240 +1,270 @@
-# 🚀 Deploy to Vercel - Quick Guide (10 Minutes)
+# 🚀 DEPLOY NOW - Google Cloud Run
 
-## ✅ Pre-Deployment Checklist
-
-- [x] Local development working
-- [x] Database configured
-- [ ] GitHub repository ready
-- [ ] Vercel account created
-- [ ] Production database ready
+## ✅ พร้อมแล้ว!
+- Balance: THB 18.73 ✅
+- Project: skillnexus-lms-2025 ✅
+- Database: Supabase ✅
 
 ---
 
-## 📋 Step-by-Step Deployment
+## 📋 ข้อมูลที่ต้องใช้
 
-### Step 1: Setup Production Database (5 min)
-
-**Option A: Vercel Postgres (Recommended)**
-```bash
-# Will setup after deploying to Vercel
-# Vercel Dashboard → Storage → Create Database → Postgres
 ```
-
-**Option B: Supabase (Free)**
-1. Go to https://supabase.com
-2. Create New Project
-3. Settings → Database → Copy Connection String
-4. Save for Step 4
-
----
-
-### Step 2: Push to GitHub (2 min)
-
-```bash
-# Initialize git (if not already)
-git init
-git add .
-git commit -m "Initial commit - SkillNexus LMS"
-
-# Create GitHub repo and push
-git remote add origin https://github.com/YOUR_USERNAME/skillnexus-lms.git
-git branch -M main
-git push -u origin main
+Project ID: skillnexus-lms-2025
+Account: joesive@gmail.com
+Database: postgresql://postgres:[PASSWORD]@db.sorvxmipetkhofhhqjio.supabase.co:5432/postgres
+Region: asia-southeast1
 ```
 
 ---
 
-### Step 3: Deploy to Vercel (2 min)
+## 🚀 Deploy เลย! (Copy-Paste)
 
-1. Go to https://vercel.com
-2. Click "Add New" → "Project"
-3. Import your GitHub repository
-4. Click "Deploy" (don't configure yet)
+### วิธีที่ 1: ใช้ Local Terminal (Windows)
+
+```bash
+# 1. Install Google Cloud CLI (ถ้ายังไม่มี)
+# Download: https://cloud.google.com/sdk/docs/install
+
+# 2. Login
+gcloud auth login
+
+# 3. Set project
+gcloud config set project skillnexus-lms-2025
+
+# 4. Enable APIs
+gcloud services enable run.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+
+# 5. Deploy
+cd c:\API\The-SkillNexus
+
+gcloud run deploy skillnexus-lms ^
+  --source . ^
+  --region=asia-southeast1 ^
+  --platform=managed ^
+  --allow-unauthenticated ^
+  --memory=1Gi ^
+  --cpu=1 ^
+  --max-instances=5 ^
+  --min-instances=0
+
+# รอ 5-10 นาที...
+```
+
+### วิธีที่ 2: ใช้ Cloud Console (ไม่ต้องติดตั้งอะไร)
+
+1. **ไปที่:** https://shell.cloud.google.com
+2. **Login:** joesive@gmail.com
+3. **Copy-paste commands:**
+
+```bash
+# Set project
+gcloud config set project skillnexus-lms-2025
+
+# Enable APIs
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com
+
+# Clone repo (แก้ YOUR_USERNAME)
+git clone https://github.com/YOUR_USERNAME/The-SkillNexus.git
+cd The-SkillNexus
+
+# Deploy
+gcloud run deploy skillnexus-lms \
+  --source . \
+  --region=asia-southeast1 \
+  --platform=managed \
+  --allow-unauthenticated \
+  --memory=1Gi \
+  --cpu=1 \
+  --max-instances=5 \
+  --min-instances=0
+```
 
 ---
 
-### Step 4: Configure Environment Variables (3 min)
+## 🔑 Add Environment Variables
 
-In Vercel Dashboard → Settings → Environment Variables, add:
+### หลัง Deploy สำเร็จ:
 
+1. **Get URL:**
 ```bash
-# Database (Choose one)
-DATABASE_URL=postgresql://postgres:PASSWORD@db.PROJECT.supabase.co:5432/postgres?pgbouncer=true
-
-# Or Vercel Postgres (after creating in Storage tab)
-DATABASE_URL=postgres://default:PASSWORD@HOST-pooler.postgres.vercel-storage.com:5432/verceldb?sslmode=require
-
-# Authentication (Generate new secrets!)
-NEXTAUTH_SECRET=YOUR_GENERATED_SECRET_HERE
-AUTH_SECRET=YOUR_GENERATED_SECRET_HERE
-NEXTAUTH_URL=https://your-app.vercel.app
-AUTH_URL=https://your-app.vercel.app
-AUTH_TRUST_HOST=true
-NODE_ENV=production
-NEXT_PUBLIC_URL=https://your-app.vercel.app
-
-# Certificate Signing
-CERT_SIGNING_KEY=YOUR_GENERATED_SECRET_HERE
-
-# RAG System
-RAG_CHUNK_SIZE=600
-RAG_CHUNK_OVERLAP=50
-RAG_MAX_RESULTS=3
-RAG_BATCH_SIZE=10
-RAG_MAX_CONCURRENT=5
-RAG_CACHE_SIZE=2000
-RAG_ENABLE_PRELOAD=true
-RAG_FAST_MODE=true
-RAG_SIMILARITY_THRESHOLD=0.25
+gcloud run services describe skillnexus-lms --region=asia-southeast1 --format="value(status.url)"
 ```
 
-**Generate Secrets:**
+2. **Update Environment Variables:**
 ```bash
-# Run this 3 times for different secrets
-openssl rand -base64 32
+# แทนที่ [PASSWORD] และ [URL]
+gcloud run services update skillnexus-lms ^
+  --region=asia-southeast1 ^
+  --set-env-vars="DATABASE_URL=postgresql://postgres:[PASSWORD]@db.sorvxmipetkhofhhqjio.supabase.co:5432/postgres,NEXTAUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=,AUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=,NEXTAUTH_URL=[URL],AUTH_URL=[URL],NEXT_PUBLIC_URL=[URL],AUTH_TRUST_HOST=true,NODE_ENV=production"
 ```
 
 ---
 
-### Step 5: Setup Database Schema (2 min)
+## 🗄️ Run Migrations
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login
-vercel login
-
-# Link project
-vercel link
+# Set DATABASE_URL (แทนที่ [PASSWORD])
+set DATABASE_URL=postgresql://postgres:[PASSWORD]@db.sorvxmipetkhofhhqjio.supabase.co:5432/postgres
 
 # Run migrations
-vercel env pull .env.production
-npx prisma migrate deploy --schema=./prisma/schema.prisma
-npx prisma db seed
-```
-
-**Or use Vercel Dashboard:**
-1. Deployments → Latest → View Function Logs
-2. Run migration command in terminal
-
----
-
-### Step 6: Redeploy (1 min)
-
-```bash
-# Trigger redeploy
-git commit --allow-empty -m "Trigger redeploy"
-git push
-
-# Or in Vercel Dashboard
-# Deployments → Latest → Redeploy
-```
-
----
-
-## 🎯 Quick Deploy Commands
-
-```bash
-# 1. Generate secrets
-openssl rand -base64 32  # NEXTAUTH_SECRET
-openssl rand -base64 32  # AUTH_SECRET
-openssl rand -base64 32  # CERT_SIGNING_KEY
-
-# 2. Push to GitHub
-git add .
-git commit -m "Deploy to production"
-git push
-
-# 3. Deploy to Vercel
-vercel --prod
-
-# 4. Run migrations
-vercel env pull
 npx prisma migrate deploy
-npx prisma db seed
+
+# Seed database
+npm run db:seed
 ```
 
 ---
 
-## 🔐 Environment Variables Template
+## ✅ Test!
 
-Copy this to Vercel → Settings → Environment Variables:
+**URL:** https://skillnexus-lms-xxxxx-as.a.run.app
 
-```env
-DATABASE_URL=
-NEXTAUTH_SECRET=
-AUTH_SECRET=
-NEXTAUTH_URL=
-AUTH_URL=
-AUTH_TRUST_HOST=true
-NODE_ENV=production
-NEXT_PUBLIC_URL=
-CERT_SIGNING_KEY=
-RAG_CHUNK_SIZE=600
-RAG_CHUNK_OVERLAP=50
-RAG_MAX_RESULTS=3
-RAG_BATCH_SIZE=10
-RAG_MAX_CONCURRENT=5
-RAG_CACHE_SIZE=2000
-RAG_ENABLE_PRELOAD=true
-RAG_FAST_MODE=true
-RAG_SIMILARITY_THRESHOLD=0.25
+**Login:**
+- Email: `admin@skillnexus.com`
+- Password: `Admin@123!`
+
+---
+
+## 💰 ค่าใช้จ่าย (ประมาณการ)
+
+### Configuration:
+- Memory: 1GB
+- CPU: 1
+- Max instances: 5
+- Min instances: 0
+
+### ค่าใช้จ่าย:
+- **0-1K requests/วัน:** ~฿0/เดือน (Free Tier)
+- **1K-10K requests/วัน:** ~฿15-30/เดือน
+- **10K-50K requests/วัน:** ~฿150-300/เดือน
+
+### Balance ปัจจุบัน: THB 18.73
+- **พอใช้:** 1-2 เดือน (traffic ปกติ)
+- **Free Tier:** 2M requests/เดือน
+
+---
+
+## 🎯 ตั้ง Budget Alert
+
+```bash
+# ไปที่
+https://console.cloud.google.com/billing/budgets
+
+# สร้าง Budget
+- Name: skillnexus-budget
+- Budget: THB 50
+- Alert at: 50%, 90%, 100%
+- Email: joesive@gmail.com
 ```
 
 ---
 
-## ✅ Post-Deployment Checklist
+## 📊 Monitor Usage
 
-- [ ] Site is live at https://your-app.vercel.app
-- [ ] Database connected (check logs)
-- [ ] Can login with test accounts
-- [ ] Test admin features
-- [ ] Test student enrollment
-- [ ] Test video playback
-- [ ] Test quiz functionality
-- [ ] Check certificate generation
+### View Metrics:
+```
+https://console.cloud.google.com/run/detail/asia-southeast1/skillnexus-lms/metrics
+```
+
+### View Logs:
+```bash
+gcloud run logs read skillnexus-lms --region=asia-southeast1 --limit=50
+```
+
+### Check Billing:
+```
+https://console.cloud.google.com/billing
+```
+
+---
+
+## 🔧 Useful Commands
+
+### View Service:
+```bash
+gcloud run services describe skillnexus-lms --region=asia-southeast1
+```
+
+### Update Config:
+```bash
+# ลด memory เพื่อประหยัด
+gcloud run services update skillnexus-lms --region=asia-southeast1 --memory=512Mi
+
+# ลด max instances
+gcloud run services update skillnexus-lms --region=asia-southeast1 --max-instances=3
+```
+
+### Pause Service (ประหยัดเงิน):
+```bash
+# Set max instances = 0 (หยุดชั่วคราว)
+gcloud run services update skillnexus-lms --region=asia-southeast1 --max-instances=0
+
+# Resume
+gcloud run services update skillnexus-lms --region=asia-southeast1 --max-instances=5
+```
+
+### Delete Service:
+```bash
+gcloud run services delete skillnexus-lms --region=asia-southeast1
+```
+
+---
+
+## 💡 Tips ประหยัดเงิน
+
+1. **ใช้ min-instances=0** (pay-per-use)
+2. **ลด memory เป็น 512Mi** (ถ้าพอใช้)
+3. **จำกัด max-instances=3-5**
+4. **ตั้ง budget alert**
+5. **ลบ service ถ้าไม่ใช้**
 
 ---
 
 ## 🆘 Troubleshooting
 
-### Build Failed
+### Build Failed:
 ```bash
-# Check build logs in Vercel Dashboard
-# Common issues:
-# - Missing environment variables
-# - TypeScript errors
-# - Prisma client not generated
+gcloud builds list --limit=5
 ```
 
-### Database Connection Failed
+### Out of Memory:
 ```bash
-# Verify DATABASE_URL format
-# Check if database is accessible
-# Ensure SSL mode is enabled (?sslmode=require)
+# เพิ่ม memory
+gcloud run services update skillnexus-lms --region=asia-southeast1 --memory=2Gi
 ```
 
-### 500 Internal Server Error
+### Database Error:
 ```bash
-# Check Function Logs in Vercel
-# Verify all environment variables are set
-# Run migrations: npx prisma migrate deploy
+# Test connection
+psql "postgresql://postgres:[PASSWORD]@db.sorvxmipetkhofhhqjio.supabase.co:5432/postgres"
 ```
 
 ---
 
-## 🎉 Success!
+## 📝 Checklist
 
-Your SkillNexus LMS is now live! 🚀
-
-**Next Steps:**
-1. Setup custom domain (optional)
-2. Configure SSL certificate
-3. Setup monitoring
-4. Enable analytics
-5. Configure backups
+- [ ] Install Google Cloud CLI (หรือใช้ Cloud Shell)
+- [ ] Login & Set Project
+- [ ] Enable APIs
+- [ ] Deploy to Cloud Run
+- [ ] Add Environment Variables
+- [ ] Run Migrations
+- [ ] Test Application
+- [ ] Setup Budget Alert
+- [ ] Monitor Usage
 
 ---
 
-**Need Help?** See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed guide.
+## 🎉 Ready to Deploy!
+
+**Balance:** THB 18.73 ✅  
+**Project:** skillnexus-lms-2025 ✅  
+**Database:** Supabase ✅  
+
+**เลือกวิธีที่ 1 หรือ 2 แล้ว Deploy เลย!** 🚀
+
+---
+
+**Good Luck! 🎉**
