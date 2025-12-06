@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Trash2, Edit, Plus, Eye } from 'lucide-react'
-import { DeleteCourseForm } from './delete-course-form'
+
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { CourseImage } from '@/components/ui/course-image'
@@ -88,7 +88,9 @@ export default async function AdminCoursesPage() {
                     <Edit className="w-4 h-4" />
                   </Button>
                 </Link>
-                <DeleteCourseForm courseId={course.id} courseTitle={course.title} />
+                <Button variant="destructive" size="sm" disabled>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
