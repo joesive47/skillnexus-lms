@@ -21,6 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th">
+      <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" />
+      </head>
       <body className={inter.className}>
         <ErrorBoundary>
           <Providers>
