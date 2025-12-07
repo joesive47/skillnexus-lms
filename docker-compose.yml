@@ -1,30 +1,13 @@
 version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+  postgres:
+    image: postgres:15
+    container_name: skillnexus-postgres
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - AUTH_SECRET=${AUTH_SECRET}
-      - NEXTAUTH_URL=${NEXTAUTH_URL}
-      - AUTH_URL=${AUTH_URL}
-      - AUTH_TRUST_HOST=true
-      - NODE_ENV=production
-    depends_on:
-      - db
-    restart: unless-stopped
-
-  db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=skillnexus
-      - POSTGRES_PASSWORD=skillnexus123
-      - POSTGRES_DB=skillnexus_lms
+      POSTGRES_DB: skillnexus
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
