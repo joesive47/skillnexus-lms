@@ -66,7 +66,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
+
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Use environment variable for base URL
+      const localBaseUrl = process.env.NEXT_PUBLIC_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      
+      // If url is relative, prepend base URL
+      if (url.startsWith('/')) {
+        return `${localBaseUrl}${url}`
+      }
+      
+      // If url is same origin, allow it
+      if (url.startsWith(localBaseUrl)) {
+        return url
+      }
+      
+      // Default to base URL
+      return localBaseUrl
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
@@ -81,9 +102,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session
     },
-  },
-  pages: {
-    signIn: "/login",
   },
   debug: process.env.NODE_ENV === 'development',
   trustHost: true,

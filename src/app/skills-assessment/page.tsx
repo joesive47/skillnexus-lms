@@ -11,6 +11,7 @@ import { ImportPage } from '@/components/skill-assessment/import-page'
 import { getCareers } from '@/app/actions/assessment'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 
 interface Career {
   id: string
@@ -22,12 +23,17 @@ interface Career {
   difficulty: string
 }
 
-export default function SkillsAssessmentPage() {
+function SkillsAssessmentPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [careers, setCareers] = useState<Career[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -36,15 +42,18 @@ export default function SkillsAssessmentPage() {
   }, [status, router])
 
   useEffect(() => {
-    loadCareers()
-  }, [])
+    if (mounted && status !== 'loading') {
+      loadCareers()
+    }
+  }, [mounted, status])
 
   const loadCareers = async () => {
     try {
       const data = await getCareers()
-      setCareers(data)
+      setCareers(data || [])
     } catch (error) {
       console.error('Failed to load careers:', error)
+      setCareers([])
     } finally {
       setLoading(false)
     }
@@ -56,7 +65,7 @@ export default function SkillsAssessmentPage() {
     setActiveTab('overview')
   }
 
-  if (status === 'loading') {
+  if (!mounted || status === 'loading') {
     return <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>
   }
 
@@ -290,3 +299,9 @@ export default function SkillsAssessmentPage() {
     </div>
   )
 }
+
+// Export as dynamic component to prevent SSR issues
+export default dynamic(() => Promise.resolve(SkillsAssessmentPage), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>
+})

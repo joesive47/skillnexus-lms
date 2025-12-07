@@ -11,6 +11,8 @@ export async function authenticate(
   formData: FormData,
 ) {
   try {
+    console.log('[AUTH ACTION] Starting authentication...')
+    
     // Validate input
     const validatedFields = loginSchema.safeParse({
       email: formData.get('email'),
@@ -18,10 +20,21 @@ export async function authenticate(
     })
 
     if (!validatedFields.success) {
+      console.log('[AUTH ACTION] Validation failed:', validatedFields.error)
       return 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีเมลและรหัสผ่าน'
     }
 
     const { email, password } = validatedFields.data
+    console.log('[AUTH ACTION] Attempting login for:', email)
+
+    // Test database connection first
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      console.log('[AUTH ACTION] Database connection OK')
+    } catch (dbError) {
+      console.error('[AUTH ACTION] Database connection failed:', dbError)
+      return 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง'
+    }
 
     // Get user to determine role-based redirect
     const user = await prisma.user.findUnique({
@@ -31,33 +44,45 @@ export async function authenticate(
 
     const redirectMap: Record<string, string> = {
       'ADMIN': '/admin/dashboard',
-      'TEACHER': '/teacher/dashboard',
+      'TEACHER': '/teacher/dashboard', 
       'STUDENT': '/student/dashboard'
     }
 
     const redirectTo = redirectMap[user?.role || 'STUDENT'] || '/student/dashboard'
+    console.log('[AUTH ACTION] Redirect target:', redirectTo)
 
     await signIn('credentials', {
       email,
       password,
-      redirectTo,
+      redirectTo: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}${redirectTo}`,
     })
     
   } catch (error) {
+    console.error('[AUTH ACTION] Authentication error:', error)
+    
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
           return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+        case 'CallbackRouteError':
+          return 'เกิดข้อผิดพลาดในการเข้าระบบ กรุณาตรวจสอบการตั้งค่า'
         default:
-          return 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'
+          return `เกิดข้อผิดพลาด: ${error.type}`
       }
     }
-    throw error
+    
+    // Check if it's a redirect (normal behavior)
+    if (error && typeof error === 'object' && 'message' in error && 
+        typeof error.message === 'string' && error.message.includes('NEXT_REDIRECT')) {
+      throw error // Let Next.js handle the redirect
+    }
+    
+    return 'เกิดข้อผิดพลาดในการเข้าระบบ กรุณาลองใหม่อีกครั้ง'
   }
 }
 
 export async function handleSignOut() {
-  await signOut({ redirectTo: "/login" })
+  await signOut({ redirectTo: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/login` })
 }
 
 export async function registerUser(formData: FormData) {

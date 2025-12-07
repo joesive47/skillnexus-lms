@@ -121,11 +121,15 @@ SkillNexus LMS พร้อม Deploy ไปยัง Vercel แล้ว!
    npm install
    ```
 
-2. **Setup Environment**
+2. **Setup PostgreSQL Database**
    ```bash
-   cp .env.example .env
+   # Automated setup (Windows)
+   scripts\setup-postgresql.bat
+   
+   # Or manual setup
+   cp .env.postgresql .env
+   # Update DATABASE_URL in .env
    ```
-   Update the environment variables in `.env`
 
 3. **Setup Database**
    ```bash
@@ -139,51 +143,53 @@ SkillNexus LMS พร้อม Deploy ไปยัง Vercel แล้ว!
    npm run dev
    ```
 
-## 🗄️ Production Database Setup
+📖 **Full PostgreSQL Guide:** [QUICK-POSTGRESQL-SETUP.md](./QUICK-POSTGRESQL-SETUP.md)
 
-### Quick Switch to Production Database
+## 🐘 PostgreSQL Database Setup
+
+### Quick Setup (Automated)
 
 **Windows:**
 ```bash
-scripts\switch-to-production.bat
+scripts\setup-postgresql.bat
 ```
 
 **Linux/Mac:**
 ```bash
-chmod +x scripts/switch-to-production.sh
-./scripts/switch-to-production.sh
+npm run db:setup-postgresql
 ```
 
-### Manual Setup
+### Production Database Options
 
-1. **Choose Database Provider** (see [PRODUCTION-DATABASE-SETUP.md](./PRODUCTION-DATABASE-SETUP.md))
-   - ✅ Vercel Postgres (recommended for Vercel)
-   - ✅ Supabase (free tier available)
-   - ✅ Neon (serverless)
-   - ✅ Railway (full-stack)
-   - ✅ AWS RDS (enterprise)
+1. **Choose Database Provider** (see [POSTGRESQL-MIGRATION.md](./POSTGRESQL-MIGRATION.md))
+   - 🐘 **Vercel Postgres** (recommended for Vercel)
+   - 🐘 **Supabase** (free tier available)
+   - 🐘 **Neon** (serverless PostgreSQL)
+   - 🐘 **Railway** (full-stack platform)
+   - 🐘 **AWS RDS** (enterprise)
 
 2. **Update Environment Variables**
    ```bash
-   # Copy production template
-   cp .env.production .env
+   # Copy PostgreSQL template
+   cp .env.postgresql .env
    
-   # Update DATABASE_URL with your production database
-   # Generate secrets: openssl rand -base64 32
+   # Update DATABASE_URL with your PostgreSQL credentials
+   DATABASE_URL="postgresql://user:password@localhost:5432/skillnexus"
    ```
 
 3. **Run Migrations**
    ```bash
-   npx prisma migrate deploy
+   npm run db:generate
+   npm run db:push
    npm run db:seed
    ```
 
 4. **Verify Connection**
    ```bash
-   npx prisma db pull
+   npx prisma studio
    ```
 
-📖 **Full Guide:** [PRODUCTION-DATABASE-SETUP.md](./PRODUCTION-DATABASE-SETUP.md)
+📖 **Full Guide:** [POSTGRESQL-MIGRATION.md](./POSTGRESQL-MIGRATION.md)
 
 ## Phase 8 Performance Features
 

@@ -1,32 +1,22 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { Providers } from '@/components/providers'
-import { ErrorBoundary } from '@/components/error-boundary'
-import UnifiedChatWidget from '@/components/chatbot/UnifiedChatWidget'
-import './globals.css'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'SkillWorld Nexus - Global LMS Platform',
-  description: 'ระบบจัดการการเรียนรู้ระดับโลกที่ทันสมัย',
-}
+  title: "SkillNexus LMS - Global Learning Platform",
+  description: "ระบบจัดการการเรียนรู้ระดับโลกที่ทันสมัย",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="th">
-      <body className={inter.className}>
-        <ErrorBoundary>
-          <Providers>
-            {children}
-            <UnifiedChatWidget />
-          </Providers>
-        </ErrorBoundary>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
-  )
+  );
 }
