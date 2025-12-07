@@ -54,7 +54,7 @@ export async function authenticate(
     await signIn('credentials', {
       email,
       password,
-      redirectTo: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}${redirectTo}`,
+      redirectTo: redirectTo, // Use relative path only
     })
     
   } catch (error) {
@@ -82,7 +82,7 @@ export async function authenticate(
 }
 
 export async function handleSignOut() {
-  await signOut({ redirectTo: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/login` })
+  await signOut({ redirectTo: '/login' })
 }
 
 export async function registerUser(formData: FormData) {

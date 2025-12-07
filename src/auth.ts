@@ -72,21 +72,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Use environment variable for base URL
-      const localBaseUrl = process.env.NEXT_PUBLIC_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      console.log('[AUTH] Redirect - url:', url, 'baseUrl:', baseUrl)
       
-      // If url is relative, prepend base URL
+      // Always use localhost for development
+      const localUrl = 'http://localhost:3000'
+      
+      // If url is relative, prepend localhost
       if (url.startsWith('/')) {
-        return `${localBaseUrl}${url}`
+        return `${localUrl}${url}`
       }
       
-      // If url is same origin, allow it
-      if (url.startsWith(localBaseUrl)) {
+      // If url is localhost, allow it
+      if (url.startsWith(localUrl)) {
         return url
       }
       
-      // Default to base URL
-      return localBaseUrl
+      // Default to dashboard
+      return `${localUrl}/dashboard`
     },
     async jwt({ token, user }) {
       if (user) {
