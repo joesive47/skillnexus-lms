@@ -18,6 +18,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:setup-postgresql": "node scripts/setup-postgresql.js",
     "db:reset": "prisma migrate reset --force",
+    "migrate:production": "node scripts/migrate-production.js",
+    "build:clean": "rm -rf .next && npm run build",
     "import:knowledge": "tsx scripts/import-knowledge.ts",
     "load-test": "node scripts/load-test.js",
     "stress-test": "node scripts/stress-test.js",
