@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <Image 
-              src="/uploads/picture/logoupPowerskill.png" 
+              src="/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
               width={48}
               height={48}
@@ -45,7 +45,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="mb-8 flex justify-center">
             <Image 
-              src="/uploads/picture/logoupPowerskill.png" 
+              src="/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
               width={128}
               height={128}
@@ -185,7 +185,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <Image 
-              src="/uploads/picture/logoupPowerskill.png" 
+              src="/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
               width={40}
               height={40}

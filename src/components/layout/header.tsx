@@ -17,7 +17,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <Image 
-              src="/uploads/picture/logoupPowerskill.png" 
+              src="/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
               width={40}
               height={40}

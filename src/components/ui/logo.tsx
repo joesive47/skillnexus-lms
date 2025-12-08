@@ -24,7 +24,7 @@ export function Logo({
   return (
     <div className={cn('flex items-center gap-3', className)}>
       <Image 
-        src="/uploads/picture/logoupPowerskill.png" 
+        src="/logoupPowerskill.png" 
         alt="upPowerSkill Logo" 
         width={sizeMap[size].width}
         height={sizeMap[size].height}

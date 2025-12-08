@@ -37,7 +37,7 @@ export function LoginForm() {
       <CardHeader>
         <div className="flex justify-center mb-4">
           <Image 
-            src="/uploads/picture/logoupPowerskill.png" 
+            src="/logoupPowerskill.png" 
             alt="upPowerSkill Logo" 
             width={64}
             height={64}
