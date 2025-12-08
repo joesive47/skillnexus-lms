@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
-import { Brain, Target, TrendingUp, Users, Plus, Edit, Trash2, BarChart3, Link, Eye, Settings } from "lucide-react"
+import { Brain, Target, TrendingUp, Users, Plus, Edit, Trash2, BarChart3, Link, Eye, Settings, Upload, Download, FileSpreadsheet } from "lucide-react"
 
 interface Question {
   id: string
@@ -228,6 +228,62 @@ export default function SkillsAssessmentManagement() {
     return "bg-red-100 text-red-800"
   }
 
+  const handleExcelImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Simulate Excel parsing (in real app, use libraries like xlsx)
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      // Mock data - in real implementation, parse Excel file
+      const mockQuestions: Question[] = [
+        {
+          id: Date.now().toString(),
+          text: "HTML ย่อมาจากอะไร?",
+          options: ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlink Text Markup Language"],
+          correctAnswer: 0,
+          skill: "HTML",
+          difficulty: "beginner",
+          weight: 1
+        },
+        {
+          id: (Date.now() + 1).toString(),
+          text: "CSS ใช้สำหรับอะไร?",
+          options: ["จัดรูปแบบหน้าเว็บ", "เขียนโปรแกรม", "จัดการฐานข้อมูล", "สร้างเซิร์ฟเวอร์"],
+          correctAnswer: 0,
+          skill: "CSS",
+          difficulty: "beginner",
+          weight: 1
+        }
+      ]
+      
+      setQuestions([...questions, ...mockQuestions])
+      alert(`นำเข้า ${mockQuestions.length} คำถามจากไฟล์ Excel สำเร็จ!`)
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  const downloadTemplate = () => {
+    // Create CSV template
+    const template = [
+      ['คำถาม', 'ตัวเลือก1', 'ตัวเลือก2', 'ตัวเลือก3', 'ตัวเลือก4', 'คำตอบที่ถูก(1-4)', 'ทักษะ', 'ระดับ(beginner/intermediate/advanced)', 'น้ำหนัก(1-5)'],
+      ['HTML ย่อมาจากอะไร?', 'HyperText Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlink Text Markup Language', '1', 'HTML', 'beginner', '1'],
+      ['CSS ใช้สำหรับอะไร?', 'จัดรูปแบบหน้าเว็บ', 'เขียนโปรแกรม', 'จัดการฐานข้อมูล', 'สร้างเซิร์ฟเวอร์', '1', 'CSS', 'beginner', '1'],
+      ['JavaScript เป็นภาษาอะไร?', 'Programming Language', 'Markup Language', 'Style Language', 'Database Language', '1', 'JavaScript', 'intermediate', '2']
+    ]
+    
+    const csvContent = template.map(row => row.join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', 'skills-assessment-template.csv')
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -339,7 +395,20 @@ export default function SkillsAssessmentManagement() {
 
                 {/* Add Questions */}
                 <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-4">เพิ่มคำถาม</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold">เพิ่มคำถาม</h3>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={downloadTemplate}
+                        className="flex items-center gap-1"
+                      >
+                        <FileSpreadsheet className="w-4 h-4" />
+                        Template
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-4">
                     <div>
                       <Label>คำถาม</Label>
@@ -421,10 +490,52 @@ export default function SkillsAssessmentManagement() {
                       </div>
                     </div>
 
-                    <Button onClick={addQuestion} variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      เพิ่มคำถาม
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={addQuestion} variant="outline">
+                        <Plus className="w-4 h-4 mr-2" />
+                        เพิ่มคำถาม
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => document.getElementById('excel-import')?.click()}
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Import Excel
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={downloadTemplate}
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        ดาวน์โหลด Template
+                      </Button>
+                    </div>
+                    
+                    <input
+                      id="excel-import"
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={handleExcelImport}
+                    />
+                  </div>
+                </div>
+
+                {/* Excel Import Instructions */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    รูปแบบไฟล์ Excel สำหรับ Import คำถาม
+                  </h4>
+                  <div className="text-sm text-blue-700 space-y-1">
+                    <p><strong>คอลัมน์ A:</strong> คำถาม</p>
+                    <p><strong>คอลัมน์ B-E:</strong> ตัวเลือก 1-4</p>
+                    <p><strong>คอลัมน์ F:</strong> คำตอบที่ถูก (1-4)</p>
+                    <p><strong>คอลัมน์ G:</strong> ทักษะที่วัด</p>
+                    <p><strong>คอลัมน์ H:</strong> ระดับความยาก (beginner/intermediate/advanced)</p>
+                    <p><strong>คอลัมน์ I:</strong> น้ำหนัก (1-5)</p>
                   </div>
                 </div>
 
