@@ -235,7 +235,13 @@ export default function SkillsAssessmentManagement() {
     const reader = new FileReader()
     reader.onload = (event) => {
       try {
-        const text = event.target?.result as string
+        let text = event.target?.result as string
+        
+        // Remove BOM if present
+        if (text.charCodeAt(0) === 0xFEFF) {
+          text = text.slice(1)
+        }
+        
         const lines = text.split('\n').filter(line => line.trim())
         
         // Skip header row
@@ -243,22 +249,25 @@ export default function SkillsAssessmentManagement() {
         const importedQuestions: Question[] = []
         
         dataLines.forEach((line, index) => {
-          const columns = line.split(',')
+          // Parse CSV with quoted fields support
+          const columns = line.match(/"([^"]*)"|([^,]+)/g)?.map(col => 
+            col.replace(/^"|"$/g, '').trim()
+          ) || line.split(',').map(col => col.trim())
           
           // Validate minimum columns
-          if (columns.length >= 9) {
+          if (columns.length >= 9 && columns[0]) {
             const question: Question = {
               id: (Date.now() + index).toString(),
-              text: columns[0]?.trim() || '',
+              text: columns[0] || '',
               options: [
-                columns[1]?.trim() || '',
-                columns[2]?.trim() || '',
-                columns[3]?.trim() || '',
-                columns[4]?.trim() || ''
+                columns[1] || '',
+                columns[2] || '',
+                columns[3] || '',
+                columns[4] || ''
               ],
               correctAnswer: Math.max(0, Math.min(3, parseInt(columns[5]) - 1)) || 0,
-              skill: columns[6]?.trim() || 'General',
-              difficulty: (columns[7]?.trim() as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
+              skill: columns[6] || 'General',
+              difficulty: (columns[7] as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
               weight: Math.max(1, Math.min(5, parseInt(columns[8]))) || 1
             }
             
