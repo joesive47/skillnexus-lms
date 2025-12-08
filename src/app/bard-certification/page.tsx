@@ -128,6 +128,11 @@ export default function BardCertificationPage() {
           </div>
         </div>
         
+        <div className="bg-white/60 rounded-lg p-2 border border-gray-200 mb-3">
+          <p className="text-sm font-bold text-gray-800">นายทวีศักดิ์ เจริญศิลป์</p>
+          <p className="text-xs font-medium text-gray-700">Mr.Taweesak Jaroensin</p>
+        </div>
+        
         <div className="flex justify-between items-center pt-2 border-t">
           <span className="text-sm text-gray-600">Completed: {certKey.completedDate}</span>
           <Button size="sm" variant="outline" className="flex items-center gap-1">
@@ -162,6 +167,12 @@ export default function BardCertificationPage() {
         <CardTitle className="text-xl font-bold text-gray-700 mb-2">
           {master.nameEn}
         </CardTitle>
+        
+        <div className="bg-white/60 rounded-lg p-3 border border-yellow-200 mb-4">
+          <p className="text-lg font-bold text-gray-800">นายทวีศักดิ์ เจริญศิลป์</p>
+          <p className="text-base font-semibold text-gray-700">Mr.Taweesak Jaroensin</p>
+        </div>
+        
         <CardDescription className="text-lg font-semibold text-purple-700">
           Master Certification - {master.path}
         </CardDescription>
