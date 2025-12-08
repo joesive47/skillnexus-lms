@@ -1,6 +1,6 @@
-# SkillWorld Nexus LMS
+# upPowerSkill LMS
 
-Global Learning Management System with Anti-Skip Technology
+AI-Powered Learning Management System with Anti-Skip Technology
 
 ## 🛡️ Phase 9: Enterprise-Grade Security - PLANNING! 🔒
 

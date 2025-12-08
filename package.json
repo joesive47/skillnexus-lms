@@ -1,8 +1,8 @@
 {
   "name": "uppowerskill-lms",
   "version": "1.0.0",
-  "description": "upPowerSkill - Professional Learning Management System",
-  "homepage": "https://upPowerSkill.com",
+  "description": "upPowerSkill - AI-Powered Learning Management System",
+  "homepage": "https://uppowerskill.com",
   "private": true,
   "type": "module",
   "scripts": {

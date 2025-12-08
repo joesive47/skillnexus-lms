@@ -13,7 +13,7 @@ function LoginFallback() {
           </div>
         </div>
         <h1 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
-          SkillNexus LMS
+          upPowerSkill
         </h1>
         <p className="text-center text-gray-600 mb-6">กำลังโหลด...</p>
         <div className="animate-pulse space-y-4">
@@ -41,9 +41,9 @@ export default function LoginPage() {
             </div>
             <div className="text-left">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
-                SkillNexus
+                upPowerSkill
               </h1>
-              <p className="text-xs text-gray-500">Global Learning Platform</p>
+              <p className="text-xs text-gray-500">AI-Powered Learning Platform</p>
             </div>
           </Link>
           <div className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300 px-3 py-1 text-sm font-medium mb-4">

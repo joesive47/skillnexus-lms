@@ -14,9 +14,9 @@ export default function HomePage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
-                SkillNexus LMS
+                upPowerSkill
               </h1>
-              <p className="text-xs text-gray-500">Global Learning Platform</p>
+              <p className="text-xs text-gray-500">AI-Powered Learning Platform</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -41,7 +41,7 @@ export default function HomePage() {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-600 via-orange-500 to-blue-600 bg-clip-text text-transparent">
-            SkillNexus LMS
+            upPowerSkill
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -167,10 +167,10 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Lightbulb className="w-6 h-6 text-yellow-500" />
-            <span className="text-gray-800 font-semibold">SkillNexus LMS</span>
+            <span className="text-gray-800 font-semibold">upPowerSkill</span>
           </div>
           <p className="text-gray-600 text-sm">
-            © 2024 SkillNexus Learning Management System. Empowering learners worldwide.
+            © 2024 upPowerSkill Education Technology. Empower Your Learning Journey.
           </p>
         </div>
       </footer>

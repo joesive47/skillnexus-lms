@@ -67,7 +67,7 @@ export default async function DashboardPage() {
           <div className="py-6 flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ด</h1>
-              <p className="text-gray-600 mt-1">ยินดีต้อนรับสู่ SkillNexus LMS</p>
+              <p className="text-gray-600 mt-1">ยินดีต้อนรับสู่ upPowerSkill</p>
             </div>
             <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
               🚀 All Features
