@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bot, MessageSquare, Settings, Brain, Plus, Edit, Trash2, Save } from "lucide-react"
+import { Bot, MessageSquare, Settings, Brain, Plus, Edit, Trash2, Save, Upload, FileText, FileSpreadsheet } from "lucide-react"
 
 interface ChatbotConfig {
   enabled: boolean
@@ -194,7 +194,7 @@ export default function ChatbotManagement() {
       </div>
 
       <Tabs defaultValue="settings" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             การตั้งค่า
@@ -202,6 +202,10 @@ export default function ChatbotManagement() {
           <TabsTrigger value="knowledge" className="flex items-center gap-2">
             <Brain className="w-4 h-4" />
             ฐานความรู้
+          </TabsTrigger>
+          <TabsTrigger value="upload" className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            อัพโหลดไฟล์
           </TabsTrigger>
           <TabsTrigger value="preview" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
@@ -439,6 +443,189 @@ export default function ChatbotManagement() {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="upload" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Excel Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                  อัพโหลด Excel File
+                </CardTitle>
+                <CardDescription>
+                  อัพโหลดไฟล์ Excel เพื่อเพิ่มคำถาม-คำตอบจำนวนมาก
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <FileSpreadsheet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-sm text-gray-600 mb-2">ลากไฟล์ Excel มาวางที่นี่ หรือ</p>
+                  <Button variant="outline" onClick={() => document.getElementById('excel-upload')?.click()}>
+                    เลือกไฟล์ Excel
+                  </Button>
+                  <input
+                    id="excel-upload"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        alert(`อัพโหลด ${file.name} สำเร็จ! (Demo mode)`)
+                      }
+                    }}
+                  />
+                </div>
+                <div className="text-xs text-gray-500">
+                  <p className="font-medium mb-1">รูปแบบไฟล์ Excel:</p>
+                  <p>• คอลัมน์ A: คำถาม</p>
+                  <p>• คอลัมน์ B: คำตอบ</p>
+                  <p>• คอลัมน์ C: หมวดหมู่</p>
+                  <p>• คอลัมน์ D: คำสำคัญ (คั่นด้วยจุลภาค)</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* PDF Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-red-600" />
+                  อัพโหลด PDF Files
+                </CardTitle>
+                <CardDescription>
+                  อัพโหลดไฟล์ PDF เพื่อสร้างฐานความรู้ด้วย RAG
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-sm text-gray-600 mb-2">ลากไฟล์ PDF มาวางที่นี่ หรือ</p>
+                  <Button variant="outline" onClick={() => document.getElementById('pdf-upload')?.click()}>
+                    เลือกไฟล์ PDF
+                  </Button>
+                  <input
+                    id="pdf-upload"
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || [])
+                      if (files.length > 0) {
+                        alert(`อัพโหลด ${files.length} ไฟล์ PDF สำเร็จ! (Demo mode)`)
+                      }
+                    }}
+                  />
+                </div>
+                <div className="text-xs text-gray-500">
+                  <p className="font-medium mb-1">RAG Processing:</p>
+                  <p>• แยกข้อความจาก PDF</p>
+                  <p>• แบ่งเป็น chunks ขนาด {process.env.RAG_CHUNK_SIZE || 600} ตัวอักษร</p>
+                  <p>• สร้าง embeddings สำหรับการค้นหา</p>
+                  <p>• เก็บใน vector database</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* RAG Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>การตั้งค่า RAG System</CardTitle>
+              <CardDescription>กำหนดพารามิเตอร์สำหรับ Retrieval-Augmented Generation</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="chunk-size">Chunk Size</Label>
+                  <Input
+                    id="chunk-size"
+                    type="number"
+                    defaultValue={600}
+                    min="100"
+                    max="2000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="chunk-overlap">Chunk Overlap</Label>
+                  <Input
+                    id="chunk-overlap"
+                    type="number"
+                    defaultValue={50}
+                    min="0"
+                    max="200"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="max-results">Max Results</Label>
+                  <Input
+                    id="max-results"
+                    type="number"
+                    defaultValue={3}
+                    min="1"
+                    max="10"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="similarity-threshold">Similarity Threshold</Label>
+                  <Input
+                    id="similarity-threshold"
+                    type="number"
+                    step="0.01"
+                    defaultValue={0.25}
+                    min="0"
+                    max="1"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Uploaded Files List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>ไฟล์ที่อัพโหลดแล้ว</CardTitle>
+              <CardDescription>รายการไฟล์ที่ใช้ในระบบ RAG</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 border rounded">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-red-600" />
+                    <div>
+                      <p className="font-medium">คู่มือการใช้งาน.pdf</p>
+                      <p className="text-sm text-gray-600">อัพโหลดเมื่อ: 2024-12-06 15:30</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">1,234 chunks</Badge>
+                    <Button size="sm" variant="ghost">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded">
+                  <div className="flex items-center gap-3">
+                    <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-medium">FAQ-Database.xlsx</p>
+                      <p className="text-sm text-gray-600">อัพโหลดเมื่อ: 2024-12-06 14:15</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">156 Q&A</Badge>
+                    <Button size="sm" variant="ghost">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
