@@ -108,7 +108,14 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="text-center">สมัครสมาชิก SkillNexus</CardTitle>
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/uploads/picture/logoupPowerskill.png" 
+            alt="upPowerSkill Logo" 
+            className="h-16 w-auto object-contain"
+          />
+        </div>
+        <CardTitle className="text-center">สมัครสมาชิก upPowerSkill</CardTitle>
         <CardDescription className="text-center">
           กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้งานใหม่
         </CardDescription>

@@ -34,7 +34,14 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-center">เข้าสู่ระบบ SkillNexus</CardTitle>
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/uploads/picture/logoupPowerskill.png" 
+            alt="upPowerSkill Logo" 
+            className="h-16 w-auto object-contain"
+          />
+        </div>
+        <CardTitle className="text-center">เข้าสู่ระบบ upPowerSkill</CardTitle>
         <CardDescription className="text-center">
           กรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ
         </CardDescription>

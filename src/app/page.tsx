@@ -10,9 +10,11 @@ export default function HomePage() {
       <header className="border-b border-yellow-200/50 backdrop-blur-sm bg-white/80">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <Lightbulb className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src="/uploads/picture/logoupPowerskill.png" 
+              alt="upPowerSkill Logo" 
+              className="h-12 w-auto object-contain"
+            />
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
                 upPowerSkill
@@ -37,6 +39,14 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden py-20">
         <div className="container mx-auto px-4 text-center">
+          <div className="mb-8 flex justify-center">
+            <img 
+              src="/uploads/picture/logoupPowerskill.png" 
+              alt="upPowerSkill Logo" 
+              className="h-32 w-auto object-contain animate-pulse"
+            />
+          </div>
+          
           <div className="mb-6 inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300 px-3 py-1 text-sm font-medium">
             🌟 Global Learning Management System
           </div>
@@ -166,9 +176,13 @@ export default function HomePage() {
 
       <footer className="border-t border-gray-200 bg-white py-8">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Lightbulb className="w-6 h-6 text-yellow-500" />
-            <span className="text-gray-800 font-semibold">upPowerSkill</span>
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <img 
+              src="/uploads/picture/logoupPowerskill.png" 
+              alt="upPowerSkill Logo" 
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-gray-800 font-semibold text-lg">upPowerSkill</span>
           </div>
           <p className="text-gray-600 text-sm">
             © 2024 upPowerSkill Education Technology. Empower Your Learning Journey.

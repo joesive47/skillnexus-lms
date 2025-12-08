@@ -14,12 +14,14 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
+          <Link href="/" className="flex items-center space-x-3">
+            <img 
+              src="/uploads/picture/logoupPowerskill.png" 
+              alt="upPowerSkill Logo" 
+              className="h-10 w-auto object-contain"
+            />
             <span className="text-xl font-bold text-white">
-              SkillNexus
+              upPowerSkill
             </span>
           </Link>
 
