@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Lightbulb, Target, BookOpen, Rocket, ArrowRight, Users, CheckCircle, Star } from "lucide-react"
 import UnifiedChatWidget from "@/components/chatbot/UnifiedChatWidget"
 
@@ -10,10 +11,13 @@ export default function HomePage() {
       <header className="border-b border-yellow-200/50 backdrop-blur-sm bg-white/80">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <img 
+            <Image 
               src="/uploads/picture/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
-              className="h-12 w-auto object-contain"
+              width={48}
+              height={48}
+              className="object-contain"
+              priority
             />
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
@@ -40,10 +44,13 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="mb-8 flex justify-center">
-            <img 
+            <Image 
               src="/uploads/picture/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
-              className="h-32 w-auto object-contain animate-pulse"
+              width={128}
+              height={128}
+              className="object-contain animate-pulse"
+              priority
             />
           </div>
           
@@ -177,10 +184,12 @@ export default function HomePage() {
       <footer className="border-t border-gray-200 bg-white py-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <img 
+            <Image 
               src="/uploads/picture/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
-              className="h-10 w-auto object-contain"
+              width={40}
+              height={40}
+              className="object-contain"
             />
             <span className="text-gray-800 font-semibold text-lg">upPowerSkill</span>
           </div>

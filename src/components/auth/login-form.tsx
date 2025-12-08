@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Eye, EyeOff } from "lucide-react"
 
 function SubmitButton() {
@@ -35,10 +36,13 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <div className="flex justify-center mb-4">
-          <img 
+          <Image 
             src="/uploads/picture/logoupPowerskill.png" 
             alt="upPowerSkill Logo" 
-            className="h-16 w-auto object-contain"
+            width={64}
+            height={64}
+            className="object-contain"
+            priority
           />
         </div>
         <CardTitle className="text-center">เข้าสู่ระบบ upPowerSkill</CardTitle>

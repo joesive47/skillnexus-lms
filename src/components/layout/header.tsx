@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { SearchBar } from '@/components/search/search-bar'
 import { Button } from '@/components/ui/button'
@@ -15,10 +16,13 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <img 
+            <Image 
               src="/uploads/picture/logoupPowerskill.png" 
               alt="upPowerSkill Logo" 
-              className="h-10 w-auto object-contain"
+              width={40}
+              height={40}
+              className="object-contain"
+              priority
             />
             <span className="text-xl font-bold text-white">
               upPowerSkill

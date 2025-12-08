@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
+import Image from "next/image"
 import { User, Mail, Phone, MapPin, Building, GraduationCap } from "lucide-react"
 import { registerUser } from "@/app/actions/auth"
 
@@ -109,10 +110,13 @@ export function RegisterForm() {
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <div className="flex justify-center mb-4">
-          <img 
+          <Image 
             src="/uploads/picture/logoupPowerskill.png" 
             alt="upPowerSkill Logo" 
-            className="h-16 w-auto object-contain"
+            width={64}
+            height={64}
+            className="object-contain"
+            priority
           />
         </div>
         <CardTitle className="text-center">สมัครสมาชิก upPowerSkill</CardTitle>

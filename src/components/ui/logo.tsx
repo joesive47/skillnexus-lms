@@ -9,10 +9,10 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: 'h-8',
-  md: 'h-12',
-  lg: 'h-16',
-  xl: 'h-24'
+  sm: { width: 32, height: 32 },
+  md: { width: 48, height: 48 },
+  lg: { width: 64, height: 64 },
+  xl: { width: 96, height: 96 }
 }
 
 export function Logo({ 
@@ -23,14 +23,16 @@ export function Logo({
 }: LogoProps) {
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      <img 
+      <Image 
         src="/uploads/picture/logoupPowerskill.png" 
         alt="upPowerSkill Logo" 
+        width={sizeMap[size].width}
+        height={sizeMap[size].height}
         className={cn(
-          'w-auto object-contain',
-          sizeMap[size],
+          'object-contain',
           animated && 'animate-pulse'
         )}
+        priority
       />
       {showText && (
         <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
