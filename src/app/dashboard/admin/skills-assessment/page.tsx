@@ -232,35 +232,57 @@ export default function SkillsAssessmentManagement() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Simulate Excel parsing (in real app, use libraries like xlsx)
     const reader = new FileReader()
     reader.onload = (event) => {
-      // Mock data - in real implementation, parse Excel file
-      const mockQuestions: Question[] = [
-        {
-          id: Date.now().toString(),
-          text: "HTML ย่อมาจากอะไร?",
-          options: ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlink Text Markup Language"],
-          correctAnswer: 0,
-          skill: "HTML",
-          difficulty: "beginner",
-          weight: 1
-        },
-        {
-          id: (Date.now() + 1).toString(),
-          text: "CSS ใช้สำหรับอะไร?",
-          options: ["จัดรูปแบบหน้าเว็บ", "เขียนโปรแกรม", "จัดการฐานข้อมูล", "สร้างเซิร์ฟเวอร์"],
-          correctAnswer: 0,
-          skill: "CSS",
-          difficulty: "beginner",
-          weight: 1
+      try {
+        const text = event.target?.result as string
+        const lines = text.split('\n').filter(line => line.trim())
+        
+        // Skip header row
+        const dataLines = lines.slice(1)
+        const importedQuestions: Question[] = []
+        
+        dataLines.forEach((line, index) => {
+          const columns = line.split(',')
+          
+          // Validate minimum columns
+          if (columns.length >= 9) {
+            const question: Question = {
+              id: (Date.now() + index).toString(),
+              text: columns[0]?.trim() || '',
+              options: [
+                columns[1]?.trim() || '',
+                columns[2]?.trim() || '',
+                columns[3]?.trim() || '',
+                columns[4]?.trim() || ''
+              ],
+              correctAnswer: Math.max(0, Math.min(3, parseInt(columns[5]) - 1)) || 0,
+              skill: columns[6]?.trim() || 'General',
+              difficulty: (columns[7]?.trim() as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
+              weight: Math.max(1, Math.min(5, parseInt(columns[8]))) || 1
+            }
+            
+            // Only add if question text exists
+            if (question.text) {
+              importedQuestions.push(question)
+            }
+          }
+        })
+        
+        if (importedQuestions.length > 0) {
+          setQuestions([...questions, ...importedQuestions])
+          alert(`นำเข้า ${importedQuestions.length} คำถามจากไฟล์ Excel สำเร็จ!`)
+        } else {
+          alert('ไม่พบข้อมูลคำถามที่ถูกต้องในไฟล์ กรุณาตรวจสอบรูปแบบไฟล์')
         }
-      ]
+      } catch (error) {
+        alert('เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาตรวจสอบรูปแบบไฟล์')
+      }
       
-      setQuestions([...questions, ...mockQuestions])
-      alert(`นำเข้า ${mockQuestions.length} คำถามจากไฟล์ Excel สำเร็จ!`)
+      // Reset file input
+      e.target.value = ''
     }
-    reader.readAsArrayBuffer(file)
+    reader.readAsText(file)
   }
 
   const downloadTemplate = () => {
