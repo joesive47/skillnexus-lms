@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Lightbulb, Target, BookOpen, Rocket, ArrowRight, Users, CheckCircle, Star } from "lucide-react"
+import UnifiedChatWidget from "@/components/chatbot/UnifiedChatWidget"
 
 export default function HomePage() {
   return (
@@ -174,6 +175,9 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+      
+      {/* AI Chatbot Widget */}
+      <UnifiedChatWidget />
     </div>
   )
 }

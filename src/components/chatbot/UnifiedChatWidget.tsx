@@ -10,7 +10,7 @@ import { useChat, type Message } from '@/hooks/useChat'
 
 const INITIAL_MESSAGE: Message = {
   id: '1',
-  content: 'สวัสดีครับ! ผมคือ SkillNexus Assistant ผู้ช่วยการเรียนรู้ AI ของ SkillNexus 🤖\n\nผมสามารถตอบคำถามเกี่ยวกับ:\n• Anti-Skip Video Player\n• SCORM Support\n• ราคาและการชำระเงิน\n• ใบประกาศนียบัตร\n• PWA และฟีเจอร์ต่างๆ\n\nลองถามผมดูครับ! 😊',
+  content: 'สวัสดีครับ! ผมคือ upPowerSkill Assistant ผู้ช่วยการเรียนรู้ AI ของ upPowerSkill 🤖\n\nผมสามารถตอบคำถามเกี่ยวกับ:\n• Anti-Skip Video Player\n• SCORM Support\n• ราคาและการชำระเงิน\n• ใบประกาศนียบัตร\n• PWA และฟีเจอร์ต่างๆ\n\nลองถามผมดูครับ! 😊',
   sender: 'ai',
   timestamp: new Date()
 }
@@ -114,7 +114,7 @@ export default function UnifiedChatWidget() {
           <div className="flex items-center justify-between p-3 bg-blue-600 text-white rounded-lg">
             <div className="flex items-center gap-2">
               <Bot className="h-4 w-4" />
-              <span className="font-medium text-sm">SkillNexus Assistant</span>
+              <span className="font-medium text-sm">upPowerSkill Assistant</span>
             </div>
             <div className="flex gap-1">
               <Button
@@ -149,7 +149,7 @@ export default function UnifiedChatWidget() {
       <div className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
-          <span className="font-medium">SkillNexus Assistant</span>
+          <span className="font-medium">upPowerSkill Assistant</span>
         </div>
         <div className="flex gap-2">
           <Button
