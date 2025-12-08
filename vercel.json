@@ -1,18 +1,16 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install",
+  "outputDirectory": ".next",
   "framework": "nextjs",
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "AUTH_TRUST_HOST": "true"
   },
-  "build": {
-    "env": {
-      "NEXT_TELEMETRY_DISABLED": "1"
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -21,7 +19,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://uppowerskill.com"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -32,6 +30,12 @@
           "value": "Content-Type, Authorization"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth/$1"
     }
   ]
 }
