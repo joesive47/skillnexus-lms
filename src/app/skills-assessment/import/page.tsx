@@ -131,10 +131,10 @@ export default function ImportPage() {
   }
 
   const downloadTemplate = () => {
-    // Download the pre-built template file with proper encoding
+    // Download the new template file with clean English headers
     const link = document.createElement('a')
-    link.href = '/skills-assessment-template-enhanced.xlsx'
-    link.download = 'Skills_Assessment_Template_Enhanced.xlsx'
+    link.href = '/skills-template-v2.xlsx'
+    link.download = 'Skills_Assessment_Template_v2.xlsx'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
