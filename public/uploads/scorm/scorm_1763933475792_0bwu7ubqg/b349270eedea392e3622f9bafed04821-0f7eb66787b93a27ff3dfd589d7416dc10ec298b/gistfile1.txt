@@ -1,0 +1,5 @@
+/scorm-package
+    /api/
+        SCORM_API.js.  // make sure this file is nested in the folder for this to work!
+    index.html
+    imsmanifest.xml

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Fundamentals - Introduction</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+            color: white;
+            margin: -20px -20px 30px -20px;
+            border-radius: 0 0 20px 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .content {
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .interactive-demo {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .btn {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        .quiz-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1976d2;
+        }
+        .options {
+            list-style: none;
+        }
+        .options li {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .options li:hover {
+            background: #bbdefb;
+            transform: translateX(5px);
+        }
+        .correct { background: #c8e6c9 !important; }
+        .incorrect { background: #ffcdd2 !important; }
+        .navigation {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 JavaScript Fundamentals</h1>
+            <h2>บทที่ 1: Introduction to JavaScript</h2>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="content">
+            <div class="highlight">
+                <h3>🎯 จุดประสงค์การเรียนรู้</h3>
+                <ul>
+                    <li>เข้าใจประวัติและความสำคัญของ JavaScript</li>
+                    <li>รู้จักการใช้งาน JavaScript ในเว็บไซต์</li>
+                    <li>เรียนรู้วิธีการเขียนโค้ด JavaScript พื้นฐาน</li>
+                </ul>
+            </div>
+
+            <h3>📚 JavaScript คืออะไร?</h3>
+            <p>JavaScript เป็นภาษาโปรแกรมมิ่งที่ใช้สำหรับพัฒนาเว็บไซต์ให้มีความโต้ตอบ (Interactive) มากขึ้น ถูกสร้างขึ้นในปี 1995 โดย Brendan Eich ที่บริษัท Netscape</p>
+
+            <div class="interactive-demo">
+                <h4>🎮 ทดลองใช้ JavaScript</h4>
+                <p>กดปุ่มด้านล่างเพื่อดูการทำงานของ JavaScript:</p>
+                <button class="btn" onclick="showAlert()">แสดง Alert</button>
+                <button class="btn" onclick="changeColor()">เปลี่ยนสี</button>
+                <button class="btn" onclick="showTime()">แสดงเวลา</button>
+                <div id="demo-output" style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 5px;"></div>
+            </div>
+
+            <h3>💻 ตัวอย่างโค้ด JavaScript</h3>
+            <div class="code-block">
+// การแสดงข้อความ
+console.log("สวัสดี JavaScript!");
+
+// การสร้างตัวแปร
+let name = "นักเรียน";
+let age = 20;
+
+// การสร้างฟังก์ชัน
+function sayHello() {
+    alert("สวัสดี " + name + "!");
+}
+
+// การเรียกใช้ฟังก์ชัน
+sayHello();
+            </div>
+
+            <div class="quiz-section">
+                <div class="question">❓ JavaScript ถูกสร้างขึ้นในปีใด?</div>
+                <ul class="options">
+                    <li onclick="checkAnswer(this, false)">A) 1990</li>
+                    <li onclick="checkAnswer(this, true)">B) 1995</li>
+                    <li onclick="checkAnswer(this, false)">C) 2000</li>
+                    <li onclick="checkAnswer(this, false)">D) 2005</li>
+                </ul>
+                <div id="quiz-feedback"></div>
+            </div>
+
+            <div class="highlight">
+                <h4>🌟 สิ่งที่คุณได้เรียนรู้:</h4>
+                <ul>
+                    <li>JavaScript เป็นภาษาโปรแกรมมิ่งสำหรับเว็บ</li>
+                    <li>ถูกสร้างขึ้นในปี 1995</li>
+                    <li>ใช้สำหรับทำให้เว็บไซต์มีความโต้ตอบ</li>
+                    <li>สามารถเขียนโค้ดได้ง่าย</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="btn" onclick="completeModule()">เสร็จสิ้นบทเรียน ✅</button>
+        </div>
+    </div>
+
+    <script src="../../shared/scorm-api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="com.skillnexus.javascript.fundamentals" version="1.0"
+          xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+  </metadata>
+
+  <organizations default="ORG-001">
+    <organization identifier="ORG-001" structure="hierarchical">
+      <title>JavaScript Fundamentals Course</title>
+      
+      <item identifier="ITEM-001" identifierref="RES-001">
+        <title>1. Introduction to JavaScript</title>
+        <adlcp:maxtimeallowed>PT30M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>80</adlcp:masteryscore>
+      </item>
+
+      <item identifier="ITEM-002" identifierref="RES-002">
+        <title>2. Variables and Data Types</title>
+        <adlcp:maxtimeallowed>PT45M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>80</adlcp:masteryscore>
+      </item>
+
+      <item identifier="ITEM-003" identifierref="RES-003">
+        <title>3. Functions and Scope</title>
+        <adlcp:maxtimeallowed>PT60M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>85</adlcp:masteryscore>
+      </item>
+
+      <item identifier="ITEM-004" identifierref="RES-004">
+        <title>4. Final Assessment</title>
+        <adlcp:maxtimeallowed>PT45M</adlcp:maxtimeallowed>
+        <adlcp:masteryscore>90</adlcp:masteryscore>
+      </item>
+    </organization>
+  </organizations>
+
+  <resources>
+    <resource identifier="RES-001" type="webcontent" adlcp:scormType="sco" href="modules/introduction/index.html">
+      <file href="modules/introduction/index.html"/>
+      <file href="modules/introduction/script.js"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+
+    <resource identifier="RES-002" type="webcontent" adlcp:scormType="sco" href="modules/variables/index.html">
+      <file href="modules/variables/index.html"/>
+      <file href="modules/variables/script.js"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+
+    <resource identifier="RES-003" type="webcontent" adlcp:scormType="sco" href="modules/functions/index.html">
+      <file href="modules/functions/index.html"/>
+      <file href="modules/functions/script.js"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+
+    <resource identifier="RES-004" type="webcontent" adlcp:scormType="sco" href="modules/assessment/index.html">
+      <file href="modules/assessment/index.html"/>
+      <file href="modules/assessment/script.js"/>
+      <file href="shared/scorm-api.js"/>
+    </resource>
+  </resources>
+</manifest>
