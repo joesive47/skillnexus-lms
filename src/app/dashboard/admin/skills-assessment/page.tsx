@@ -565,9 +565,6 @@ export default function SkillsAssessmentManagement() {
                       className="hidden"
                       onChange={handleExcelImport}
                     />
-                    </div>
-                    
-
                   </div>
                 </div>
 
