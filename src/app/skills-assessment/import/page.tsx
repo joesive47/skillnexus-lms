@@ -131,26 +131,13 @@ export default function ImportPage() {
   }
 
   const downloadTemplate = () => {
-    const template = [
-      {
-        question_id: 'Q001',
-        career_title: 'Social Media Manager',
-        skill_name: 'Content Creation',
-        question_text: 'คุณใช้เครื่องมือใดในการออกแบบ?',
-        option_1: 'Canva',
-        option_2: 'Photoshop',
-        option_3: 'Figma',
-        option_4: 'Illustrator',
-        correct_answer: '2,3,4',
-        score: 5,
-        course_link: 'https://example.com/course'
-      }
-    ]
-    
-    const ws = XLSX.utils.json_to_sheet(template)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Template')
-    XLSX.writeFile(wb, 'Skills_Assessment_Template.xlsx')
+    // Download the pre-built template file with proper encoding
+    const link = document.createElement('a')
+    link.href = '/skills-assessment-template-enhanced.xlsx'
+    link.download = 'Skills_Assessment_Template_Enhanced.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   if (result?.success) {
