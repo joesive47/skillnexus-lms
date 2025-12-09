@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Brain, Target, TrendingUp, Users, Plus, Edit, Trash2, BarChart3, Link, Eye, Settings, Upload, Download, FileSpreadsheet } from "lucide-react"
+import * as XLSX from 'xlsx'
 
 interface Question {
   id: string
@@ -438,7 +439,7 @@ export default function SkillsAssessmentManagement() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        onClick={downloadTemplate}
+                        onClick={() => downloadTemplate('excel')}
                         className="flex items-center gap-1"
                       >
                         <FileSpreadsheet className="w-4 h-4" />
