@@ -14,12 +14,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
+
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
