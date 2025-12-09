@@ -64,14 +64,15 @@ class PredictiveAnalyticsEngine {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url)
     const courseId = searchParams.get('courseId')
+    const resolvedParams = await params
     
     const engine = new PredictiveAnalyticsEngine()
-    const predictions = await engine.generatePredictions(params.userId, courseId || undefined)
+    const predictions = await engine.generatePredictions(resolvedParams.userId, courseId || undefined)
 
     return NextResponse.json(predictions)
 

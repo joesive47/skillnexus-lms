@@ -11,9 +11,6 @@ const nextConfig = {
     '*': ['node_modules/@swc/core-linux-x64-gnu', 'node_modules/@swc/core-linux-x64-musl'],
   },
   serverExternalPackages: ['@xenova/transformers', 'pdf-parse', 'mammoth'],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',

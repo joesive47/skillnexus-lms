@@ -3,11 +3,12 @@ import { BadgeService } from '@/lib/badge-service'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { verifyCode: string } }
+  { params }: { params: Promise<{ verifyCode: string }> }
 ) {
   try {
+    const resolvedParams = await params
     const badgeService = new BadgeService()
-    const userBadge = await badgeService.getBadgeByVerifyCode(params.verifyCode)
+    const userBadge = await badgeService.getBadgeByVerifyCode(resolvedParams.verifyCode)
 
     if (!userBadge) {
       return NextResponse.json({ error: 'Badge not found' }, { status: 404 })
@@ -18,7 +19,7 @@ export async function GET(
       title: userBadge.badge.name,
       recipient: userBadge.user?.name || userBadge.user?.email || 'Unknown User',
       issueDate: new Date(userBadge.earnedAt).toLocaleDateString(),
-      verifyCode: params.verifyCode,
+      verifyCode: resolvedParams.verifyCode,
       description: userBadge.badge.description,
       points: userBadge.badge.points,
       criteria: userBadge.badge.criteria
