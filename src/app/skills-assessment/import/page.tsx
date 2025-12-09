@@ -21,15 +21,39 @@ export default function ImportPage() {
     
     const reader = new FileReader()
     reader.onload = (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer)
-      const workbook = XLSX.read(data, { type: 'array' })
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-      const jsonData = XLSX.utils.sheet_to_json(worksheet)
-      
-      setPreview(jsonData.slice(0, 5))
-      validateData(jsonData)
+      if (selectedFile.name.endsWith('.csv')) {
+        // Parse CSV
+        const text = e.target?.result as string
+        const lines = text.split('\n').filter(line => line.trim())
+        const headers = lines[0].split(',')
+        const jsonData = lines.slice(1).map(line => {
+          const values = line.split(',')
+          const obj: any = {}
+          headers.forEach((header, index) => {
+            obj[header.trim()] = values[index]?.trim() || ''
+          })
+          return obj
+        })
+        
+        setPreview(jsonData.slice(0, 5))
+        validateData(jsonData)
+      } else {
+        // Parse Excel
+        const data = new Uint8Array(e.target?.result as ArrayBuffer)
+        const workbook = XLSX.read(data, { type: 'array' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const jsonData = XLSX.utils.sheet_to_json(worksheet)
+        
+        setPreview(jsonData.slice(0, 5))
+        validateData(jsonData)
+      }
     }
-    reader.readAsArrayBuffer(selectedFile)
+    
+    if (selectedFile.name.endsWith('.csv')) {
+      reader.readAsText(selectedFile, 'utf-8')
+    } else {
+      reader.readAsArrayBuffer(selectedFile)
+    }
   }
 
   const validateData = (data: any[]) => {
@@ -93,10 +117,28 @@ export default function ImportPage() {
       const reader = new FileReader()
       reader.onload = async (e) => {
         try {
-          const data = new Uint8Array(e.target?.result as ArrayBuffer)
-          const workbook = XLSX.read(data, { type: 'array' })
-          const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-          const jsonData = XLSX.utils.sheet_to_json(worksheet)
+          let jsonData
+          
+          if (file.name.endsWith('.csv')) {
+            // Parse CSV
+            const text = e.target?.result as string
+            const lines = text.split('\n').filter(line => line.trim())
+            const headers = lines[0].split(',')
+            jsonData = lines.slice(1).map(line => {
+              const values = line.split(',')
+              const obj: any = {}
+              headers.forEach((header, index) => {
+                obj[header.trim()] = values[index]?.trim() || ''
+              })
+              return obj
+            })
+          } else {
+            // Parse Excel
+            const data = new Uint8Array(e.target?.result as ArrayBuffer)
+            const workbook = XLSX.read(data, { type: 'array' })
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+            jsonData = XLSX.utils.sheet_to_json(worksheet)
+          }
           
           if (jsonData.length === 0) {
             throw new Error('ไฟล์ว่างเปล่า')
@@ -122,7 +164,11 @@ export default function ImportPage() {
         alert('ไม่สามารถอ่านไฟล์ได้')
       }
       
-      reader.readAsArrayBuffer(file)
+      if (file.name.endsWith('.csv')) {
+        reader.readAsText(file, 'utf-8')
+      } else {
+        reader.readAsArrayBuffer(file)
+      }
     } catch (error) {
       console.error('Import error:', error)
       setImporting(false)
@@ -131,10 +177,10 @@ export default function ImportPage() {
   }
 
   const downloadTemplate = () => {
-    // Download the new template file with clean English headers
+    // Download CSV template - no encoding issues
     const link = document.createElement('a')
-    link.href = '/skills-template-v2.xlsx'
-    link.download = 'Skills_Assessment_Template_v2.xlsx'
+    link.href = '/skills-template.csv'
+    link.download = 'Skills_Assessment_Template.csv'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -194,11 +240,11 @@ export default function ImportPage() {
                 ลากไฟล์ Excel มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์
               </p>
               <p className="text-sm text-gray-500 mb-4">
-                รองรับไฟล์ .xlsx และ .xls เท่านั้น
+                รองรับไฟล์ .csv, .xlsx และ .xls
               </p>
               <input
                 type="file"
-                accept=".xlsx,.xls"
+                accept=".csv,.xlsx,.xls"
                 onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                 className="hidden"
                 id="file-upload"
