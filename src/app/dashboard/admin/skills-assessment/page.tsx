@@ -295,21 +295,10 @@ export default function SkillsAssessmentManagement() {
   }
 
   const downloadTemplate = () => {
-    // Create CSV template
-    const template = [
-      ['คำถาม', 'ตัวเลือก1', 'ตัวเลือก2', 'ตัวเลือก3', 'ตัวเลือก4', 'คำตอบที่ถูก(1-4)', 'ทักษะ', 'ระดับ(beginner/intermediate/advanced)', 'น้ำหนัก(1-5)'],
-      ['HTML ย่อมาจากอะไร?', 'HyperText Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlink Text Markup Language', '1', 'HTML', 'beginner', '1'],
-      ['CSS ใช้สำหรับอะไร?', 'จัดรูปแบบหน้าเว็บ', 'เขียนโปรแกรม', 'จัดการฐานข้อมูล', 'สร้างเซิร์ฟเวอร์', '1', 'CSS', 'beginner', '1'],
-      ['JavaScript เป็นภาษาอะไร?', 'Programming Language', 'Markup Language', 'Style Language', 'Database Language', '1', 'JavaScript', 'intermediate', '2']
-    ]
-    
-    const csvContent = template.map(row => row.join(',')).join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    // Download Excel template with English headers
     const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', 'skills-assessment-template.csv')
-    link.style.visibility = 'hidden'
+    link.href = '/skills-assessment-template.xlsx'
+    link.download = 'Skills_Assessment_Template.xlsx'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -558,15 +547,16 @@ export default function SkillsAssessmentManagement() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                   <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4" />
-                    รูปแบบไฟล์ Excel สำหรับ Import คำถาม
+                    Excel Template Format (English Headers)
                   </h4>
                   <div className="text-sm text-blue-700 space-y-1">
-                    <p><strong>คอลัมน์ A:</strong> คำถาม</p>
-                    <p><strong>คอลัมน์ B-E:</strong> ตัวเลือก 1-4</p>
-                    <p><strong>คอลัมน์ F:</strong> คำตอบที่ถูก (1-4)</p>
-                    <p><strong>คอลัมน์ G:</strong> ทักษะที่วัด</p>
-                    <p><strong>คอลัมน์ H:</strong> ระดับความยาก (beginner/intermediate/advanced)</p>
-                    <p><strong>คอลัมน์ I:</strong> น้ำหนัก (1-5)</p>
+                    <p><strong>Column A:</strong> question_text</p>
+                    <p><strong>Column B-E:</strong> option_1, option_2, option_3, option_4</p>
+                    <p><strong>Column F:</strong> correct_answer (1-4)</p>
+                    <p><strong>Column G:</strong> skill_name</p>
+                    <p><strong>Column H:</strong> difficulty_level (beginner/intermediate/advanced)</p>
+                    <p><strong>Column I:</strong> weight (1-5)</p>
+                    <p className="text-blue-600 font-medium mt-2">✅ รองรับภาษาไทยในเนื้อหาคำถาม แต่ใช้ชื่อคอลัมน์ภาษาอังกฤษ</p>
                   </div>
                 </div>
 
