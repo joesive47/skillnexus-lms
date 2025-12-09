@@ -92,6 +92,20 @@ AI-Powered Learning Management System with Anti-Skip Technology
 - **🏆 Verified Skill Certificates** - Industry-recognized certifications
 - **🔐 Secure Authentication** - NextAuth.js v5 with server actions
 
+### 📊 Skill Assessment System (NEW! v2.0)
+- **📋 Enhanced Excel Import** - 20 columns with advanced analysis fields
+- **🔍 Detailed Analysis** - Skill breakdown, strengths, and weaknesses
+- **📚 Smart Recommendations** - AI-powered course suggestions
+- **🗺️ Learning Path** - Step-by-step career progression plan
+- **🎯 Career Readiness** - Calculate job-readiness score (0-100%)
+- **⏱️ Time Estimation** - Predict learning time needed
+
+**Quick Start:**
+- 🚀 [QUICK-START-ASSESSMENT.md](./QUICK-START-ASSESSMENT.md) - เริ่มใช้งานใน 5 นาที
+- 📖 [SKILL-ASSESSMENT-GUIDE.md](./SKILL-ASSESSMENT-GUIDE.md) - คู่มือฉบับเต็ม
+- 📊 [EXCEL-TEMPLATE-EXAMPLE.md](./EXCEL-TEMPLATE-EXAMPLE.md) - ตัวอย่างข้อมูล
+- 🗄️ [DATABASE-MIGRATION-GUIDE.md](./DATABASE-MIGRATION-GUIDE.md) - การ migrate database
+
 ## 🚀 Deployment to Vercel
 
 ### ✅ Ready to Deploy!
@@ -144,6 +158,66 @@ SkillNexus LMS พร้อม Deploy ไปยัง Vercel แล้ว!
    ```
 
 📖 **Full PostgreSQL Guide:** [QUICK-POSTGRESQL-SETUP.md](./QUICK-POSTGRESQL-SETUP.md)
+
+## 📊 Skill Assessment System
+
+### ✨ New Features (v2.0)
+
+**Enhanced Excel Import:**
+```bash
+# 1. Download template
+http://localhost:3000/skills-assessment/import
+
+# 2. Fill with 20 columns (10 new analysis fields)
+# 3. Import and get instant validation
+```
+
+**Advanced Analysis:**
+- 🎯 **Overall Score** - Percentage and level (Beginner → Expert)
+- 💪 **Skill Breakdown** - Detailed analysis per skill
+- 📉 **Weakest Skills** - Priority areas for improvement
+- 📈 **Strongest Skills** - Areas of expertise
+- 🎓 **Career Readiness** - Job-readiness score (0-100%)
+- ⏱️ **Learning Time** - Estimated weeks needed
+
+**Smart Course Recommendations:**
+- **High Priority** - For skills < 40% (Beginner courses)
+- **Medium Priority** - For skills 40-70% (Intermediate courses)
+- **Low Priority** - For skills >= 70% (Advanced courses)
+
+**Learning Path Generator:**
+- **Step 1:** Foundation Building (1-2 months)
+- **Step 2:** Skill Development (2-3 months)
+- **Step 3:** Advanced & Specialization (3-4 months)
+
+### 📋 Excel Template Columns
+
+**Basic (10 columns):**
+- question_id, career_title, skill_name, question_text
+- option_1, option_2, option_3, option_4
+- correct_answer, score
+
+**Enhanced (10 new columns):**
+- skill_category, skill_importance, question_type
+- difficulty_level, explanation, course_link
+- course_title, learning_resource, estimated_time
+- prerequisite_skills
+
+### 🚀 Quick Start
+
+```bash
+# 1. Update database
+npx prisma generate && npx prisma db push
+
+# 2. Go to import page
+http://localhost:3000/skills-assessment/import
+
+# 3. Download template and fill data
+
+# 4. Import and test
+```
+
+📖 **Full Guide:** [QUICK-START-ASSESSMENT.md](./QUICK-START-ASSESSMENT.md)
 
 ## 🐘 PostgreSQL Database Setup
 
@@ -233,6 +307,7 @@ npm run performance:check
 - alice@example.com / Student@123!
 
 **Login:** http://localhost:3000/login  
+**Skill Assessment:** http://localhost:3000/skills-assessment  
 **Full List:** [TEST-ACCOUNTS.md](./TEST-ACCOUNTS.md)
 
 ## 🛠️ Tech Stack

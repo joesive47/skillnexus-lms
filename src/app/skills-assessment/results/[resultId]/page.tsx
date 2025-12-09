@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import SkillAssessmentResults from '@/components/skill-assessment/skill-assessment-results'
+import { AssessmentAnalysisView } from '@/components/skill-assessment/assessment-analysis'
 import { getAssessmentResult } from '@/app/actions/assessment'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ResultsPage() {
   const router = useRouter()
@@ -110,18 +112,51 @@ export default function ResultsPage() {
   ]
 
   return (
-    <SkillAssessmentResults
-      assessmentId={resultId}
-      skillData={skillData}
-      overallScore={Math.round(result.percentage || 0)}
-      level={result.level || 'Intermediate'}
-      assessmentTitle={result.career?.title || 'Career Assessment'}
-      date={new Date(result.completedAt).toLocaleDateString('th-TH')}
-      timeSpent={formatTime(result.timeSpent || 0)}
-      percentile={Math.floor(Math.random() * 30) + 70}
-      avgTimePerQuestion={formatTime(Math.floor((result.timeSpent || 0) / (result.totalQuestions || 1)))}
-      accuracy={Math.round(((result.totalScore || 0) / (result.maxScore || 1)) * 100)}
-      courseRecommendations={courseRecommendations}
-    />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="overview">ภาพรวมผลการประเมิน</TabsTrigger>
+            <TabsTrigger value="analysis">การวิเคราะห์และแนะนำ</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview">
+            <SkillAssessmentResults
+              assessmentId={resultId}
+              skillData={skillData}
+              overallScore={Math.round(result.percentage || 0)}
+              level={result.level || 'Intermediate'}
+              assessmentTitle={result.career?.title || 'Career Assessment'}
+              date={new Date(result.completedAt).toLocaleDateString('th-TH')}
+              timeSpent={formatTime(result.timeSpent || 0)}
+              percentile={Math.floor(Math.random() * 30) + 70}
+              avgTimePerQuestion={formatTime(Math.floor((result.timeSpent || 0) / (result.totalQuestions || 1)))}
+              accuracy={Math.round(((result.totalScore || 0) / (result.maxScore || 1)) * 100)}
+              courseRecommendations={courseRecommendations}
+            />
+          </TabsContent>
+          
+          <TabsContent value="analysis">
+            {result.analysis ? (
+              <AssessmentAnalysisView 
+                analysis={result.analysis}
+                careerTitle={result.career?.title || 'Career'}
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-gray-600 mb-4">
+                    การวิเคราะห์แบบละเอียดยังไม่พร้อมใช้งานสำหรับผลการประเมินนี้
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    กรุณาทำการประเมินใหม่เพื่อรับการวิเคราะห์แบบละเอียด
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   )
 }

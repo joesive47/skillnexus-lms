@@ -1,0 +1,28 @@
+This is a placeholder. The actual Excel file needs to be created with the following structure:
+
+Columns:
+1. question_id - รหัสคำถาม (เช่น Q001, Q002)
+2. career_title - ชื่ออาชีพ (เช่น Full Stack Developer, Data Scientist)
+3. skill_name - ชื่อทักษะ (เช่น JavaScript, Python, SQL)
+4. skill_category - หมวดหมู่ทักษะ (Technical, Soft Skills, Tools)
+5. skill_importance - ความสำคัญ (Critical, High, Medium, Low)
+6. question_text - คำถาม
+7. question_type - ประเภทคำถาม (single, multiple, scenario)
+8. difficulty_level - ระดับความยาก (Beginner, Intermediate, Advanced)
+9. option_1 - ตัวเลือกที่ 1
+10. option_2 - ตัวเลือกที่ 2
+11. option_3 - ตัวเลือกที่ 3
+12. option_4 - ตัวเลือกที่ 4
+13. correct_answer - คำตอบที่ถูกต้อง (1,2,3,4 หรือ 1,3 สำหรับหลายคำตอบ)
+14. score - คะแนน (1-10)
+15. explanation - คำอธิบายคำตอบ
+16. course_link - ลิงก์หลักสูตรที่แนะนำ
+17. course_title - ชื่อหลักสูตรที่แนะนำ
+18. learning_resource - แหล่งเรียนรู้เพิ่มเติม
+19. estimated_time - เวลาที่ใช้ในการเรียน (ชั่วโมง)
+20. prerequisite_skills - ทักษะที่ต้องมีก่อน
+
+Example Row:
+Q001 | Full Stack Developer | JavaScript | Technical | Critical | What is closure in JavaScript? | single | Intermediate | A function with access to parent scope | A loop structure | A data type | An operator | 1 | 5 | Closure allows functions to access variables from outer scope | /courses/javascript-advanced | JavaScript Advanced | MDN Web Docs | 40 | JavaScript Basics
+
+Note: Please create this Excel file manually with proper formatting and sample data.

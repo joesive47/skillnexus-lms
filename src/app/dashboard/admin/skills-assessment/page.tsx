@@ -793,7 +793,7 @@ export default function SkillsAssessmentManagement() {
                       <h4 className="font-semibold">{assessment.title}</h4>
                       <p className="text-sm text-gray-600">{assessment.description}</p>
                       <p className="text-xs text-blue-600 mt-1">
-                        https://www.uppowerskill.com/skills-test/{assessment.id}
+                        {process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/skills-test/{assessment.id}
                       </p>
                     </div>
                     <div className="flex gap-2">

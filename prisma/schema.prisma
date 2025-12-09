@@ -262,21 +262,31 @@ model CareerSkill {
 }
 
 model AssessmentQuestion {
-  id            String      @id @default(cuid())
-  questionId    String      @unique
-  careerId      String
-  skillId       String
-  questionText  String
-  option1       String
-  option2       String
-  option3       String
-  option4       String
-  correctAnswer String
-  score         Int         @default(1)
-  courseLink    String?
-  createdAt     DateTime    @default(now())
-  skill         CareerSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  career        Career      @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  id                 String      @id @default(cuid())
+  questionId         String      @unique
+  careerId           String
+  skillId            String
+  questionText       String
+  option1            String
+  option2            String
+  option3            String
+  option4            String
+  correctAnswer      String
+  score              Int         @default(1)
+  // Enhanced fields for analysis
+  skillCategory      String?     @default("General")
+  skillImportance    String?     @default("Medium")
+  questionType       String?     @default("single")
+  difficultyLevel    String?     @default("Intermediate")
+  explanation        String?
+  courseLink         String?
+  courseTitle        String?
+  learningResource   String?
+  estimatedTime      Int?
+  prerequisiteSkills String?
+  createdAt          DateTime    @default(now())
+  skill              CareerSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  career             Career      @relation(fields: [careerId], references: [id], onDelete: Cascade)
 
   @@map("assessment_questions")
 }
@@ -292,6 +302,8 @@ model AssessmentResult {
   timeSpent   Int      @default(0)
   answers     String
   skillScores String
+  // Enhanced analysis field
+  analysis    String?  @db.Text
   completedAt DateTime @default(now())
   career      Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

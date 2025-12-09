@@ -74,7 +74,8 @@ export async function authenticate(
     // Check if it's a redirect (normal behavior)
     if (error && typeof error === 'object' && 'message' in error && 
         typeof error.message === 'string' && error.message.includes('NEXT_REDIRECT')) {
-      throw error // Let Next.js handle the redirect
+      // Suppress redirect error logging - this is normal Next.js behavior
+      throw error
     }
     
     return 'เกิดข้อผิดพลาดในการเข้าระบบ กรุณาลองใหม่อีกครั้ง'

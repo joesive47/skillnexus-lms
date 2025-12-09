@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { AssessmentAnalyzer } from '@/lib/assessment-analyzer'
 
 export async function importAssessmentQuestions(data: any[]) {
   console.log('Server: Import function called with', data.length, 'questions')
@@ -20,8 +21,11 @@ export async function importAssessmentQuestions(data: any[]) {
       errors: [] as string[]
     }
 
-    // Validate required fields
-    const requiredFields = ['question_id', 'career_title', 'skill_name', 'question_text', 'option_1', 'option_2', 'option_3', 'option_4', 'correct_answer', 'score', 'course_link']
+    // Required fields (คอลัมน์พื้นฐาน)
+    const requiredFields = ['question_id', 'career_title', 'skill_name', 'question_text', 'option_1', 'option_2', 'option_3', 'option_4', 'correct_answer', 'score']
+    
+    // Optional fields (คอลัมน์เพิ่มเติมสำหรับการวิเคราะห์)
+    const optionalFields = ['skill_category', 'skill_importance', 'question_type', 'difficulty_level', 'explanation', 'course_link', 'course_title', 'learning_resource', 'estimated_time', 'prerequisite_skills']
     
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
@@ -70,33 +74,37 @@ export async function importAssessmentQuestions(data: any[]) {
           })
           results.skills.add(row.skill_name)
 
+          // Prepare question data with enhanced fields
+          const questionData = {
+            careerId: career.id,
+            skillId: skill.id,
+            questionText: row.question_text.toString().trim(),
+            option1: row.option_1.toString().trim(),
+            option2: row.option_2.toString().trim(),
+            option3: row.option_3.toString().trim(),
+            option4: row.option_4.toString().trim(),
+            correctAnswer: row.correct_answer.toString().trim(),
+            score: parseInt(row.score.toString()) || 1,
+            // Enhanced fields
+            skillCategory: row.skill_category?.toString().trim() || 'General',
+            skillImportance: row.skill_importance?.toString().trim() || 'Medium',
+            questionType: row.question_type?.toString().trim() || 'single',
+            difficultyLevel: row.difficulty_level?.toString().trim() || 'Intermediate',
+            explanation: row.explanation?.toString().trim() || null,
+            courseLink: row.course_link?.toString().trim() || null,
+            courseTitle: row.course_title?.toString().trim() || null,
+            learningResource: row.learning_resource?.toString().trim() || null,
+            estimatedTime: row.estimated_time ? parseInt(row.estimated_time.toString()) : null,
+            prerequisiteSkills: row.prerequisite_skills?.toString().trim() || null
+          }
+
           // Create question
           await tx.assessmentQuestion.upsert({
             where: { questionId: row.question_id.toString().trim() },
-            update: {
-              careerId: career.id,
-              skillId: skill.id,
-              questionText: row.question_text.toString().trim(),
-              option1: row.option_1.toString().trim(),
-              option2: row.option_2.toString().trim(),
-              option3: row.option_3.toString().trim(),
-              option4: row.option_4.toString().trim(),
-              correctAnswer: row.correct_answer.toString().trim(),
-              score: parseInt(row.score.toString()) || 1,
-              courseLink: row.course_link?.toString().trim() || null
-            },
+            update: questionData,
             create: {
               questionId: row.question_id.toString().trim(),
-              careerId: career.id,
-              skillId: skill.id,
-              questionText: row.question_text.toString().trim(),
-              option1: row.option_1.toString().trim(),
-              option2: row.option_2.toString().trim(),
-              option3: row.option_3.toString().trim(),
-              option4: row.option_4.toString().trim(),
-              correctAnswer: row.correct_answer.toString().trim(),
-              score: parseInt(row.score.toString()) || 1,
-              courseLink: row.course_link?.toString().trim() || null
+              ...questionData
             }
           })
           results.questions++
@@ -182,7 +190,7 @@ export async function saveAssessmentResult(data: {
 
     const questions = await prisma.assessmentQuestion.findMany({
       where: { careerId: data.careerId },
-      include: { skill: true }
+      include: { skill: true, career: true }
     })
 
     let totalScore = 0
@@ -217,6 +225,15 @@ export async function saveAssessmentResult(data: {
                  percentage >= 61 ? 'Advanced' :
                  percentage >= 41 ? 'Intermediate' : 'Beginner'
 
+    // วิเคราะห์ผลการประเมินแบบละเอียด
+    const careerTitle = questions[0]?.career?.title || 'Unknown'
+    const analysis = AssessmentAnalyzer.analyzeAssessment(
+      skillScores,
+      data.answers,
+      questions,
+      careerTitle
+    )
+
     const result = await prisma.assessmentResult.create({
       data: {
         userId: session.user.id,
@@ -227,11 +244,13 @@ export async function saveAssessmentResult(data: {
         level,
         timeSpent: data.timeSpent,
         answers: JSON.stringify(data.answers),
-        skillScores: JSON.stringify(skillScores)
+        skillScores: JSON.stringify(skillScores),
+        // บันทึกผลการวิเคราะห์
+        analysis: JSON.stringify(analysis)
       }
     })
 
-    return { success: true, resultId: result.id }
+    return { success: true, resultId: result.id, analysis }
   } catch (error) {
     console.error('Save result error:', error)
     return { success: false, error: 'Failed to save result' }
@@ -253,7 +272,8 @@ export async function getAssessmentResult(resultId: string) {
     return {
       ...result,
       skillScores: JSON.parse(result.skillScores),
-      answers: JSON.parse(result.answers)
+      answers: JSON.parse(result.answers),
+      analysis: result.analysis ? JSON.parse(result.analysis) : null
     }
   } catch (error) {
     console.error('Get result error:', error)
