@@ -228,71 +228,7 @@ export default function SkillsAssessmentManagement() {
     return "bg-red-100 text-red-800"
   }
 
-  const handleExcelImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      try {
-        let text = event.target?.result as string
-        
-        // Remove BOM if present
-        if (text.charCodeAt(0) === 0xFEFF) {
-          text = text.slice(1)
-        }
-        
-        const lines = text.split('\n').filter(line => line.trim())
-        
-        // Skip header row
-        const dataLines = lines.slice(1)
-        const importedQuestions: Question[] = []
-        
-        dataLines.forEach((line, index) => {
-          // Parse CSV with quoted fields support
-          const columns = line.match(/"([^"]*)"|([^,]+)/g)?.map(col => 
-            col.replace(/^"|"$/g, '').trim()
-          ) || line.split(',').map(col => col.trim())
-          
-          // Validate minimum columns
-          if (columns.length >= 9 && columns[0]) {
-            const question: Question = {
-              id: (Date.now() + index).toString(),
-              text: columns[0] || '',
-              options: [
-                columns[1] || '',
-                columns[2] || '',
-                columns[3] || '',
-                columns[4] || ''
-              ],
-              correctAnswer: Math.max(0, Math.min(3, parseInt(columns[5]) - 1)) || 0,
-              skill: columns[6] || 'General',
-              difficulty: (columns[7] as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
-              weight: Math.max(1, Math.min(5, parseInt(columns[8]))) || 1
-            }
-            
-            // Only add if question text exists
-            if (question.text) {
-              importedQuestions.push(question)
-            }
-          }
-        })
-        
-        if (importedQuestions.length > 0) {
-          setQuestions([...questions, ...importedQuestions])
-          alert(`นำเข้า ${importedQuestions.length} คำถามจากไฟล์ Excel สำเร็จ!`)
-        } else {
-          alert('ไม่พบข้อมูลคำถามที่ถูกต้องในไฟล์ กรุณาตรวจสอบรูปแบบไฟล์')
-        }
-      } catch (error) {
-        alert('เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาตรวจสอบรูปแบบไฟล์')
-      }
-      
-      // Reset file input
-      e.target.value = ''
-    }
-    reader.readAsText(file)
-  }
+  // Excel import function removed for testing deployment
 
   const downloadTemplate = () => {
     // Download Excel template with English headers
@@ -517,14 +453,6 @@ export default function SkillsAssessmentManagement() {
                       </Button>
                       <Button 
                         variant="outline" 
-                        onClick={() => document.getElementById('excel-import')?.click()}
-                        className="flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        Import Excel
-                      </Button>
-                      <Button 
-                        variant="outline" 
                         onClick={downloadTemplate}
                         className="flex items-center gap-2"
                       >
@@ -533,30 +461,18 @@ export default function SkillsAssessmentManagement() {
                       </Button>
                     </div>
                     
-                    <input
-                      id="excel-import"
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={handleExcelImport}
-                    />
+
                   </div>
                 </div>
 
                 {/* Excel Import Instructions */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                  <h4 className="font-medium text-red-800 mb-2 flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4" />
-                    Excel Template Format (English Headers)
+                    ฟังก์ชั่น Import Excel ถูกถอดออกเพื่อทดสอบ Deployment
                   </h4>
-                  <div className="text-sm text-blue-700 space-y-1">
-                    <p><strong>Column A:</strong> question_text</p>
-                    <p><strong>Column B-E:</strong> option_1, option_2, option_3, option_4</p>
-                    <p><strong>Column F:</strong> correct_answer (1-4)</p>
-                    <p><strong>Column G:</strong> skill_name</p>
-                    <p><strong>Column H:</strong> difficulty_level (beginner/intermediate/advanced)</p>
-                    <p><strong>Column I:</strong> weight (1-5)</p>
-                    <p className="text-blue-600 font-medium mt-2">✅ รองรับภาษาไทยในเนื้อหาคำถาม แต่ใช้ชื่อคอลัมน์ภาษาอังกฤษ</p>
+                  <div className="text-sm text-red-700">
+                    <p>หากคุณเห็นข้อความนี้ แสดงว่าระบบ Deploy ทำงานแล้ว!</p>
                   </div>
                 </div>
 
