@@ -672,11 +672,21 @@ export default function SkillsAssessmentManagement() {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
-                      <Eye className="w-4 h-4 mr-2" />
-                      ดูตัวอย่าง
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={`/skills-test/${assessment.id}`} target="_blank">
+                        <Eye className="w-4 h-4 mr-2" />
+                        ดูตัวอย่าง
+                      </a>
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        const url = `${window.location.origin}/skills-test/${assessment.id}`
+                        navigator.clipboard.writeText(url)
+                        alert('คัดลอกลิงค์แล้ว!')
+                      }}
+                    >
                       <Link className="w-4 h-4 mr-2" />
                       คัดลอกลิงค์
                     </Button>
@@ -819,13 +829,23 @@ export default function SkillsAssessmentManagement() {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          const url = `${window.location.origin}/skills-test/${assessment.id}`
+                          navigator.clipboard.writeText(url)
+                          alert('คัดลอกลิงค์แล้ว!')
+                        }}
+                      >
                         <Link className="w-4 h-4 mr-2" />
                         คัดลอก
                       </Button>
-                      <Button size="sm">
-                        <Eye className="w-4 h-4 mr-2" />
-                        ดูหน้าทดสอบ
+                      <Button size="sm" asChild>
+                        <a href={`/skills-test/${assessment.id}`} target="_blank">
+                          <Eye className="w-4 h-4 mr-2" />
+                          ดูหน้าทดสอบ
+                        </a>
                       </Button>
                     </div>
                   </div>
