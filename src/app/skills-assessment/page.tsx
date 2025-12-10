@@ -35,17 +35,18 @@ function SkillsAssessmentPage() {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login')
-    }
-  }, [status, router])
+  // Remove authentication requirement - allow public access
+  // useEffect(() => {
+  //   if (status === 'unauthenticated') {
+  //     router.push('/login')
+  //   }
+  // }, [status, router])
 
   useEffect(() => {
-    if (mounted && status !== 'loading') {
+    if (mounted) {
       loadCareers()
     }
-  }, [mounted, status])
+  }, [mounted])
 
   const loadCareers = async () => {
     try {
@@ -65,7 +66,7 @@ function SkillsAssessmentPage() {
     setActiveTab('overview')
   }
 
-  if (!mounted || status === 'loading') {
+  if (!mounted) {
     return <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>
   }
 
@@ -73,10 +74,17 @@ function SkillsAssessmentPage() {
     <div className="container mx-auto p-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">ประเมินทักษะอาชีพ</h1>
+          <h1 className="text-4xl font-bold mb-4">ประเมินทักษะอาชีพ ฟรี!</h1>
           <p className="text-xl text-muted-foreground">
-            ค้นพบจุดแข็งและพัฒนาทักษะให้ตรงกับตลาดแรงงาน
+            ค้นพบจุดแข็งและพัฒนาทักษะให้ตรงกับตลาดแรงงาน - ไม่ต้องสมัครสมาชิก
           </p>
+          {!session && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-blue-700 font-medium">
+                🎉 ทดลองประเมินทักษะได้ฟรี! หากต้องการผลลัพธ์และคำแนะนำ กรุณาเข้าสู่ระบบ
+              </p>
+            </div>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -219,12 +227,21 @@ function SkillsAssessmentPage() {
                             </div>
                           </div>
                           
-                          <Link href={`/skills-assessment/assessment/${career.id}`}>
-                            <Button className="w-full">
-                              <Target className="w-4 h-4 mr-2" />
-                              เริ่มประเมิน
-                            </Button>
-                          </Link>
+                          {session ? (
+                            <Link href={`/skills-assessment/assessment/${career.id}`}>
+                              <Button className="w-full">
+                                <Target className="w-4 h-4 mr-2" />
+                                เริ่มประเมิน
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Link href="/login">
+                              <Button className="w-full" variant="outline">
+                                <Target className="w-4 h-4 mr-2" />
+                                เข้าสู่ระบบเพื่อประเมิน
+                              </Button>
+                            </Link>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
@@ -281,12 +298,21 @@ function SkillsAssessmentPage() {
                     ดูหลักสูตรทั้งหมด
                   </Button>
                 </Link>
-                <Link href="/dashboard">
-                  <Button className="gap-2">
-                    <Target className="w-4 h-4" />
-                    กลับไปแดชบอร์ด
-                  </Button>
-                </Link>
+                {session ? (
+                  <Link href="/dashboard">
+                    <Button className="gap-2">
+                      <Target className="w-4 h-4" />
+                      กลับไปแดชบอร์ด
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/login">
+                    <Button className="gap-2">
+                      <Target className="w-4 h-4" />
+                      เข้าสู่ระบบ
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </TabsContent>
