@@ -50,7 +50,7 @@ function SkillsAssessmentPage() {
   const loadCareers = async () => {
     try {
       const data = await getCareers()
-      setCareers(data || [])
+      setCareers(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Failed to load careers:', error)
       setCareers([])

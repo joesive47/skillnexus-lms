@@ -145,14 +145,16 @@ export async function getCareers() {
       }
     })
 
-    return careers.map(career => ({
+    const result = careers.map(career => ({
       ...career,
-      questionCount: career.assessmentQuestions.length,
-      skillCount: new Set(career.assessmentQuestions.map(q => q.skill.name)).size,
-      estimatedTime: Math.ceil(career.assessmentQuestions.length * 2),
-      difficulty: career.assessmentQuestions.length < 15 ? 'Beginner' : 
-                 career.assessmentQuestions.length <= 20 ? 'Intermediate' : 'Advanced'
+      questionCount: career.assessmentQuestions?.length || 0,
+      skillCount: career.assessmentQuestions ? new Set(career.assessmentQuestions.map(q => q.skill?.name).filter(Boolean)).size : 0,
+      estimatedTime: Math.ceil((career.assessmentQuestions?.length || 0) * 2),
+      difficulty: (career.assessmentQuestions?.length || 0) < 15 ? 'Beginner' : 
+                 (career.assessmentQuestions?.length || 0) <= 20 ? 'Intermediate' : 'Advanced'
     }))
+
+    return result
   } catch (error) {
     console.error('Get careers error:', error)
     return []
