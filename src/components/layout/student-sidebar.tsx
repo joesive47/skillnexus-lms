@@ -18,7 +18,6 @@ const menuItems = [
   { icon: BarChart, label: 'Progress', href: '/student/dashboard' },
   { icon: Clock, label: 'Study Time', href: '/student/dashboard' },
   { icon: Users, label: 'Study Groups', href: '/social-learning' },
-  { icon: MessageSquare, label: 'AI Assistant', href: '/dashboard/chatbot' },
 ];
 
 export function StudentSidebar() {
