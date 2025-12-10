@@ -9,7 +9,7 @@ import { Target, Brain, TrendingUp, Award, Upload, FileSpreadsheet, Users, BookO
 import Link from "next/link"
 import { ImportPage } from '@/components/skill-assessment/import-page'
 import { getCareers } from '@/app/actions/assessment'
-import { useSession } from 'next-auth/react'
+// import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
@@ -24,7 +24,8 @@ interface Career {
 }
 
 function SkillsAssessmentPage() {
-  const { data: session, status } = useSession()
+  const [session, setSession] = useState<any>(null)
+  const [status, setStatus] = useState('loading')
   const router = useRouter()
   const [careers, setCareers] = useState<Career[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +34,17 @@ function SkillsAssessmentPage() {
 
   useEffect(() => {
     setMounted(true)
+    // Check session without useSession hook
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        setSession(data.user || null)
+        setStatus(data.user ? 'authenticated' : 'unauthenticated')
+      })
+      .catch(() => {
+        setSession(null)
+        setStatus('unauthenticated')
+      })
   }, [])
 
   // Remove authentication requirement - allow public access
