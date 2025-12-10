@@ -383,6 +383,12 @@ model User {
   stripeCustomerId     String?                    @unique
   credits              Int                        @default(0)
   certificateTemplate  Int?                       @default(1)
+  // Gamification fields
+  totalXP              Int                        @default(0)
+  level                Int                        @default(1)
+  currentStreak        Int                        @default(0)
+  maxStreak            Int                        @default(0)
+  lastLoginDate        DateTime?
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime                   @updatedAt
   apiKeys              ApiKey[]
@@ -414,6 +420,12 @@ model User {
   receivedReviews      PeerReview[]           @relation("ReceivedReviews")
   profile              UserProfile?
   voiceSubmissions     VoiceSubmission[]      @relation("VoiceSubmissions")
+  // Gamification relations
+  rewards              UserReward[]
+  achievementsNew      UserAchievementNew[]
+  xpLogs               UserXPLog[]
+  missionCompletions   MissionCompletion[]
+  creditPurchases      CreditPurchase[]
 
   @@map("users")
 }
@@ -1004,4 +1016,113 @@ model Organization {
   updatedAt      DateTime @updatedAt
 
   @@map("organizations")
+}
+
+// Gamification Models
+model UserReward {
+  id          String   @id @default(cuid())
+  userId      String
+  rewardType  String   // 'daily_login', 'streak', 'achievement'
+  rewardValue Int
+  streakDay   Int?     @default(1)
+  claimedAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_rewards")
+}
+
+model Achievement {
+  id              String @id @default(cuid())
+  name            String @unique
+  description     String
+  icon            String?
+  xpReward        Int    @default(0)
+  badgeReward     String?
+  requirementType String // 'login_streak', 'course_complete'
+  requirementValue Int
+  createdAt       DateTime @default(now())
+  
+  userAchievements UserAchievementNew[]
+  @@map("achievements")
+}
+
+model UserAchievementNew {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  progress      Int      @default(0)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, achievementId])
+  @@map("user_achievements_new")
+}
+
+model UserXPLog {
+  id        String   @id @default(cuid())
+  userId    String
+  xpGained  Int
+  source    String   // 'lesson_complete', 'quiz_pass', 'daily_login'
+  sourceId  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_xp_log")
+}
+
+model DailyMission {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  type        String // 'lesson_complete', 'quiz_pass', 'login'
+  target      Int    @default(1)
+  xpReward    Int    @default(50)
+  creditReward Int   @default(1)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  
+  completions MissionCompletion[]
+  @@map("daily_missions")
+}
+
+model MissionCompletion {
+  id        String      @id @default(cuid())
+  userId    String
+  missionId String
+  progress  Int         @default(0)
+  completed Boolean     @default(false)
+  date      DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission   DailyMission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, missionId, date])
+  @@map("mission_completions")
+}
+
+model CreditStore {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  type        String // 'course', 'feature', 'cosmetic'
+  cost        Int
+  targetId    String?
+  imageUrl    String?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  
+  purchases CreditPurchase[]
+  @@map("credit_store")
+}
+
+model CreditPurchase {
+  id        String      @id @default(cuid())
+  userId    String
+  storeId   String
+  cost      Int
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      CreditStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  @@map("credit_purchases")
 }
