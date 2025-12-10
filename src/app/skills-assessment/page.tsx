@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Target, Brain, TrendingUp, Award, Upload, FileSpreadsheet, Users, BookOpen } from "lucide-react"
+import { Target, Brain, TrendingUp, Award, FileSpreadsheet, Users, BookOpen } from "lucide-react"
 import Link from "next/link"
-import { ImportPage } from '@/components/skill-assessment/import-page'
 import { getCareers } from '@/app/actions/assessment'
 // import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -29,7 +27,7 @@ function SkillsAssessmentPage() {
   const router = useRouter()
   const [careers, setCareers] = useState<Career[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('overview')
+  // Remove activeTab state as tabs are removed
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -72,11 +70,7 @@ function SkillsAssessmentPage() {
     }
   }
 
-  const handleImportComplete = async () => {
-    setLoading(true)
-    await loadCareers()
-    setActiveTab('overview')
-  }
+  // Remove import functionality for regular users
 
   if (!mounted) {
     return <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>
@@ -99,13 +93,8 @@ function SkillsAssessmentPage() {
           )}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="overview">ภาพรวม</TabsTrigger>
-            <TabsTrigger value="import">นำเข้าข้อสอบ</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-8">
+        {/* Remove tabs for non-admin users */}
+        <div className="space-y-8">
             {/* Hero Card */}
             <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
               <CardContent className="p-8">
@@ -200,10 +189,7 @@ function SkillsAssessmentPage() {
                   <div className="text-center py-8">
                     <FileSpreadsheet className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                     <p className="text-muted-foreground mb-4">ยังไม่มีแบบประเมินในระบบ</p>
-                    <Button onClick={() => setActiveTab('import')} className="gap-2">
-                      <Upload className="w-4 h-4" />
-                      นำเข้าข้อสอบ
-                    </Button>
+                    <p className="text-sm text-muted-foreground">กรุณาติดต่อผู้ดูแลระบบเพื่อเพิ่มแบบประเมิน</p>
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -327,12 +313,7 @@ function SkillsAssessmentPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="import">
-            <ImportPage onImportComplete={handleImportComplete} />
-          </TabsContent>
-        </Tabs>
+        </div>
       </div>
     </div>
   )
