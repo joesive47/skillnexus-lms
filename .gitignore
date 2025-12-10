@@ -40,6 +40,9 @@ yarn-debug.log*
 .eslintcache
 .stylelintcache
 *.tsbuildinfo
+.swc/
+.turbo/
+.next/cache/
 
 # IDE
 .vscode
