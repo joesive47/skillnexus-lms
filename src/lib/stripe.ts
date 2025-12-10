@@ -1,8 +1,14 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Fallback for missing Stripe key during build
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'
+
+export const stripe = new Stripe(stripeKey, {
   apiVersion: '2023-10-16',
 })
+
+// Check if Stripe is properly configured
+export const isStripeConfigured = !!process.env.STRIPE_SECRET_KEY
 
 export async function createPaymentIntent(amount: number, courseId: string, userId: string) {
   return await stripe.paymentIntents.create({

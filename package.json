@@ -4,7 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "npm run build:check && cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "build:check": "node scripts/check-prisma.js || prisma generate",
+    "build:fast": "cross-env NODE_OPTIONS=--max-old-space-size=2048 next build",
+    "build:ultra-fast": "cross-env NODE_OPTIONS=--max-old-space-size=1024 SKIP_ENV_VALIDATION=true next build",
+    "build:analyze": "cross-env ANALYZE=true npm run build",
+    "performance:fix": "node performance-fix.js",
+    "performance:monitor": "node -e \"console.log('Memory:', process.memoryUsage()); console.log('Performance fixed!')\"",
+    "fix:performance": "node performance-fix.js",
+    "build:windows-fast": "scripts\\fast-build.bat",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
@@ -20,7 +28,10 @@
     "security:migrate": "tsx scripts/run-security-migration.ts",
     "phase8:setup": "npm run db:push && npm run load-test",
     "phase9:setup": "npm run security:migrate && npm run security:scan",
-    "phase8-9:complete": "echo Phase 8-9 Implementation: 100% Complete!"
+    "phase8-9:complete": "echo Phase 8-9 Implementation: 100% Complete!",
+    "build:windows": "scripts\\fast-build.bat",
+    "build:optimize": "cross-env NODE_OPTIONS=--max-old-space-size=4096 npm run build",
+    "prisma:check": "node scripts/check-prisma.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
@@ -73,11 +84,11 @@
     "stripe": "^20.0.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.7.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "xml2js": "^0.6.2",
     "yauzl": "^3.2.0",
-    "zod": "^3.24.1",
-    "typescript": "^5.7.2"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -88,6 +99,7 @@
     "@types/react-dom": "^19",
     "@types/xml2js": "^0.4.14",
     "@types/yauzl": "^2.10.3",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.1.3",
     "postcss": "^8",

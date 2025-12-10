@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
+import { stripe, isStripeConfigured } from '@/lib/stripe'
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
 
     switch (paymentMethod) {
       case 'CREDIT_CARD':
+        if (!isStripeConfigured) {
+          return NextResponse.json({ error: 'Payment system not configured' }, { status: 503 })
+        }
+        
         const paymentIntent = await stripe.paymentIntents.create({
           amount: amount * 100,
           currency: 'thb',
