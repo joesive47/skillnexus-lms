@@ -3,6 +3,9 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import CreditBalance from "@/components/dashboard/CreditBalance"
 import { Phase3Showcase } from "@/components/phase3/phase3-showcase"
+import DailyMissions from "@/components/missions/DailyMissions"
+import CreditStore from "@/components/missions/CreditStore"
+import RewardPopup from "@/components/rewards/RewardPopup"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,7 +23,10 @@ import {
   ArrowRight,
   Package,
   Zap,
-  Video
+  Video,
+  Target,
+  ShoppingCart,
+  Gift
 } from "lucide-react"
 
 export default async function DashboardPage() {
@@ -88,7 +94,7 @@ export default async function DashboardPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-4 gap-4">
+                <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
                   <Link href="/courses">
                     <Button className="w-full h-24 flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg">
                       <BookOpen className="w-8 h-8 mb-2" />
@@ -117,10 +123,28 @@ export default async function DashboardPage() {
                       <span className="text-xs opacity-90">เรียนร่วมกัน</span>
                     </Button>
                   </Link>
+                  <Button className="w-full h-24 flex flex-col items-center justify-center bg-gradient-to-br from-orange-600 to-red-700 hover:from-orange-700 hover:to-red-800 text-white shadow-lg">
+                    <Target className="w-8 h-8 mb-2" />
+                    <span className="font-semibold">ภารกิจประจำวัน</span>
+                    <span className="text-xs opacity-90">รับรางวัล</span>
+                  </Button>
+                  <Button className="w-full h-24 flex flex-col items-center justify-center bg-gradient-to-br from-pink-600 to-purple-700 hover:from-pink-700 hover:to-purple-800 text-white shadow-lg">
+                    <ShoppingCart className="w-8 h-8 mb-2" />
+                    <span className="font-semibold">ร้าน Credits</span>
+                    <span className="text-xs opacity-90">ซื้อไอเท็ม</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Gamification Section */}
+          {user && (
+            <div className="mb-8 grid gap-6 lg:grid-cols-2">
+              <DailyMissions userId={user.id} />
+              <CreditStore userId={user.id} userCredits={user.credits} />
+            </div>
+          )}
 
           {/* Credit Balance */}
           {user && (
