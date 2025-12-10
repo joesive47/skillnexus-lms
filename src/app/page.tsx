@@ -3,7 +3,6 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Lightbulb, Target, BookOpen, Rocket, ArrowRight, Users, CheckCircle, Star } from "lucide-react"
-import UnifiedChatWidget from "@/components/chatbot/UnifiedChatWidget"
 
 export default function HomePage() {
   return (
@@ -199,8 +198,7 @@ export default function HomePage() {
         </div>
       </footer>
       
-      {/* AI Chatbot Widget */}
-      <UnifiedChatWidget />
+      {/* Chatbot widget moved to root layout */}
     </div>
   )
 }
