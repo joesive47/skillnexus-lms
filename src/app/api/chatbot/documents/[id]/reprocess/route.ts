@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -12,8 +12,9 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const document = await prisma.ragDocument.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!document) {
@@ -22,7 +23,7 @@ export async function POST(
 
     // Update status to processing
     await prisma.ragDocument.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'processing',
         errorMessage: null,
@@ -32,13 +33,13 @@ export async function POST(
 
     // Delete existing chunks
     await prisma.ragChunk.deleteMany({
-      where: { documentId: params.id }
+      where: { documentId: id }
     })
 
     // For reprocessing, we need the original file content
     // Since we don't store it, mark as failed with helpful message
     await prisma.ragDocument.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'failed',
         errorMessage: 'ไม่สามารถประมวลผลใหม่ได้: ไม่มีไฟล์ต้นฉบับ กรุณาอัพโหลดเอกสารใหม่',

@@ -1,6 +1,6 @@
-import pdf from 'pdf-parse'
 import mammoth from 'mammoth'
 import * as XLSX from 'xlsx'
+const pdf = require('pdf-parse')
 import { splitTextIntoChunks, generateEmbedding } from './rag-service'
 import prisma from './prisma'
 

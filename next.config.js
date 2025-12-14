@@ -1,70 +1,29 @@
-const path = require('path')
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Minimal config for speed
-  compiler: {
-    removeConsole: false, // Keep console in dev
-  },
+  // Minimal config for stability
+  serverExternalPackages: ['pdf-parse', '@napi-rs/canvas', 'canvas'],
   
-  experimental: {
-    optimizePackageImports: ['lucide-react'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
-
-  // Skip all checks in development
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  swcMinify: true,
-  
-  // Minimal webpack config
-  webpack: (config, { isServer, dev }) => {
-    if (dev) {
-      // Development optimizations
-      config.optimization = {
-        ...config.optimization,
-        minimize: false,
-        splitChunks: false,
-      }
-    }
-    
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(process.cwd(), './src'),
-    }
-    
+  // Handle optional dependencies
+  webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
+        crypto: false,
+        'pdf-parse': false,
+        '@napi-rs/canvas': false,
+        'canvas': false
       }
     }
     
     return config
   },
   
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.amazonaws.com',
-      },
-    ],
-  },
+  // Basic settings
+  poweredByHeader: false,
+  compress: true,
 }
 
 module.exports = nextConfig

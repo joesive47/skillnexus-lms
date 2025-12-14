@@ -1,5 +1,5 @@
 // Multi-Layer Caching Strategy
-import redis from '../redis';
+import { redis } from '../redis';
 
 export class CacheStrategy {
   // Layer 1: Memory Cache (fastest)
@@ -69,7 +69,7 @@ export class CacheStrategy {
       try {
         const keys = await redis.keys(`*${pattern}*`);
         if (keys.length > 0) {
-          await Promise.all(keys.map(key => redis!.del(key)));
+          await Promise.all(keys.map((key: string) => redis!.del(key)));
         }
       } catch (error) {
         console.error('Redis invalidate error:', error);

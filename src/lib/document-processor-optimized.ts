@@ -1,6 +1,21 @@
 import * as mammoth from 'mammoth'
-import pdfParse from 'pdf-parse'
 import * as XLSX from 'xlsx'
+
+// Dynamic import for pdf-parse to avoid SSR issues
+let pdfParse: any = null
+
+async function getPdfParse() {
+  if (!pdfParse) {
+    try {
+      const pdfModule = await import('pdf-parse') as any
+      pdfParse = pdfModule.default || pdfModule
+    } catch (error) {
+      console.warn('pdf-parse not available:', error)
+      return null
+    }
+  }
+  return pdfParse
+}
 
 export async function processDocument(buffer: ArrayBuffer, filename: string): Promise<string | null> {
   try {
@@ -39,8 +54,13 @@ export async function processDocument(buffer: ArrayBuffer, filename: string): Pr
       
       case 'pdf':
         try {
+          const pdfParser = await getPdfParse()
+          if (!pdfParser) {
+            throw new Error('PDF parser ไม่พร้อมใช้งาน กรุณาใช้ไฟล์ TXT หรือ DOCX แทน')
+          }
+          
           const pdfBuffer = Buffer.from(buffer)
-          const data = await pdfParse(pdfBuffer)
+          const data = await pdfParser(pdfBuffer)
           console.log(`📝 PDF content length: ${data.text.length}`)
           if (!data.text || data.text.trim().length === 0) {
             throw new Error('ไฟล์ PDF ไม่มีข้อความหรือเป็นไฟล์รูปภาพ')
@@ -48,7 +68,10 @@ export async function processDocument(buffer: ArrayBuffer, filename: string): Pr
           return data.text
         } catch (pdfError) {
           console.error('PDF processing failed:', pdfError)
-          throw new Error('ไม่สามารถอ่านไฟล์ PDF ได้ กรุณาตรวจสอบไฟล์')
+          if (pdfError instanceof Error && pdfError.message.includes('PDF parser ไม่พร้อมใช้งาน')) {
+            throw pdfError
+          }
+          throw new Error('ไม่สามารถอ่านไฟล์ PDF ได้ กรุณาแปลงเป็น TXT หรือ DOCX')
         }
       
       case 'xlsx':

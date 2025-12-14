@@ -23,6 +23,20 @@ export async function POST(request: NextRequest) {
         error: 'รองรับเฉพาะไฟล์ PDF, TXT, DOCX, DOC เท่านั้น' 
       }, { status: 400 })
     }
+    
+    // ตรวจสอบว่า PDF parser พร้อมใช้งานหรือไม่
+    if (fileExtension === 'pdf') {
+      try {
+        const { processDocument } = await import('@/lib/document-processor-optimized')
+        // Test if PDF processing is available
+        const testBuffer = new ArrayBuffer(0)
+        await processDocument(testBuffer, 'test.txt') // Test with TXT first
+      } catch (error) {
+        return NextResponse.json({ 
+          error: 'ขณะนี้ไม่สามารถประมวลผลไฟล์ PDF ได้ กรุณาใช้ไฟล์ TXT หรือ DOCX แทน' 
+        }, { status: 400 })
+      }
+    }
 
     // ตรวจสอบขนาดไฟล์ (10MB)
     if (file.size > 10 * 1024 * 1024) {
@@ -35,7 +49,25 @@ export async function POST(request: NextRequest) {
     
     // อ่านเนื้อหาไฟล์
     const buffer = await file.arrayBuffer()
-    const content = await processDocument(buffer, file.name)
+    let content: string | null = null
+    
+    try {
+      content = await processDocument(buffer, file.name)
+    } catch (error) {
+      console.error('Document processing error:', error)
+      
+      // ถ้าเป็น PDF และมีปัญหา ให้แนะนำใช้ไฟล์อื่น
+      if (fileExtension === 'pdf') {
+        return NextResponse.json({ 
+          error: 'ไม่สามารถประมวลผลไฟล์ PDF ได้ กรุณาแปลงเป็นไฟล์ TXT หรือ DOCX แทน' 
+        }, { status: 400 })
+      }
+      
+      // สำหรับไฟล์อื่นๆ
+      return NextResponse.json({ 
+        error: 'ไม่สามารถอ่านเนื้อหาไฟล์ได้: ' + (error instanceof Error ? error.message : 'Unknown error')
+      }, { status: 400 })
+    }
 
     if (!content || content.trim().length < 10) {
       return NextResponse.json({ 

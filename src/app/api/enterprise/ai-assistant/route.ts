@@ -4,41 +4,41 @@ import { intelligentTutor } from '@/lib/ai/intelligent-tutor'
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, ...params } = await request.json()
+    const { action, topic, difficulty, questionCount, title, objectives, duration, studentId, answer, question, correctAnswer, currentSkills, targetRole } = await request.json()
 
     switch (action) {
       case 'generateQuiz':
         const quiz = await aiContentGenerator.generateQuiz(
-          params.topic,
-          params.difficulty,
-          params.questionCount
+          topic,
+          difficulty,
+          questionCount
         )
         return NextResponse.json({ success: true, data: quiz })
 
       case 'generateLesson':
         const lesson = await aiContentGenerator.generateLessonContent(
-          params.title,
-          params.objectives,
-          params.duration
+          title,
+          objectives,
+          duration
         )
         return NextResponse.json({ success: true, data: lesson })
 
       case 'analyzeProgress':
-        const analysis = await intelligentTutor.analyzeStudentProgress(params.studentId)
+        const analysis = await intelligentTutor.analyzeStudentProgress(studentId)
         return NextResponse.json({ success: true, data: analysis })
 
       case 'provideFeedback':
         const feedback = await intelligentTutor.provideFeedback(
-          params.answer,
-          params.question,
-          params.correctAnswer
+          answer,
+          question,
+          correctAnswer
         )
         return NextResponse.json({ success: true, data: feedback })
 
       case 'suggestPath':
         const path = await intelligentTutor.suggestNextSteps(
-          params.currentSkills,
-          params.targetRole
+          currentSkills,
+          targetRole
         )
         return NextResponse.json({ success: true, data: path })
 

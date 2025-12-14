@@ -57,7 +57,7 @@ export async function healthCheck() {
 
   try {
     // Check Redis
-    const redis = (await import('../redis')).default;
+    const { redis } = await import('../redis');
     if (redis) {
       await redis.ping();
       checks.redis = true;

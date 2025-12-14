@@ -1,204 +1,207 @@
-"use client"
-
-import Link from "next/link"
-import Image from "next/image"
-import { Lightbulb, Target, BookOpen, Rocket, ArrowRight, Users, CheckCircle, Star } from "lucide-react"
+import Link from 'next/link'
+import { FloatingActions } from '@/components/ui/floating-actions'
+import { StatusIndicator } from '@/components/ui/status-indicator'
+import { NewsletterSignup } from '@/components/ui/newsletter-signup'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-blue-50">
-      <header className="border-b border-yellow-200/50 backdrop-blur-sm bg-white/80">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <Image 
-              src="/logoupPowerskill.png" 
-              alt="upPowerSkill Logo" 
-              width={48}
-              height={48}
-              className="object-contain"
-              priority
-            />
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
-                upPowerSkill
-              </h1>
-              <p className="text-xs text-gray-500">AI-Powered Learning Platform</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
+        <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <button className="border border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium transition">
-                เข้าสู่ระบบ
-              </button>
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">S</span>
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+              SkillNexus
+            </h1>
+          </div>
+          <div className="flex space-x-4">
+            <Link href="/login" className="bg-white/10 border border-white/30 text-white px-6 py-2 rounded-lg hover:bg-white/20 transition-all duration-300 hover:scale-105">
+              เข้าสู่ระบบ
             </Link>
-            <Link href="/register">
-              <button className="bg-gradient-to-r from-yellow-500 to-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-yellow-600 hover:to-blue-700 transition">
-                เริ่มต้นเลย
-              </button>
+            <Link href="/register" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg">
+              เริ่มต้นเลย
             </Link>
           </div>
         </div>
       </header>
 
-      <section className="relative overflow-hidden py-20">
-        <div className="container mx-auto px-4 text-center">
-          <div className="mb-8 flex justify-center">
-            <Image 
-              src="/logoupPowerskill.png" 
-              alt="upPowerSkill Logo" 
-              width={128}
-              height={128}
-              className="object-contain animate-pulse"
-              priority
-            />
-          </div>
-          
-          <div className="mb-6 inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300 px-3 py-1 text-sm font-medium">
-            🌟 Global Learning Management System
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-600 via-orange-500 to-blue-600 bg-clip-text text-transparent">
-            upPowerSkill
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
-            <span className="font-semibold text-yellow-600">Learn</span> → 
-            <span className="font-semibold text-orange-500"> Practice</span> → 
-            <span className="font-semibold text-blue-600"> Certify</span> → 
-            <span className="font-semibold text-green-600"> Succeed</span>
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link href="/login">
-              <button className="bg-gradient-to-r from-yellow-500 to-blue-600 hover:from-yellow-600 hover:to-blue-700 text-white text-lg px-8 py-4 rounded-lg font-medium transition flex items-center justify-center">
-                <Target className="w-5 h-5 mr-2" />
-                เข้าสู่ระบบ
-              </button>
-            </Link>
-            <Link href="/register">
-              <button className="border border-blue-300 text-blue-700 hover:bg-blue-50 text-lg px-8 py-4 rounded-lg font-medium transition flex items-center justify-center">
-                <BookOpen className="w-5 h-5 mr-2" />
-                เรียนฟรี
-              </button>
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-1">10K+</div>
-              <div className="text-gray-600 text-sm">Active Learners</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-1">500+</div>
-              <div className="text-gray-600 text-sm">Expert Courses</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-1">95%</div>
-              <div className="text-gray-600 text-sm">Success Rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-1">24/7</div>
-              <div className="text-gray-600 text-sm">AI Support</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-white/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">🌟 How It Works</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Clear path to success with transparency and maximum efficiency
+      {/* Hero Section */}
+      <section className="relative z-10 py-24">
+        <div className="container mx-auto px-6 text-center">
+          <div className="animate-fade-in-up">
+            <h1 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent animate-pulse-slow">
+              SkillNexus
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-4xl mx-auto leading-relaxed">
+              🚀 แพลตฟอร์มการเรียนรู้ที่ขับเคลื่อนด้วย AI ระดับองค์กร<br/>
+              <span className="text-lg text-blue-300">พร้อมเทคโนโลยี Anti-Skip และระบบรักษาความปลอดภัยระดับ Enterprise</span>
             </p>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <BookOpen className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">1. Learn</h3>
-              <p className="text-gray-600">
-                Master essential skills through specially designed courses
-              </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-fade-in-up animation-delay-500">
+            <Link href="/login" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl px-12 py-4 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-2xl">
+              🎯 เข้าสู่ระบบ
+            </Link>
+            <Link href="/skills-assessment" className="border-2 border-white/30 text-white text-xl px-12 py-4 rounded-2xl hover:bg-white/10 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm">
+              📊 ทดสอบทักษะ
+            </Link>
+          </div>
+          
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto animate-fade-in-up animation-delay-1000">
+            <div className="bg-blue-500/20 border border-blue-400/30 rounded-3xl p-6 backdrop-blur-sm hover:bg-blue-500/30 transition-all duration-300 transform hover:scale-105 hover:rotate-1">
+              <div className="text-4xl font-bold text-white mb-2 animate-count-up">100K+</div>
+              <div className="text-gray-300">👥 ผู้เรียนทั่วโลก</div>
             </div>
-            
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">2. Practice</h3>
-              <p className="text-gray-600">
-                Take assessments and receive verifiable certificates
-              </p>
+            <div className="bg-green-500/20 border border-green-400/30 rounded-3xl p-6 backdrop-blur-sm hover:bg-green-500/30 transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
+              <div className="text-4xl font-bold text-white mb-2 animate-count-up">1000+</div>
+              <div className="text-gray-300">📚 คอร์สคุณภาพ</div>
             </div>
-            
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Target className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">3. Get Opportunities</h3>
-              <p className="text-gray-600">
-                Smart matching system for opportunities that fit your skills
-              </p>
+            <div className="bg-purple-500/20 border border-purple-400/30 rounded-3xl p-6 backdrop-blur-sm hover:bg-purple-500/30 transition-all duration-300 transform hover:scale-105 hover:rotate-1">
+              <div className="text-4xl font-bold text-white mb-2 animate-count-up">98%</div>
+              <div className="text-gray-300">🎯 อัตราความสำเร็จ</div>
             </div>
-            
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Rocket className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">4. Build Future</h3>
-              <p className="text-gray-600">
-                Start your business or invest with confidence
-              </p>
+            <div className="bg-cyan-500/20 border border-cyan-400/30 rounded-3xl p-6 backdrop-blur-sm hover:bg-cyan-500/30 transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
+              <div className="text-4xl font-bold text-white mb-2 animate-count-up">24/7</div>
+              <div className="text-gray-300">🤖 AI ช่วยเหลือ</div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-yellow-100 to-blue-100">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">🚀 Ready to Get Started?</h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Join thousands of people creating a bright future through our platform
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
-            <Link href="/login">
-              <button className="bg-gradient-to-r from-yellow-500 to-blue-600 hover:from-yellow-600 hover:to-blue-700 text-white text-lg px-6 py-4 rounded-lg font-medium transition flex items-center justify-center w-full">
-                เข้าสู่ระบบ
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </button>
-            </Link>
-            <Link href="/register">
-              <button className="border border-blue-300 text-blue-700 hover:bg-blue-50 text-lg px-6 py-4 rounded-lg font-medium transition flex items-center justify-center w-full">
-                เรียนฟรี
-                <BookOpen className="w-5 h-5 ml-2" />
-              </button>
-            </Link>
+      {/* Features */}
+      <section className="relative z-10 py-24 bg-slate-800/50 backdrop-blur-sm">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              ⚡ เครื่องมือที่ทรงพลัง
+            </h2>
+            <p className="text-xl text-gray-300">เทคโนโลジีล้ำสมัยสำหรับการเรียนรู้ยุคใหม่</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white/10 border border-white/20 rounded-3xl p-8 backdrop-blur-sm hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up animation-delay-200">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg animate-bounce-slow">
+                <span className="text-white text-2xl">🎯</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">AI ทดสอบทักษะ</h3>
+              <p className="text-gray-300 leading-relaxed">วิเคราะห์ความสามารถด้วย AI และสร้างเส้นทางการเรียนรู้ที่เหมาะสม</p>
+              <Link href="/skills-assessment" className="inline-block mt-4 text-blue-400 hover:text-blue-300 transition-colors">
+                เริ่มทดสอบ →
+              </Link>
+            </div>
+            
+            <div className="bg-white/10 border border-white/20 rounded-3xl p-8 backdrop-blur-sm hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up animation-delay-400">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg animate-bounce-slow animation-delay-1000">
+                <span className="text-white text-2xl">📚</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">คอร์สเรียน AI</h3>
+              <p className="text-gray-300 leading-relaxed">เรียนรู้ทักษะใหม่ด้วยระบบ Anti-Skip และ AI Tutor ที่ช่วยเหลือตลอด 24/7</p>
+              <Link href="/courses" className="inline-block mt-4 text-green-400 hover:text-green-300 transition-colors">
+                ดูคอร์ส →
+              </Link>
+            </div>
+            
+            <div className="bg-white/10 border border-white/20 rounded-3xl p-8 backdrop-blur-sm hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up animation-delay-600">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg animate-bounce-slow animation-delay-2000">
+                <span className="text-white text-2xl">🏆</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">ใบรับรอง Blockchain</h3>
+              <p className="text-gray-300 leading-relaxed">รับใบรับรองที่ยืนยันด้วย Blockchain และได้รับการยอมรับจากอุตสาหกรรม</p>
+              <Link href="/certificates" className="inline-block mt-4 text-purple-400 hover:text-purple-300 transition-colors">
+                ดูใบรับรอง →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-gray-200 bg-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Image 
-              src="/logoupPowerskill.png" 
-              alt="upPowerSkill Logo" 
-              width={40}
-              height={40}
-              className="object-contain"
-            />
-            <span className="text-gray-800 font-semibold text-lg">upPowerSkill</span>
+      {/* Enterprise Features */}
+      <section className="relative z-10 py-24">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              🏢 Enterprise Ready
+            </h2>
+            <p className="text-xl text-gray-300">ระบบระดับองค์กรที่พร้อมใช้งานจริง</p>
           </div>
-          <p className="text-gray-600 text-sm">
-            © 2024 upPowerSkill Education Technology. Empower Your Learning Journey.
-          </p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+              <div className="text-3xl mb-3">🛡️</div>
+              <h3 className="text-lg font-bold text-white mb-2">Security 95/100</h3>
+              <p className="text-sm text-gray-300">MFA, AES-256, Audit Logging</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+              <div className="text-3xl mb-3">⚡</div>
+              <h3 className="text-lg font-bold text-white mb-2">Ultra Fast</h3>
+              <p className="text-sm text-gray-300">&lt;100ms, 100K+ users</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+              <div className="text-3xl mb-3">🌍</div>
+              <h3 className="text-lg font-bold text-white mb-2">Global CDN</h3>
+              <p className="text-sm text-gray-300">99.99% uptime</p>
+            </div>
+            <div className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+              <div className="text-3xl mb-3">📜</div>
+              <h3 className="text-lg font-bold text-white mb-2">Compliance</h3>
+              <p className="text-sm text-gray-300">GDPR, SOC 2, ISO 27001</p>
+            </div>
+          </div>
         </div>
-      </footer>
+      </section>
+
+      {/* Newsletter */}
+      <section className="relative z-10 py-24">
+        <div className="container mx-auto px-6">
+          <NewsletterSignup />
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative z-10 py-24 bg-gradient-to-br from-indigo-900 to-purple-900">
+        <div className="container mx-auto px-6 text-center">
+          <div className="animate-fade-in-up">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-8 animate-pulse-slow">
+              🚀 พร้อมเริ่มต้นแล้วหรือยัง?
+            </h2>
+            <p className="text-xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+              เข้าร่วมกับผู้คนหลายแสนคนที่กำลังสร้างอนาคตที่สดใสด้วย AI และเทคโนโลยีล้ำสมัย
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up animation-delay-500">
+            <Link href="/login" className="bg-white text-purple-600 text-xl px-12 py-4 rounded-3xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-2xl font-semibold">
+              🎯 เข้าสู่ระบบ
+            </Link>
+            <Link href="/skills-assessment" className="border-2 border-white/30 text-white text-xl px-12 py-4 rounded-3xl hover:bg-white/10 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm font-semibold">
+              📊 ทดสอบทักษะฟรี
+            </Link>
+          </div>
+          
+          <div className="mt-12 text-center animate-fade-in-up animation-delay-1000">
+            <p className="text-white/70 text-sm">
+              ✅ ไม่มีค่าใช้จ่าย | ✅ ทดลองใช้ฟรี | ✅ ไม่ต้องใส่บัตรเครดิต
+            </p>
+          </div>
+        </div>
+      </section>
       
-      {/* Chatbot widget moved to root layout */}
+      {/* Status Indicator */}
+      <StatusIndicator />
+      
+      {/* Floating Actions */}
+      <FloatingActions />
     </div>
   )
 }

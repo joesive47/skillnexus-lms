@@ -311,15 +311,18 @@ export default function PublicSkillsTest() {
                   การแบ่งคะแนนตามทักษะ
                 </h3>
                 <div className="grid gap-4">
-                  {Object.entries(results.skillBreakdown).map(([skill, score]) => (
-                    <div key={skill} className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">{skill}</span>
-                        <span className={getScoreColor(score)}>{score}%</span>
+                  {Object.entries(results.skillBreakdown).map(([skill, score]) => {
+                    const numScore = Number(score)
+                    return (
+                      <div key={skill} className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="font-medium">{skill}</span>
+                          <span className={getScoreColor(numScore)}>{numScore}%</span>
+                        </div>
+                        <Progress value={numScore} className="h-2" />
                       </div>
-                      <Progress value={score} className="h-2" />
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 

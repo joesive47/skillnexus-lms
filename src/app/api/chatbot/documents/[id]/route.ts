@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -12,8 +12,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const document = await prisma.ragDocument.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         chunks: {
           select: {
@@ -57,7 +58,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -65,9 +66,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     // Check if document exists
     const document = await prisma.ragDocument.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!document) {
@@ -76,15 +78,15 @@ export async function DELETE(
 
     // Delete chunks first
     await prisma.ragChunk.deleteMany({
-      where: { documentId: params.id }
+      where: { documentId: id }
     })
 
     // Delete document
     await prisma.ragDocument.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
-    console.log(`✅ Document deleted: ${document.filename} (${params.id})`)
+    console.log(`✅ Document deleted: ${document.filename} (${id})`)
 
     return NextResponse.json({
       success: true,
@@ -102,7 +104,7 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -110,10 +112,11 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { filename, status } = await request.json()
 
     const document = await prisma.ragDocument.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(filename && { filename }),
         ...(status && { status }),

@@ -3,15 +3,16 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { VoicePractice } from '@/components/voice/voice-practice'
 
-export default async function VoicePracticePage({ params }: { params: { id: string } }) {
+export default async function VoicePracticePage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   
   if (!session?.user?.id) {
     redirect('/login')
   }
 
+  const { id } = await params
   const assignment = await prisma.voiceAssignment.findFirst({
-    where: { lessonId: params.id }
+    where: { lessonId: id }
   })
 
   if (!assignment) {

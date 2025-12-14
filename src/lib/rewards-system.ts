@@ -1,6 +1,6 @@
 // 🎯 Rewards System - Make Learning Addictive
 import prisma from './prisma'
-import { redis } from './redis'
+import { getCache, setCache, deleteCache } from './redis'
 
 export interface DailyReward {
   day: number
@@ -38,7 +38,7 @@ export class RewardsSystem {
       const cacheKey = `daily:reward:${userId}:${today}`
       
       // Check if already claimed today
-      const alreadyClaimed = await redis.get(cacheKey)
+      const alreadyClaimed = await getCache(cacheKey)
       if (alreadyClaimed) {
         return { success: false, message: 'Already claimed today' }
       }
@@ -65,7 +65,7 @@ export class RewardsSystem {
       }
 
       // Mark as claimed
-      await redis.setex(cacheKey, 86400, 'claimed') // 24 hours
+      await setCache(cacheKey, 'claimed', 86400) // 24 hours
 
       // Log reward
       await prisma.userReward.create({
@@ -100,43 +100,41 @@ export class RewardsSystem {
       yesterday.setDate(yesterday.getDate() - 1)
       
       const streakKey = `user:streak:${userId}`
-      const existingStreak = await redis.hgetall(streakKey)
+      const existingStreak = await getCache(streakKey) || {}
       
       let currentStreak = 1
       let maxStreak = 1
       let lastLogin = today
 
-      if (existingStreak.lastLogin) {
-        const lastLoginDate = new Date(existingStreak.lastLogin)
+      if (existingStreak && typeof existingStreak === 'object' && 'lastLogin' in existingStreak && existingStreak.lastLogin) {
+        const lastLoginDate = new Date((existingStreak as any).lastLogin)
         const daysDiff = Math.floor((today.getTime() - lastLoginDate.getTime()) / (1000 * 60 * 60 * 24))
         
         if (daysDiff === 0) {
           // Same day - no change
-          currentStreak = parseInt(existingStreak.current) || 1
+          currentStreak = parseInt((existingStreak as any).current) || 1
         } else if (daysDiff === 1) {
           // Consecutive day - increment streak
-          currentStreak = (parseInt(existingStreak.current) || 0) + 1
+          currentStreak = (parseInt((existingStreak as any).current) || 0) + 1
         } else {
           // Streak broken - reset to 1
           currentStreak = 1
         }
         
-        maxStreak = Math.max(currentStreak, parseInt(existingStreak.max) || 1)
+        maxStreak = Math.max(currentStreak, parseInt((existingStreak as any).max) || 1)
       }
 
       // Calculate multiplier
       const multiplier = this.getStreakMultiplier(currentStreak)
 
       // Save streak data
-      await redis.hmset(streakKey, {
+      const streakData = {
         current: currentStreak.toString(),
         max: maxStreak.toString(),
         lastLogin: today.toISOString(),
         multiplier: multiplier.toString()
-      })
-
-      // Set expiry (keep for 48 hours to allow streak recovery)
-      await redis.expire(streakKey, 172800)
+      }
+      await setCache(streakKey, streakData, 172800) // 48 hours
 
       return {
         current: currentStreak,
@@ -154,7 +152,7 @@ export class RewardsSystem {
   static async getStreak(userId: string): Promise<UserStreak> {
     try {
       const streakKey = `user:streak:${userId}`
-      const streak = await redis.hgetall(streakKey)
+      const streak = await getCache(streakKey) as any || {}
       
       if (!streak.current) {
         return await this.updateStreak(userId)
@@ -177,7 +175,7 @@ export class RewardsSystem {
     try {
       // Get current XP
       const xpKey = `user:xp:${userId}`
-      const currentData = await redis.hgetall(xpKey)
+      const currentData = await getCache(xpKey) as any || {}
       
       const currentXP = parseInt(currentData.totalXP) || 0
       const currentLevel = parseInt(currentData.level) || 1
@@ -188,11 +186,12 @@ export class RewardsSystem {
       const leveledUp = newLevel > currentLevel
 
       // Update XP cache
-      await redis.hmset(xpKey, {
+      const xpData = {
         totalXP: newTotalXP.toString(),
         level: newLevel.toString(),
         xpToNext: this.getXPToNextLevel(newTotalXP).toString()
-      })
+      }
+      await setCache(xpKey, xpData, 3600) // 1 hour
 
       // Log XP gain
       await prisma.userXPLog.create({
@@ -244,7 +243,7 @@ export class RewardsSystem {
   static async unlockAchievement(userId: string, achievementName: string) {
     try {
       // Check if already unlocked
-      const existing = await prisma.userAchievement.findFirst({
+      const existing = await prisma.userAchievementNew.findFirst({
         where: {
           userId,
           achievement: {
@@ -263,7 +262,7 @@ export class RewardsSystem {
       if (!achievement) return false
 
       // Unlock achievement
-      await prisma.userAchievement.create({
+      await prisma.userAchievementNew.create({
         data: {
           userId,
           achievementId: achievement.id
@@ -323,9 +322,9 @@ export class RewardsSystem {
   static async getUserStats(userId: string) {
     try {
       const [xpData, streak, achievements] = await Promise.all([
-        redis.hgetall(`user:xp:${userId}`),
+        getCache(`user:xp:${userId}`) as any || {},
         this.getStreak(userId),
-        prisma.userAchievement.count({ where: { userId } })
+        prisma.userAchievementNew.count({ where: { userId } })
       ])
 
       const totalXP = parseInt(xpData.totalXP) || 0

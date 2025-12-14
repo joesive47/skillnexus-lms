@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -118,7 +119,7 @@ export function StudentAnalyticsDashboard({ data }: StudentAnalyticsProps) {
             <CardTitle>ความคืบหน้าคอร์ส</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {safeMap<{ title: string, progress: number, watchTime: number }, JSX.Element>(data.courseProgress, (course, index) => (
+            {safeMap<{ title: string, progress: number, watchTime: number }, React.JSX.Element>(data.courseProgress, (course, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="truncate">{course.title}</span>
@@ -135,7 +136,7 @@ export function StudentAnalyticsDashboard({ data }: StudentAnalyticsProps) {
             <CardTitle>แบบทดสอบล่าสุด</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {safeMap<{ quiz: { title: string }, score: number, passed: boolean }, JSX.Element>(data.recentQuizzes, (quiz, index) => (
+            {safeMap<{ quiz: { title: string }, score: number, passed: boolean }, React.JSX.Element>(data.recentQuizzes, (quiz, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-sm truncate">{quiz.quiz.title}</span>
                 <div className="flex items-center gap-2">
@@ -217,7 +218,7 @@ export function AdminAnalyticsDashboard({ data }: AdminAnalyticsProps) {
             <CardTitle>คอร์สยอดนิยม</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {safeMap<{ title: string, enrollments: number }, JSX.Element>(data.popularCourses, (course, index) => (
+            {safeMap<{ title: string, enrollments: number }, React.JSX.Element>(data.popularCourses, (course, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-sm truncate">{course.title}</span>
                 <Badge variant="secondary">{course.enrollments} คน</Badge>

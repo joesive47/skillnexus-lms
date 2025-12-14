@@ -1,23 +1,25 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Ultra-lightweight middleware - ไม่มี security overhead
-export async function middleware(request: NextRequest) {
+// ULTRA-MINIMAL middleware - <2kB target
+export function middleware(request: NextRequest) {
+  // Skip static files immediately
   const { pathname } = request.nextUrl
-
-  // Skip ทุกอย่างยกเว้น API rate limiting พื้นฐาน
-  if (pathname.startsWith('/_next') || pathname.includes('.')) {
+  
+  if (pathname.startsWith('/_next') || 
+      pathname.startsWith('/favicon') ||
+      pathname.includes('.')) {
     return NextResponse.next()
   }
 
-  // Rate limiting แบบง่ายๆ เฉพาะ production
-  if (process.env.NODE_ENV === 'production' && pathname.startsWith('/api')) {
-    // Simple in-memory rate limiting
-    const ip = request.headers.get('x-forwarded-for') || 'unknown'
-    // TODO: Add simple rate limiting if needed
-  }
-
-  return NextResponse.next()
+  // Minimal security headers only
+  const response = NextResponse.next()
+  
+  // Only essential headers
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'DENY')
+  
+  return response
 }
 
 export const config = {
