@@ -20,7 +20,7 @@
     "analyze": "cross-env ANALYZE=true npm run build",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "node -r esbuild-register prisma/seed.ts || tsx prisma/seed.ts || node prisma/seed.js",
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
