@@ -21,7 +21,7 @@ export default function HomePage() {
               <span className="text-white font-bold text-xl">S</span>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-              SkillNexus
+              upPowerSkill
             </h1>
           </div>
           <div className="flex space-x-4">
@@ -40,7 +40,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 text-center">
           <div className="animate-fade-in-up">
             <h1 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent animate-pulse-slow">
-              SkillNexus
+              upPowerSkill
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-4xl mx-auto leading-relaxed">
               🚀 แพลตฟอร์มการเรียนรู้ที่ขับเคลื่อนด้วย AI ระดับองค์กร<br/>
