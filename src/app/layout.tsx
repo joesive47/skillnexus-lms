@@ -1,5 +1,6 @@
 import "./globals.css"
 import { Providers } from "@/components/providers"
+import { ChatbotWidget } from "@/components/chatbot/chatbot-widget"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
+          <ChatbotWidget />
         </Providers>
       </body>
     </html>

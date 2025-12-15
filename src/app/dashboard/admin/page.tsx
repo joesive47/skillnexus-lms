@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { UserRole } from "@/lib/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, DollarSign, BookOpen, Settings, Award, TrendingUp, Activity, Shield, FileText, Target } from "lucide-react"
+import { Users, DollarSign, BookOpen, Settings, Award, TrendingUp, Activity, Shield, FileText, Target, BarChart3, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminDashboard() {
@@ -137,73 +137,105 @@ export default async function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-2xl p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
-            <p className="text-blue-100 text-lg">ศูนย์ควบคุมหลักสำหรับ SkillNexus LMS</p>
-          </div>
-          <div className="hidden md:block">
-            <Activity className="w-16 h-16 text-blue-200" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-3xl p-8 shadow-2xl">
+          <div className="absolute inset-0 bg-grid-white/10"></div>
+          <div className="relative flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
+              </div>
+              <p className="text-blue-100 text-lg flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                ศูนย์ควบคุมหลัก SkillNexus LMS
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="relative">
+                <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full"></div>
+                <Activity className="relative w-20 h-20 text-white animate-pulse" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <Card key={index} className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{stat.title}</p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</p>
-                    <p className="text-sm text-green-600 font-medium">{stat.change}</p>
-                  </div>
-                  <div className={`p-3 rounded-full bg-slate-100 dark:bg-slate-700`}>
-                    <Icon className={`w-6 h-6 ${stat.color}`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Admin Modules */}
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">โมดูลการจัดการ</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {adminModules.map((module) => {
-            const Icon = module.icon
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon
             return (
-              <Link key={module.href} href={module.href}>
-                <Card className="group bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden">
-                  <div className={`h-2 bg-gradient-to-r ${module.gradient}`}></div>
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
-                      <div className={`p-3 rounded-xl bg-gradient-to-r ${module.bgGradient} dark:from-slate-700 dark:to-slate-600`}>
-                        <Icon className={`h-6 w-6 bg-gradient-to-r ${module.gradient} bg-clip-text text-transparent`} />
+              <Card key={index} className="group relative overflow-hidden bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-blue-50 dark:to-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <CardContent className="relative p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`p-2 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600`}>
+                          <Icon className={`w-5 h-5 ${stat.color}`} />
+                        </div>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{stat.title}</p>
                       </div>
-                      <span className="text-2xl font-bold text-slate-400 dark:text-slate-500">{module.count}</span>
+                      <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1">{stat.value}</p>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3 text-green-600" />
+                        <p className="text-sm text-green-600 font-semibold">{stat.change}</p>
+                      </div>
                     </div>
-                    <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 transition-colors">
-                      {module.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <CardDescription className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {module.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
             )
           })}
+        </div>
+
+        {/* Admin Modules */}
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+              <BarChart3 className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">โมดูลการจัดการ</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {adminModules.map((module) => {
+              const Icon = module.icon
+              return (
+                <Link key={module.href} href={module.href}>
+                  <Card className="group relative bg-white dark:bg-slate-800 border-0 shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden h-full">
+                    {/* Gradient Border Top */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${module.gradient}`}></div>
+                    
+                    {/* Hover Effect Background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${module.bgGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                    
+                    <CardHeader className="pb-3 pt-5 relative">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${module.bgGradient} dark:from-slate-700 dark:to-slate-600 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon className={`h-6 w-6 bg-gradient-to-r ${module.gradient} bg-clip-text text-transparent`} />
+                        </div>
+                        <div className="text-right">
+                          <span className="text-2xl font-bold bg-gradient-to-r from-slate-400 to-slate-600 dark:from-slate-400 dark:to-slate-500 bg-clip-text text-transparent">{module.count}</span>
+                        </div>
+                      </div>
+                      <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                        {module.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-5 relative">
+                      <CardDescription className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                        {module.description}
+                      </CardDescription>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>
