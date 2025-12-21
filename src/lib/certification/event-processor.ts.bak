@@ -1,0 +1,132 @@
+/**
+ * Event Processor - Handles certification events and triggers webhooks
+ */
+
+import { prisma } from "@/lib/prisma";
+import { CertificationEngine } from "./certification-engine";
+
+export class EventProcessor {
+  /**
+   * Process pending events
+   */
+  static async processPendingEvents() {
+    const events = await prisma.certificationEvent.findMany({
+      where: { processed: false },
+      orderBy: { createdAt: "asc" },
+      take: 100,
+    });
+
+    for (const event of events) {
+      await this.processEvent(event);
+      await prisma.certificationEvent.update({ where: { id: event.id }, data: { processed: true } });
+    }
+  }
+
+  private static async processEvent(event: any) {
+    switch (event.eventType) {
+      case "BADGE_EARNED":
+        await this.onBadgeEarned(event);
+        break;
+      case "CERT_ISSUED":
+        await this.onCertificationIssued(event);
+        break;
+      case "BADGE_EXPIRED":
+        await this.onBadgeExpired(event);
+        break;
+      case "CERT_EXPIRED":
+        await this.onCertificationExpired(event);
+        break;
+    }
+  }
+
+  private static async onBadgeEarned(event: any) {
+    // Auto-check certifications
+    await CertificationEngine.checkAndIssueCertifications(event.userId);
+
+    // Trigger webhooks
+    await this.triggerWebhooks("badge.earned", {
+      userId: event.userId,
+      badgeId: event.entityId,
+      timestamp: event.createdAt,
+    });
+  }
+
+  private static async onCertificationIssued(event: any) {
+    const metadata = JSON.parse(event.metadata || "{}");
+
+    // Trigger webhooks
+    await this.triggerWebhooks("certification.issued", {
+      userId: event.userId,
+      certificationId: event.entityId,
+      certificationNumber: metadata.certificationNumber,
+      timestamp: event.createdAt,
+    });
+
+    // Send notification (integrate with existing notification system)
+    // await NotificationService.send(...)
+  }
+
+  private static async onBadgeExpired(event: any) {
+    await prisma.userSkillBadge.updateMany({
+      where: { userId: event.userId, badgeId: event.entityId, expiryDate: { lte: new Date() } },
+      data: { status: "EXPIRED" },
+    });
+  }
+
+  private static async onCertificationExpired(event: any) {
+    await prisma.userCertification.updateMany({
+      where: { userId: event.userId, certificationId: event.entityId, expiryDate: { lte: new Date() } },
+      data: { status: "EXPIRED" },
+    });
+  }
+
+  private static async triggerWebhooks(eventType: string, payload: any) {
+    const webhooks = await prisma.webhook.findMany({
+      where: { isActive: true, events: { contains: eventType } },
+    });
+
+    for (const webhook of webhooks) {
+      try {
+        await fetch(webhook.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Webhook-Secret": webhook.secret || "" },
+          body: JSON.stringify({ event: eventType, data: payload }),
+        });
+        await prisma.webhook.update({ where: { id: webhook.id }, data: { lastTriggeredAt: new Date() } });
+      } catch (error) {
+        console.error(`Webhook failed: ${webhook.url}`, error);
+      }
+    }
+  }
+
+  /**
+   * Check and expire badges/certifications (run daily)
+   */
+  static async checkExpirations() {
+    const now = new Date();
+
+    // Expire badges
+    const expiredBadges = await prisma.userSkillBadge.findMany({
+      where: { status: "ACTIVE", expiryDate: { lte: now } },
+    });
+
+    for (const badge of expiredBadges) {
+      await prisma.userSkillBadge.update({ where: { id: badge.id }, data: { status: "EXPIRED" } });
+      await prisma.certificationEvent.create({
+        data: { eventType: "BADGE_EXPIRED", userId: badge.userId, entityType: "BADGE", entityId: badge.badgeId },
+      });
+    }
+
+    // Expire certifications
+    const expiredCerts = await prisma.userCertification.findMany({
+      where: { status: "EARNED", expiryDate: { lte: now } },
+    });
+
+    for (const cert of expiredCerts) {
+      await prisma.userCertification.update({ where: { id: cert.id }, data: { status: "EXPIRED" } });
+      await prisma.certificationEvent.create({
+        data: { eventType: "CERT_EXPIRED", userId: cert.userId, entityType: "CERTIFICATION", entityId: cert.certificationId },
+      });
+    }
+  }
+}

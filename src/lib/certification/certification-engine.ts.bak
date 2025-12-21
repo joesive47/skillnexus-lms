@@ -1,0 +1,129 @@
+/**
+ * Certification Engine - Issues certifications based on badge completion
+ */
+
+import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
+
+export class CertificationEngine {
+  /**
+   * Check if user has all required badges for a certification
+   */
+  static async checkEligibility(userId: string, certificationId: string): Promise<{ eligible: boolean; missingBadges: string[] }> {
+    const certification = await prisma.skillCertification.findUnique({
+      where: { id: certificationId },
+      include: { requiredBadges: { where: { isRequired: true }, include: { badge: true } } },
+    });
+
+    if (!certification || !certification.isActive) {
+      return { eligible: false, missingBadges: [] };
+    }
+
+    const requiredBadgeIds = certification.requiredBadges.map((cb) => cb.badgeId);
+    const userBadges = await prisma.userSkillBadge.findMany({
+      where: { userId, badgeId: { in: requiredBadgeIds }, status: "ACTIVE" },
+      include: { badge: true },
+    });
+
+    // Check level requirement
+    if (certification.minimumBadgeLevel) {
+      const levelOrder = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "PROFESSIONAL"];
+      const minLevelIndex = levelOrder.indexOf(certification.minimumBadgeLevel);
+      const hasInvalidLevel = userBadges.some((ub) => levelOrder.indexOf(ub.badge.level) < minLevelIndex);
+      if (hasInvalidLevel) return { eligible: false, missingBadges: [] };
+    }
+
+    const earnedBadgeIds = userBadges.map((ub) => ub.badgeId);
+    const missingBadges = requiredBadgeIds.filter((id) => !earnedBadgeIds.includes(id));
+
+    return { eligible: missingBadges.length === 0, missingBadges };
+  }
+
+  /**
+   * Issue certification to user
+   */
+  static async issueCertification(userId: string, certificationId: string): Promise<string | null> {
+    const { eligible, missingBadges } = await this.checkEligibility(userId, certificationId);
+    if (!eligible) return null;
+
+    // Check if already issued
+    const existing = await prisma.userCertification.findUnique({
+      where: { userId_certificationId: { userId, certificationId } },
+    });
+    if (existing && existing.status === "EARNED") return null;
+
+    const certification = await prisma.skillCertification.findUnique({ where: { id: certificationId } });
+    if (!certification) return null;
+
+    // Get earned badges
+    const userBadges = await prisma.userSkillBadge.findMany({
+      where: { userId, status: "ACTIVE" },
+      select: { badgeId: true },
+    });
+
+    const expiryDate = certification.validityMonths ? new Date(Date.now() + certification.validityMonths * 30 * 24 * 60 * 60 * 1000) : null;
+
+    const certData = { userId, certificationId, issuedAt: new Date() };
+    const digitalSignature = crypto.createHash("sha256").update(JSON.stringify(certData)).digest("hex");
+
+    const userCert = await prisma.userCertification.create({
+      data: {
+        userId,
+        certificationId,
+        expiryDate,
+        status: "EARNED",
+        earnedBadgesSnapshot: JSON.stringify(userBadges.map((b) => b.badgeId)),
+        digitalSignature,
+        verificationUrl: `/verify/certification/${certificationId}`,
+      },
+    });
+
+    await prisma.certificationEvent.create({
+      data: { eventType: "CERT_ISSUED", userId, entityType: "CERTIFICATION", entityId: certificationId, metadata: JSON.stringify({ certificationNumber: userCert.certificationNumber }) },
+    });
+
+    return userCert.id;
+  }
+
+  /**
+   * Auto-check certifications when badge is earned
+   */
+  static async checkAndIssueCertifications(userId: string) {
+    const certifications = await prisma.skillCertification.findMany({ where: { isActive: true } });
+
+    for (const cert of certifications) {
+      const { eligible } = await this.checkEligibility(userId, cert.id);
+      if (eligible) await this.issueCertification(userId, cert.id);
+    }
+  }
+
+  /**
+   * Get certification progress for user
+   */
+  static async getCertificationProgress(userId: string, certificationId: string) {
+    const certification = await prisma.skillCertification.findUnique({
+      where: { id: certificationId },
+      include: { requiredBadges: { where: { isRequired: true }, include: { badge: true } } },
+    });
+
+    if (!certification) return null;
+
+    const requiredBadgeIds = certification.requiredBadges.map((cb) => cb.badgeId);
+    const userBadges = await prisma.userSkillBadge.findMany({
+      where: { userId, badgeId: { in: requiredBadgeIds }, status: "ACTIVE" },
+      include: { badge: true },
+    });
+
+    const earnedBadgeIds = userBadges.map((ub) => ub.badgeId);
+    const progress = (earnedBadgeIds.length / requiredBadgeIds.length) * 100;
+
+    return {
+      certificationId,
+      certificationName: certification.certificationName,
+      progress: Math.round(progress),
+      totalBadges: requiredBadgeIds.length,
+      earnedBadges: earnedBadgeIds.length,
+      missingBadges: certification.requiredBadges.filter((cb) => !earnedBadgeIds.includes(cb.badgeId)).map((cb) => cb.badge),
+    };
+  }
+}

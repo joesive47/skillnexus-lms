@@ -152,7 +152,7 @@ export default async function AdminDashboard() {
               </div>
               <p className="text-blue-100 text-lg flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                ศูนย์ควบคุมหลัก SkillNexus LMS
+                ศูนย์ควบคุมหลัก upPowerSkill LMS
               </p>
             </div>
             <div className="hidden md:block">

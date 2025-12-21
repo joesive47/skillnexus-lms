@@ -30,6 +30,13 @@ model Course {
   transactions  Transaction[]
   studyGroups   StudyGroup[]
   peerReviews   PeerReview[]
+  
+  // New Certification System
+  certificateDefinition CourseCertificateDefinition?
+  badgeDefinition       CourseBadgeDefinition?
+  courseCertificates    CourseCertificate[]
+  courseBadges          CourseBadge[]
+  careerPathCourses     CareerPathCourse[]
 
   @@map("courses")
 }
@@ -426,6 +433,11 @@ model User {
   xpLogs               UserXPLog[]
   missionCompletions   MissionCompletion[]
   creditPurchases      CreditPurchase[]
+  // New Certification System relations
+  courseCertificates   CourseCertificate[]
+  courseBadges         CourseBadge[]
+  careerCertificates   CareerCertificate[]
+  careerBadges         CareerBadge[]
 
   @@map("users")
 }
@@ -1177,4 +1189,288 @@ model Analytics {
   @@index([event])
   @@index([timestamp])
   @@map("analytics")
+}
+
+// ============================================
+// CERTIFICATION & BADGE SYSTEM (New Architecture)
+// ============================================
+
+// Media Assets for badges and certificates
+model MediaAsset {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  fileSize    Int
+  width       Int?
+  height      Int?
+  url         String
+  checksum    String
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  
+  courseBadgeDefinitions CourseBadgeDefinition[]
+  careerBadgeDefinitions CareerBadgeDefinition[]
+  
+  @@index([createdBy])
+  @@map("media_assets")
+}
+
+// Badge Design Templates for in-system builder
+model BadgeDesignTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  templateData String  // JSON: shapes, colors, layout
+  previewUrl  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  @@map("badge_design_templates")
+}
+
+// Course Certificate Definitions (templates)
+model CourseCertificateDefinition {
+  id              String   @id @default(cuid())
+  courseId        String   @unique
+  templateHtml    String   // HTML template
+  issuerName      String   @default("SkillNexus LMS")
+  issuerTitle     String   @default("Learning Management System")
+  expiryMonths    Int?     // null = never expires
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  certificates    CourseCertificate[]
+  criteria        CourseCertificateCriteria[]
+  
+  @@map("course_certificate_definitions")
+}
+
+// Course Certificate Criteria (completion rules)
+model CourseCertificateCriteria {
+  id            String   @id @default(cuid())
+  definitionId  String
+  criteriaType  String   // 'COMPLETION_PERCENTAGE', 'QUIZ_SCORE', 'ALL_LESSONS'
+  criteriaValue String   // JSON: {"minPercentage": 80} or {"minScore": 70}
+  isRequired    Boolean  @default(true)
+  
+  definition    CourseCertificateDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  
+  @@map("course_certificate_criteria")
+}
+
+// Issued Course Certificates
+model CourseCertificate {
+  id               String   @id @default(cuid())
+  userId           String
+  courseId         String
+  definitionId     String
+  verificationCode String   @unique @default(cuid())
+  issueDate        DateTime @default(now())
+  expiryDate       DateTime?
+  status           String   @default("ACTIVE") // 'ACTIVE', 'EXPIRED', 'REVOKED'
+  revokedAt        DateTime?
+  revokedReason    String?
+  pdfUrl           String?
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  definition       CourseCertificateDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  badges           CourseBadge[]
+  
+  @@unique([userId, courseId])
+  @@index([verificationCode])
+  @@index([userId, status])
+  @@map("course_certificates")
+}
+
+// Course Badge Definitions (templates)
+model CourseBadgeDefinition {
+  id          String   @id @default(cuid())
+  courseId    String   @unique
+  name        String
+  description String?
+  assetId     String?  // Link to MediaAsset
+  designData  String?  // JSON from badge builder
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  asset       MediaAsset? @relation(fields: [assetId], references: [id])
+  badges      CourseBadge[]
+  
+  @@map("course_badge_definitions")
+}
+
+// Issued Course Badges
+model CourseBadge {
+  id               String   @id @default(cuid())
+  userId           String
+  courseId         String
+  definitionId     String
+  certificateId    String   // Must be issued AFTER certificate
+  issueDate        DateTime @default(now())
+  status           String   @default("ACTIVE") // 'ACTIVE', 'EXPIRED', 'REVOKED'
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  definition       CourseBadgeDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  certificate      CourseCertificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, courseId])
+  @@index([userId, status])
+  @@map("course_badges")
+}
+
+// Career Paths (collections of courses)
+model CareerPath {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  category        String?
+  difficulty      String   @default("BEGINNER")
+  estimatedHours  Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  courses         CareerPathCourse[]
+  requirements    CareerRequirement[]
+  certificateDef  CareerCertificateDefinition?
+  badgeDef        CareerBadgeDefinition?
+  certificates    CareerCertificate[]
+  badges          CareerBadge[]
+  
+  @@map("career_paths")
+}
+
+// Mapping: Career Path -> Required Courses (ordered)
+model CareerPathCourse {
+  id           String   @id @default(cuid())
+  careerPathId String
+  courseId     String
+  order        Int
+  isRequired   Boolean  @default(true)
+  
+  careerPath   CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@unique([careerPathId, courseId])
+  @@map("career_path_courses")
+}
+
+// Career Requirements (rule engine)
+model CareerRequirement {
+  id           String   @id @default(cuid())
+  careerPathId String
+  requirementType String // 'ALL_COURSES', 'MIN_COURSES', 'SPECIFIC_COURSES'
+  requirementValue String // JSON: {"courseIds": ["id1", "id2"]} or {"minCount": 3}
+  logicType    String   @default("AND") // 'AND', 'OR' (extensible)
+  
+  careerPath   CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
+  
+  @@map("career_requirements")
+}
+
+// Career Certificate Definitions
+model CareerCertificateDefinition {
+  id              String   @id @default(cuid())
+  careerPathId    String   @unique
+  templateHtml    String
+  issuerName      String   @default("SkillNexus LMS")
+  issuerTitle     String   @default("Career Development Program")
+  expiryMonths    Int?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  careerPath      CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
+  certificates    CareerCertificate[]
+  
+  @@map("career_certificate_definitions")
+}
+
+// Issued Career Certificates
+model CareerCertificate {
+  id               String   @id @default(cuid())
+  userId           String
+  careerPathId     String
+  definitionId     String
+  verificationCode String   @unique @default(cuid())
+  issueDate        DateTime @default(now())
+  expiryDate       DateTime?
+  status           String   @default("ACTIVE")
+  courseBadgesSnapshot String // JSON array of earned CourseBadge IDs
+  revokedAt        DateTime?
+  revokedReason    String?
+  pdfUrl           String?
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careerPath       CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
+  definition       CareerCertificateDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  badges           CareerBadge[]
+  
+  @@unique([userId, careerPathId])
+  @@index([verificationCode])
+  @@index([userId, status])
+  @@map("career_certificates")
+}
+
+// Career Badge Definitions
+model CareerBadgeDefinition {
+  id          String   @id @default(cuid())
+  careerPathId String  @unique
+  name        String
+  description String?
+  assetId     String?
+  designData  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  careerPath  CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
+  asset       MediaAsset? @relation(fields: [assetId], references: [id])
+  badges      CareerBadge[]
+  
+  @@map("career_badge_definitions")
+}
+
+// Issued Career Badges
+model CareerBadge {
+  id               String   @id @default(cuid())
+  userId           String
+  careerPathId     String
+  definitionId     String
+  certificateId    String   // Must be issued AFTER career certificate
+  issueDate        DateTime @default(now())
+  status           String   @default("ACTIVE")
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careerPath       CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
+  definition       CareerBadgeDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  certificate      CareerCertificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, careerPathId])
+  @@index([userId, status])
+  @@map("career_badges")
+}
+
+// Public Verification (by verification code)
+model VerificationRecord {
+  id               String   @id @default(cuid())
+  verificationCode String   @unique
+  entityType       String   // 'COURSE_CERTIFICATE', 'CAREER_CERTIFICATE'
+  entityId         String   // Certificate ID
+  recipientName    String   // Privacy-safe display name
+  issuerName       String
+  issueDate        DateTime
+  expiryDate       DateTime?
+  status           String
+  createdAt        DateTime @default(now())
+  
+  @@index([verificationCode])
+  @@map("verification_records")
 }

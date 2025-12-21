@@ -129,7 +129,7 @@ export const CertificatePDF = ({
   <Document>
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.logo}>SkillNexus LMS</Text>
+        <Text style={styles.logo}>upPowerSkill LMS</Text>
         <Text style={styles.subtitle}>Global Learning Management System</Text>
       </View>
 
@@ -169,7 +169,7 @@ export const CertificatePDF = ({
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>This certificate is digitally signed and blockchain verified</Text>
-        <Text style={styles.footerText}>SkillNexus Learning Management System</Text>
+        <Text style={styles.footerText}>upPowerSkill Learning Management System</Text>
         <Text style={styles.certNumber}>Certificate No: {certificateNumber}</Text>
       </View>
     </Page>

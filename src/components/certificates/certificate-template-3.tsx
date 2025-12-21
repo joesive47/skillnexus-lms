@@ -81,7 +81,7 @@ export default function CertificateTemplate3({
           <div className="flex items-center justify-center gap-2">
             <Shield className="w-5 h-5" />
             <p className="text-lg opacity-90">
-              Verified by <strong>SkillNexus Tech Academy</strong>
+              Verified by <strong>upPowerSkill Tech Academy</strong>
             </p>
             <Shield className="w-5 h-5" />
           </div>

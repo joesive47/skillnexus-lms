@@ -1,0 +1,34 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function GET(req: NextRequest, { params }: { params: { code: string } }) {
+  try {
+    const { code } = params;
+
+    const cert = await prisma.userCertification.findUnique({
+      where: { verificationCode: code },
+      include: { user: { select: { name: true, email: true } }, certification: true },
+    });
+
+    if (!cert) return NextResponse.json({ error: "Certification not found" }, { status: 404 });
+    if (cert.status === "REVOKED") return NextResponse.json({ error: "Certification revoked", reason: cert.revokedReason }, { status: 403 });
+    if (cert.expiryDate && new Date() > cert.expiryDate) return NextResponse.json({ error: "Certification expired" }, { status: 410 });
+
+    const badges = JSON.parse(cert.earnedBadgesSnapshot);
+    const badgeDetails = await prisma.skillBadge.findMany({ where: { id: { in: badges } } });
+
+    return NextResponse.json({
+      valid: true,
+      certificationNumber: cert.certificationNumber,
+      certificationName: cert.certification.certificationName,
+      holderName: cert.user.name,
+      issueDate: cert.issueDate,
+      expiryDate: cert.expiryDate,
+      issuer: cert.certification.issuerName,
+      badges: badgeDetails.map((b) => ({ name: b.badgeName, category: b.skillCategory, level: b.level })),
+      digitalSignature: cert.digitalSignature,
+    });
+  } catch (error) {
+    return NextResponse.json({ error: "Verification failed" }, { status: 500 });
+  }
+}

@@ -1,0 +1,104 @@
+/**
+ * Badge Engine - Evaluates criteria and issues badges automatically
+ */
+
+import { prisma } from "@/lib/prisma";
+
+interface BadgeCriteria {
+  minScore?: number;
+  quizId?: string;
+  minHours?: number;
+  assessmentId?: string;
+  projectId?: string;
+  courseId?: string;
+}
+
+export class BadgeEngine {
+  static async evaluateCriteria(userId: string, badgeId: string): Promise<{ eligible: boolean; evidence?: any }> {
+    const badge = await prisma.skillBadge.findUnique({ where: { id: badgeId } });
+    if (!badge || !badge.isActive) return { eligible: false };
+
+    const criteria: BadgeCriteria = JSON.parse(badge.criteriaValue);
+
+    switch (badge.criteriaType) {
+      case "QUIZ_SCORE":
+        return await this.evaluateQuizScore(userId, criteria);
+      case "ASSESSMENT":
+        return await this.evaluateAssessment(userId, criteria);
+      case "HOURS":
+        return await this.evaluateHours(userId, criteria);
+      case "COMBINED":
+        return await this.evaluateCombined(userId, criteria);
+      default:
+        return { eligible: false };
+    }
+  }
+
+  private static async evaluateQuizScore(userId: string, criteria: BadgeCriteria) {
+    const submission = await prisma.studentSubmission.findFirst({
+      where: { userId, quizId: criteria.quizId, passed: true, score: { gte: criteria.minScore || 0 } },
+      orderBy: { score: "desc" },
+    });
+    return { eligible: !!submission, evidence: submission ? { type: "QUIZ", id: submission.id, score: submission.score } : undefined };
+  }
+
+  private static async evaluateAssessment(userId: string, criteria: BadgeCriteria) {
+    const result = await prisma.assessmentResult.findFirst({
+      where: { userId, careerId: criteria.assessmentId, percentage: { gte: criteria.minScore || 0 } },
+      orderBy: { percentage: "desc" },
+    });
+    return { eligible: !!result, evidence: result ? { type: "ASSESSMENT", id: result.id, score: result.percentage } : undefined };
+  }
+
+  private static async evaluateHours(userId: string, criteria: BadgeCriteria) {
+    const totalMinutes = await prisma.watchHistory.aggregate({
+      where: { userId, completed: true },
+      _sum: { watchTime: true },
+    });
+    const hours = (totalMinutes._sum.watchTime || 0) / 60;
+    return { eligible: hours >= (criteria.minHours || 0), evidence: { type: "HOURS", hours } };
+  }
+
+  private static async evaluateCombined(userId: string, criteria: BadgeCriteria) {
+    const results = await Promise.all([
+      criteria.quizId ? this.evaluateQuizScore(userId, criteria) : null,
+      criteria.assessmentId ? this.evaluateAssessment(userId, criteria) : null,
+      criteria.minHours ? this.evaluateHours(userId, criteria) : null,
+    ]);
+    const allEligible = results.every((r) => !r || r.eligible);
+    return { eligible: allEligible, evidence: { type: "COMBINED", results: results.filter((r) => r).map((r) => r!.evidence) } };
+  }
+
+  static async issueBadge(userId: string, badgeId: string, evidence?: any): Promise<string | null> {
+    const existing = await prisma.userSkillBadge.findUnique({ where: { userId_badgeId: { userId, badgeId } } });
+    if (existing && existing.status === "ACTIVE") return null;
+
+    const badge = await prisma.skillBadge.findUnique({ where: { id: badgeId } });
+    if (!badge) return null;
+
+    const expiryDate = badge.expiryMonths ? new Date(Date.now() + badge.expiryMonths * 30 * 24 * 60 * 60 * 1000) : null;
+
+    const userBadge = await prisma.userSkillBadge.create({
+      data: { userId, badgeId, expiryDate, evidenceType: evidence?.type, evidenceId: evidence?.id, status: "ACTIVE" },
+    });
+
+    await prisma.certificationEvent.create({
+      data: { eventType: "BADGE_EARNED", userId, entityType: "BADGE", entityId: badgeId, metadata: JSON.stringify({ evidence }) },
+    });
+
+    return userBadge.id;
+  }
+
+  static async checkAndIssueBadges(userId: string, activityType: string, activityId: string) {
+    const badges = await prisma.skillBadge.findMany({ where: { isActive: true } });
+
+    for (const badge of badges) {
+      const criteria: BadgeCriteria = JSON.parse(badge.criteriaValue);
+      const isRelevant = (activityType === "QUIZ" && criteria.quizId === activityId) || (activityType === "ASSESSMENT" && criteria.assessmentId === activityId);
+      if (!isRelevant) continue;
+
+      const { eligible, evidence } = await this.evaluateCriteria(userId, badge.id);
+      if (eligible) await this.issueBadge(userId, badge.id, evidence);
+    }
+  }
+}

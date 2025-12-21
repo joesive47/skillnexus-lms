@@ -100,14 +100,17 @@ export default async function AdminDashboard() {
             <CardTitle>Certificates & Badges</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
+            <Link href="/admin/certifications" className="block p-2 hover:bg-gray-100 rounded text-sm">
+              🏆 Certification System
+            </Link>
             <Link href="/dashboard/admin/certificates" className="block p-2 hover:bg-gray-100 rounded text-sm">
-              🏆 Certificates
+              📜 Legacy Certificates
             </Link>
             <Link href="/dashboard/admin/bard-certificates" className="block p-2 hover:bg-gray-100 rounded text-sm">
               🎖️ BARD Certificates
             </Link>
             <Link href="/dashboard/admin/badges" className="block p-2 hover:bg-gray-100 rounded text-sm">
-              🥇 Badges
+              🥇 Legacy Badges
             </Link>
           </CardContent>
         </Card>

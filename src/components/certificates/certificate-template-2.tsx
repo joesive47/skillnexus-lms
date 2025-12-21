@@ -68,7 +68,7 @@ export default function CertificateTemplate2({
           </div>
 
           <p className="text-xl opacity-90">
-            Presented by <strong className="text-2xl">SkillNexus LMS</strong>
+            Presented by <strong className="text-2xl">upPowerSkill LMS</strong>
           </p>
         </div>
 

@@ -75,7 +75,7 @@ export default function CertificateTemplateSelector({ courses, certificates }: C
   const [certificateSettings, setCertificateSettings] = useState({
     title: 'ใบประกาศนียบัตร',
     subtitle: 'Certificate of Completion',
-    organizationName: 'SkillNexus Learning Platform',
+    organizationName: 'upPowerSkill Learning Platform',
     signerName: 'ผู้อำนวยการ',
     signerTitle: 'Director'
   })

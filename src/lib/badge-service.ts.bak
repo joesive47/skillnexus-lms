@@ -1,0 +1,87 @@
+import { prisma } from '@/lib/prisma'
+import { BadgeEngine } from './certification/badge-engine'
+import { CertificationEngine } from './certification/certification-engine'
+
+export class BadgeService {
+  // Legacy badge system (keep for backward compatibility)
+  async checkBadgeEligibility(userId: string, badgeId: string): Promise<boolean> {
+    const badge = await prisma.badge.findUnique({ where: { id: badgeId } })
+    if (!badge || !badge.isActive) return false
+
+    const existingBadge = await prisma.userBadge.findUnique({
+      where: { userId_badgeId: { userId, badgeId } }
+    })
+    if (existingBadge) return false
+
+    const enrollments = await prisma.enrollment.findMany({ where: { userId } })
+    return enrollments.length > 0
+  }
+
+  async issueBadge(userId: string, badgeId: string): Promise<string | null> {
+    const isEligible = await this.checkBadgeEligibility(userId, badgeId)
+    if (!isEligible) return null
+
+    await prisma.userProfile.upsert({
+      where: { userId },
+      create: { userId },
+      update: {}
+    })
+
+    const userBadge = await prisma.userBadge.create({ data: { userId, badgeId } })
+    return `VERIFY-${userBadge.id}`
+  }
+
+  async checkAllBadgesForUser(userId: string): Promise<string[]> {
+    const badges = await prisma.badge.findMany({ where: { isActive: true } })
+    const issuedBadges: string[] = []
+
+    for (const badge of badges) {
+      const verifyCode = await this.issueBadge(userId, badge.id)
+      if (verifyCode) issuedBadges.push(verifyCode)
+    }
+
+    return issuedBadges
+  }
+
+  async getUserBadges(userId: string) {
+    return await prisma.userBadge.findMany({
+      where: { userId },
+      include: { badge: true },
+      orderBy: { earnedAt: 'desc' }
+    })
+  }
+
+  async getBadgeByVerifyCode(verifyCode: string) {
+    const badgeId = verifyCode.replace('VERIFY-', '')
+    const userBadge = await prisma.userBadge.findUnique({
+      where: { id: badgeId },
+      include: { badge: true }
+    })
+
+    if (!userBadge) return null
+    const user = await prisma.user.findUnique({ where: { id: userBadge.userId } })
+    return { ...userBadge, user }
+  }
+
+  // New skill badge system integration
+  async checkSkillBadges(userId: string, activityType: string, activityId: string) {
+    await BadgeEngine.checkAndIssueBadges(userId, activityType, activityId)
+    await CertificationEngine.checkAndIssueCertifications(userId)
+  }
+
+  async getUserSkillBadges(userId: string) {
+    return await prisma.userSkillBadge.findMany({
+      where: { userId, status: 'ACTIVE' },
+      include: { badge: true },
+      orderBy: { issuedDate: 'desc' }
+    })
+  }
+
+  async getUserCertifications(userId: string) {
+    return await prisma.userCertification.findMany({
+      where: { userId, status: 'EARNED' },
+      include: { certification: true },
+      orderBy: { issueDate: 'desc' }
+    })
+  }
+}

@@ -6,16 +6,22 @@ export class BadgeAutoIssue {
   async onCourseComplete(userId: string, courseId: string) {
     console.log(`Course completed: ${courseId} by user: ${userId}`)
     await this.checkAndIssueBadges(userId)
+    // New system integration
+    await this.badgeService.checkSkillBadges(userId, 'COURSE', courseId)
   }
 
   async onQuizPass(userId: string, quizId: string, score: number) {
     console.log(`Quiz passed: ${quizId} by user: ${userId} with score: ${score}`)
     await this.checkAndIssueBadges(userId)
+    // New system integration
+    await this.badgeService.checkSkillBadges(userId, 'QUIZ', quizId)
   }
 
   async onLessonComplete(userId: string, lessonId: string) {
     console.log(`Lesson completed: ${lessonId} by user: ${userId}`)
     await this.checkAndIssueBadges(userId)
+    // New system integration
+    await this.badgeService.checkSkillBadges(userId, 'LESSON', lessonId)
   }
 
   private async checkAndIssueBadges(userId: string) {
@@ -24,9 +30,6 @@ export class BadgeAutoIssue {
       
       if (issuedBadges.length > 0) {
         console.log(`Issued ${issuedBadges.length} new badges for user: ${userId}`)
-        
-        // Here you could add notification logic
-        // await this.sendBadgeNotification(userId, issuedBadges)
       }
     } catch (error) {
       console.error('Error in auto badge issuance:', error)

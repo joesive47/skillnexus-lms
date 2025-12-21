@@ -4,12 +4,12 @@ export default function Loading() {
       <div className="text-center">
         {/* Animated Logo */}
         <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-8 mx-auto animate-pulse-slow shadow-2xl">
-          <span className="text-white font-bold text-3xl">S</span>
+          <span className="text-white font-bold text-2xl">uP</span>
         </div>
         
         {/* Loading Text */}
         <h2 className="text-2xl font-bold text-white mb-4 animate-fade-in-up">
-          SkillNexus
+          upPowerSkill
         </h2>
         <p className="text-gray-300 mb-8 animate-fade-in-up animation-delay-200">
           กำลังโหลดระบบ...

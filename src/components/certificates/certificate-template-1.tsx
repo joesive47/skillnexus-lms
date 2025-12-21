@@ -52,7 +52,7 @@ export default function CertificateTemplate1({
           </div>
 
           <p className="text-lg opacity-90">
-            Awarded by <strong>SkillNexus LMS</strong>
+            Awarded by <strong>upPowerSkill LMS</strong>
           </p>
         </div>
 
