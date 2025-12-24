@@ -86,7 +86,7 @@ export default function HomePage() {
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               ⚡ เครื่องมือที่ทรงพลัง
             </h2>
-            <p className="text-xl text-gray-300">เทคโนโลジีล้ำสมัยสำหรับการเรียนรู้ยุคใหม่</p>
+            <p className="text-xl text-gray-300">เทคโนโลยีล้ำสมัยสำหรับการเรียนรู้ยุคใหม่</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
