@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Target, Brain, TrendingUp, Award, FileSpreadsheet, Users, BookOpen } from "lucide-react"
 import Link from "next/link"
-import { getCareers } from '@/app/actions/assessment'
-// import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import dynamicImport from 'next/dynamic'
 
@@ -63,7 +61,8 @@ function SkillsAssessmentPage() {
 
   const loadCareers = async () => {
     try {
-      const data = await getCareers()
+      const response = await fetch('/api/skills-assessment/careers')
+      const data = await response.json()
       setCareers(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Failed to load careers:', error)
