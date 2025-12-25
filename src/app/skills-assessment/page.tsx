@@ -9,7 +9,7 @@ import Link from "next/link"
 import { getCareers } from '@/app/actions/assessment'
 // import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 
 interface Career {
   id: string
@@ -326,7 +326,7 @@ function SkillsAssessmentPage() {
 }
 
 // Export as dynamic component to prevent SSR issues
-export default dynamic(() => Promise.resolve(SkillsAssessmentPage), {
+export default dynamicImport(() => Promise.resolve(SkillsAssessmentPage), {
   ssr: false,
   loading: () => <div className="flex items-center justify-center min-h-screen">กำลังโหลด...</div>
 })
