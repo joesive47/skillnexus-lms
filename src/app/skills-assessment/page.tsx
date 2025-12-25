@@ -21,6 +21,9 @@ interface Career {
   difficulty: string
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 function SkillsAssessmentPage() {
   const [session, setSession] = useState<any>(null)
   const [status, setStatus] = useState('loading')
