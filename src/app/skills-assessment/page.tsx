@@ -55,6 +55,9 @@ function SkillsAssessmentPage() {
   useEffect(() => {
     if (mounted) {
       loadCareers()
+      // Auto refresh every 30 seconds
+      const interval = setInterval(loadCareers, 30000)
+      return () => clearInterval(interval)
     }
   }, [mounted])
 
