@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Brain, Target, TrendingUp, Users, Plus, Edit, Trash2, BarChart3, Link, Eye, Settings, Upload, Download, FileSpreadsheet } from "lucide-react"
 import * as XLSX from 'xlsx'
+import NextLink from 'next/link'
 
 interface Question {
   id: string
@@ -50,6 +51,8 @@ export default function SkillsAssessmentManagement() {
   const [results, setResults] = useState<AssessmentResult[]>([])
   const [isCreating, setIsCreating] = useState(false)
   const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   const [formData, setFormData] = useState({
     title: "",
@@ -71,111 +74,91 @@ export default function SkillsAssessmentManagement() {
   })
 
   useEffect(() => {
-    // Load saved assessments
-    const savedAssessments = localStorage.getItem('skillAssessments')
-    if (savedAssessments) {
-      setAssessments(JSON.parse(savedAssessments))
-    } else {
-      // Default assessments
-      const defaultAssessments: Assessment[] = [
-        {
-          id: "1",
-          title: "Web Development Skills Assessment",
-          description: "ประเมินทักษะการพัฒนาเว็บไซต์ HTML, CSS, JavaScript",
-          category: "programming",
-          questions: [],
-          timeLimit: 45,
-          passingScore: 70,
-          enabled: true,
-          recommendedCourses: [
-            "HTML & CSS Fundamentals",
-            "JavaScript Mastery",
-            "React Development"
-          ]
-        },
-        {
-          id: "2",
-          title: "Data Analytics Assessment",
-          description: "ทดสอบความรู้ด้านการวิเคราะห์ข้อมูล Excel, SQL, Python",
-          category: "data-science",
-          questions: [],
-          timeLimit: 60,
-          passingScore: 75,
-          enabled: true,
-          recommendedCourses: [
-            "Excel for Data Analysis",
-            "SQL Database Mastery",
-            "Python Data Science"
-          ]
-        }
-      ]
-      setAssessments(defaultAssessments)
-      localStorage.setItem('skillAssessments', JSON.stringify(defaultAssessments))
-    }
-
-    // Load results
-    const savedResults = localStorage.getItem('assessmentResults')
-    if (savedResults) {
-      setResults(JSON.parse(savedResults))
-    } else {
-      // Sample results
-      const sampleResults: AssessmentResult[] = [
-        {
-          id: "r1",
-          assessmentId: "1",
-          userEmail: "john@example.com",
-          score: 85,
-          completedAt: "2024-12-06T10:30:00Z",
-          skillBreakdown: {
-            "HTML": 90,
-            "CSS": 80,
-            "JavaScript": 85
-          },
-          recommendations: ["JavaScript Mastery", "React Development"]
-        },
-        {
-          id: "r2",
-          assessmentId: "2",
-          userEmail: "alice@example.com",
-          score: 72,
-          completedAt: "2024-12-06T14:15:00Z",
-          skillBreakdown: {
-            "Excel": 75,
-            "SQL": 70,
-            "Python": 70
-          },
-          recommendations: ["SQL Database Mastery", "Python Data Science"]
-        }
-      ]
-      setResults(sampleResults)
-      localStorage.setItem('assessmentResults', JSON.stringify(sampleResults))
-    }
+    loadAssessments()
   }, [])
 
-  const saveAssessments = (newAssessments: Assessment[]) => {
-    setAssessments(newAssessments)
-    localStorage.setItem('skillAssessments', JSON.stringify(newAssessments))
+  const loadAssessments = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/admin/skills-assessment', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAssessments(Array.isArray(data) ? data : [])
+      } else {
+        console.warn('Failed to load assessments, using empty array')
+        setAssessments([])
+        setError('Failed to load assessments from server')
+      }
+    } catch (error) {
+      console.error('Failed to load assessments:', error)
+      setAssessments([])
+      setError('Network error: Unable to connect to server')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleCreateAssessment = () => {
-    const newAssessment: Assessment = {
-      id: Date.now().toString(),
-      ...formData,
-      questions: questions,
-      recommendedCourses: []
+  const handleCreateAssessment = async () => {
+    if (!formData.title || questions.length === 0) {
+      alert('กรุณากรอกชื่อการประเมินและเพิ่มคำถามอย่างน้อย 1 ข้อ')
+      return
     }
     
-    saveAssessments([...assessments, newAssessment])
-    setIsCreating(false)
-    setFormData({
-      title: "",
-      description: "",
-      category: "programming",
-      timeLimit: 30,
-      passingScore: 70,
-      enabled: true
-    })
-    setQuestions([])
+    try {
+      const newAssessment: Assessment = {
+        id: Date.now().toString(),
+        ...formData,
+        questions: questions,
+        recommendedCourses: []
+      }
+      
+      console.log('Creating assessment:', newAssessment)
+      
+      const response = await fetch('/api/admin/skills-assessment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newAssessment),
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Update local state with the created assessment
+        const createdAssessment = { ...newAssessment, id: result.assessment.id }
+        setAssessments([createdAssessment, ...assessments])
+        
+        // Reset form
+        setIsCreating(false)
+        setFormData({
+          title: "",
+          description: "",
+          category: "programming",
+          timeLimit: 30,
+          passingScore: 70,
+          enabled: true
+        })
+        setQuestions([])
+        
+        alert(`✅ สร้างการประเมิน "${formData.title}" สำเร็จ!\n📊 จำนวนคำถาม: ${questions.length} ข้อ\n💾 บันทึกลงฐานข้อมูลแล้ว`)
+      } else {
+        console.error('API Error:', result)
+        alert(`❌ เกิดข้อผิดพลาด: ${result.error || 'ไม่สามารถสร้างการประเมินได้'}\n${result.details || ''}`)
+      }
+    } catch (error) {
+      console.error('Failed to create assessment:', error)
+      alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง')
+    }
   }
 
   const addQuestion = () => {
@@ -201,19 +184,67 @@ export default function SkillsAssessmentManagement() {
     setQuestions(questions.filter(q => q.id !== id))
   }
 
-  const toggleAssessment = (id: string) => {
-    const updated = assessments.map(assessment =>
-      assessment.id === id 
-        ? { ...assessment, enabled: !assessment.enabled }
-        : assessment
-    )
-    saveAssessments(updated)
+  const toggleAssessment = async (id: string) => {
+    const assessment = assessments.find(a => a.id === id)
+    if (!assessment) return
+    
+    const newStatus = !assessment.enabled
+    
+    try {
+      const response = await fetch('/api/admin/skills-assessment/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, enabled: newStatus }),
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Update local state
+        const updated = assessments.map(assessment =>
+          assessment.id === id 
+            ? { ...assessment, enabled: newStatus }
+            : assessment
+        )
+        setAssessments(updated)
+        
+        alert(`✅ ${newStatus ? 'เปิด' : 'ปิด'}ใช้งานการประเมิน "${assessment.title}" แล้ว`)
+      } else {
+        console.error('Toggle Error:', result)
+        alert(`❌ เกิดข้อผิดพลาด: ${result.error || 'ไม่สามารถเปลี่ยนสถานะได้'}`)
+      }
+    } catch (error) {
+      console.error('Failed to toggle assessment:', error)
+      alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง')
+    }
   }
 
-  const deleteAssessment = (id: string) => {
-    if (confirm('คุณต้องการลบการประเมินนี้หรือไม่?')) {
-      const updated = assessments.filter(assessment => assessment.id !== id)
-      saveAssessments(updated)
+  const deleteAssessment = async (id: string) => {
+    if (!confirm('คุณต้องการลบการประเมินนี้หรือไม่?')) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/admin/skills-assessment?id=${id}`, {
+        method: 'DELETE',
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Remove from local state
+        const updated = assessments.filter(assessment => assessment.id !== id)
+        setAssessments(updated)
+        alert('✅ ลบการประเมินสำเร็จ')
+      } else {
+        console.error('Delete Error:', result)
+        alert(`❌ เกิดข้อผิดพลาด: ${result.error || 'ไม่สามารถลบการประเมินได้'}`)
+      }
+    } catch (error) {
+      console.error('Failed to delete assessment:', error)
+      alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง')
     }
   }
 
@@ -332,14 +363,64 @@ export default function SkillsAssessmentManagement() {
           </h1>
           <p className="text-gray-600">อาวุธการตลาดสุดยอด - ระบบประเมินทักษะและแนะนำหลักสูตร</p>
         </div>
-        <Button onClick={() => setIsCreating(true)} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          สร้างการประเมินใหม่
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={loadAssessments} disabled={isLoading}>
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            ) : (
+              <Eye className="w-4 h-4 mr-2" />
+            )}
+            {isLoading ? 'กำลังโหลด...' : 'รีเฟรช'}
+          </Button>
+          <Button variant="outline" asChild>
+            <NextLink href="/skills-assessment">
+              <Eye className="w-4 h-4 mr-2" />
+              ดูหน้าสาธารณะ
+            </NextLink>
+          </Button>
+          <Button onClick={() => setIsCreating(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4" />
+            สร้างการประเมินใหม่
+          </Button>
+        </div>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2">กำลังโหลดข้อมูล...</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h4 className="font-medium text-red-800 mb-2">เกิดข้อผิดพลาด</h4>
+              <p className="text-red-700 text-sm">{error}</p>
+              <Button 
+                onClick={loadAssessments} 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+              >
+                ลองใหม่อีกครั้ง
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Main Content */}
+      {!isLoading && (
       <Tabs defaultValue="assessments" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="assessments" className="flex items-center gap-2">
             <Target className="w-4 h-4" />
             การประเมิน
@@ -355,6 +436,10 @@ export default function SkillsAssessmentManagement() {
           <TabsTrigger value="public-link" className="flex items-center gap-2">
             <Link className="w-4 h-4" />
             ลิงค์สาธารณะ
+          </TabsTrigger>
+          <TabsTrigger value="import" className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Import ข้อมูล
           </TabsTrigger>
         </TabsList>
 
@@ -616,8 +701,12 @@ export default function SkillsAssessmentManagement() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button onClick={handleCreateAssessment} disabled={!formData.title || questions.length === 0}>
-                    สร้างการประเมิน
+                  <Button 
+                    onClick={handleCreateAssessment} 
+                    disabled={!formData.title || questions.length === 0}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    สร้างการประเมิน ({questions.length} คำถาม)
                   </Button>
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     ยกเลิก
@@ -628,6 +717,20 @@ export default function SkillsAssessmentManagement() {
           )}
 
           <div className="grid gap-6">
+            {assessments.length === 0 && !isLoading && (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">ยังไม่มีการประเมิน</h3>
+                  <p className="text-gray-600 mb-4">เริ่มต้นด้วยการสร้างการประเมินทักษะแรกของคุณ</p>
+                  <Button onClick={() => setIsCreating(true)} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    สร้างการประเมินแรก
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            
             {assessments.map((assessment) => (
               <Card key={assessment.id}>
                 <CardHeader>
@@ -684,12 +787,18 @@ export default function SkillsAssessmentManagement() {
                       onClick={() => {
                         const url = `${window.location.origin}/skills-test/${assessment.id}`
                         navigator.clipboard.writeText(url)
-                        alert('คัดลอกลิงค์แล้ว!')
+                        alert('✅ คัดลอกลิงค์แล้ว!')
                       }}
                     >
                       <Link className="w-4 h-4 mr-2" />
                       คัดลอกลิงค์
                     </Button>
+                    <Badge 
+                      variant={assessment.questions.length > 0 ? "default" : "secondary"}
+                      className="ml-2"
+                    >
+                      {assessment.questions.length > 0 ? 'พร้อมใช้' : 'ยังไม่มีคำถาม'}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -818,6 +927,18 @@ export default function SkillsAssessmentManagement() {
               <CardDescription>แชร์ลิงค์เหล่านี้ให้ลูกค้าทดสอบทักษะ</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h4 className="font-medium text-blue-800 mb-2">🌐 หน้าสาธารณะหลัก</h4>
+                <p className="text-sm text-blue-700 mb-2">
+                  หน้านี้เชื่อมต่อกับระบบจัดการแบบประเมิน (Admin)
+                </p>
+                <Button asChild variant="outline" className="w-full">
+                  <NextLink href="/skills-assessment">
+                    <Eye className="w-4 h-4 mr-2" />
+                    ไปหน้าสาธารณะ
+                  </NextLink>
+                </Button>
+              </div>
               {assessments.filter(a => a.enabled).map((assessment) => (
                 <div key={assessment.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-center">
@@ -854,7 +975,28 @@ export default function SkillsAssessmentManagement() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="import">
+          <Card>
+            <CardHeader>
+              <CardTitle>Import ข้อมูลจากไฟล์</CardTitle>
+              <CardDescription>นำเข้าข้อมูลจาก Excel หรือ CSV</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Upload className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Import ข้อมูลจากไฟล์</h3>
+                <p className="text-gray-600 mb-4">ใช้ฟีเจอร์ Import ในแท็บ "การประเมิน" เพื่อนำเข้าข้อมูลจากไฟล์ Excel หรือ CSV</p>
+                <Button onClick={() => (document.querySelector('[value="assessments"]') as HTMLElement)?.click()} className="bg-blue-600 hover:bg-blue-700">
+                  <Upload className="w-4 h-4 mr-2" />
+                  ไปแท็บการประเมิน
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+      )}
     </div>
   )
 }

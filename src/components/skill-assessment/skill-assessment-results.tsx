@@ -91,11 +91,11 @@ export default function SkillAssessmentResults({
 
   const displaySkills = groupSkills(skillData, 6)
 
-  // SVG Spider Chart
+  // Enhanced Spider Chart with Animation
   const SpiderChart = () => {
-    const size = 400
+    const size = 500
     const center = size / 2
-    const maxRadius = 150
+    const maxRadius = 180
     const skillCount = displaySkills.length
     
     const getPoint = (index: number, value: number) => {
@@ -108,29 +108,58 @@ export default function SkillAssessmentResults({
     }
 
     const userPoints = displaySkills.map((skill, i) => getPoint(i, skill.score))
-    const avgPoints = displaySkills.map((skill, i) => getPoint(i, skill.average ?? 0))
+    const avgPoints = displaySkills.map((skill, i) => getPoint(i, skill.average ?? 75))
     
     const userPath = userPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
     const avgPath = avgPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
 
     return (
-      <div className="relative">
-        <svg width={size} height={size} className="drop-shadow-lg">
-          {/* Grid circles */}
-          {[25, 50, 75, 100].map(level => (
+      <div className="relative bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl p-6">
+        <svg width={size} height={size} className="drop-shadow-xl">
+          <defs>
+            {/* Enhanced gradients */}
+            <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.9" />
+            </radialGradient>
+            <linearGradient id="userGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.6" />
+              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.4" />
+            </linearGradient>
+            <linearGradient id="avgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#64748b" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.1" />
+            </linearGradient>
+            {/* Glow effects */}
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="dropShadow">
+              <feDropShadow dx="2" dy="4" stdDeviation="4" floodOpacity="0.3"/>
+            </filter>
+          </defs>
+
+          {/* Background circles with gradient */}
+          {[20, 40, 60, 80, 100].map((level, idx) => (
             <circle
               key={level}
               cx={center}
               cy={center}
               r={(level / 100) * maxRadius}
               fill="none"
-              stroke="#e5e7eb"
-              strokeWidth={1}
-              opacity={0.5 + (level / 100) * 0.3}
+              stroke={idx === 4 ? "#6366f1" : "#e2e8f0"}
+              strokeWidth={idx === 4 ? 2 : 1}
+              opacity={0.3 + (level / 100) * 0.4}
+              strokeDasharray={idx === 4 ? "none" : "3,3"}
             />
           ))}
           
-          {/* Grid lines */}
+          {/* Grid lines with enhanced styling */}
           {displaySkills.map((_, i) => {
             const angle = -Math.PI / 2 + (2 * Math.PI * i) / skillCount
             const endX = center + maxRadius * Math.cos(angle)
@@ -142,127 +171,246 @@ export default function SkillAssessmentResults({
                 y1={center}
                 x2={endX}
                 y2={endY}
-                stroke="#d1d5db"
-                strokeWidth={1}
-                strokeDasharray="5,5"
-                opacity={0.5}
+                stroke="#cbd5e1"
+                strokeWidth={1.5}
+                strokeDasharray="4,4"
+                opacity={0.6}
               />
             )
           })}
 
-          {/* Average polygon */}
+          {/* Level indicators */}
+          {[20, 40, 60, 80, 100].map(level => (
+            <text
+              key={level}
+              x={center + (level / 100) * maxRadius + 8}
+              y={center - 5}
+              fontSize="10"
+              fill="#64748b"
+              className="text-xs font-medium"
+            >
+              {level}
+            </text>
+          ))}
+
+          {/* Average polygon with enhanced styling */}
           <path
             d={avgPath}
-            fill="#9ca3af"
-            fillOpacity={0.15}
-            stroke="#9ca3af"
+            fill="url(#avgGradient)"
+            stroke="#94a3b8"
             strokeWidth={2}
-            strokeDasharray="5,5"
+            strokeDasharray="8,4"
+            opacity={0.7}
           />
 
-          {/* User polygon */}
-          <defs>
-            <linearGradient id="userGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="100%" stopColor="#a855f7" />
-            </linearGradient>
-          </defs>
+          {/* User polygon with glow effect */}
           <path
             d={userPath}
             fill="url(#userGradient)"
-            fillOpacity={0.4}
             stroke="#6366f1"
             strokeWidth={3}
-            filter="drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))"
+            filter="url(#glow)"
+            className="animate-pulse"
           />
 
-          {/* Data points */}
-          {userPoints.map((point, i) => (
-            <g key={i}>
-              <circle
-                cx={point.x}
-                cy={point.y}
-                r={8}
-                fill="#6366f1"
-                stroke="white"
-                strokeWidth={3}
-                className="cursor-pointer hover:scale-125 transition-transform"
-                onMouseEnter={() => setHoveredSkill(displaySkills[i].name)}
-                onMouseLeave={() => setHoveredSkill(null)}
-              />
-              <circle cx={point.x} cy={point.y} r={3} fill="white" />
-            </g>
-          ))}
+          {/* Enhanced data points */}
+          {userPoints.map((point, i) => {
+            const skill = displaySkills[i]
+            const isHovered = hoveredSkill === skill.name
+            return (
+              <g key={i}>
+                {/* Outer glow ring */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isHovered ? 15 : 12}
+                  fill="#6366f1"
+                  fillOpacity={0.2}
+                  className="transition-all duration-300"
+                />
+                {/* Main point */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isHovered ? 10 : 8}
+                  fill="#6366f1"
+                  stroke="white"
+                  strokeWidth={3}
+                  className="cursor-pointer transition-all duration-300 hover:scale-125"
+                  filter="url(#dropShadow)"
+                  onMouseEnter={() => setHoveredSkill(skill.name)}
+                  onMouseLeave={() => setHoveredSkill(null)}
+                />
+                {/* Inner highlight */}
+                <circle 
+                  cx={point.x} 
+                  cy={point.y} 
+                  r={isHovered ? 4 : 3} 
+                  fill="white" 
+                  className="transition-all duration-300"
+                />
+                {/* Score badge */}
+                {isHovered && (
+                  <g>
+                    <rect
+                      x={point.x - 15}
+                      y={point.y - 35}
+                      width={30}
+                      height={20}
+                      rx={10}
+                      fill="#1e293b"
+                      fillOpacity={0.9}
+                    />
+                    <text
+                      x={point.x}
+                      y={point.y - 22}
+                      textAnchor="middle"
+                      fontSize="10"
+                      fill="white"
+                      className="font-bold"
+                    >
+                      {skill.score}
+                    </text>
+                  </g>
+                )}
+              </g>
+            )
+          })}
 
-          {/* Center badge */}
-          <circle cx={center} cy={center} r={40} fill="url(#userGradient)" opacity={0.9} />
-          <text x={center} y={center - 5} textAnchor="middle" className="fill-white font-bold text-xl">
+          {/* Enhanced center badge */}
+          <circle 
+            cx={center} 
+            cy={center} 
+            r={50} 
+            fill="url(#centerGradient)" 
+            filter="url(#dropShadow)"
+            className="animate-pulse"
+          />
+          <circle cx={center} cy={center} r={45} fill="none" stroke="white" strokeWidth={2} opacity={0.3} />
+          <text x={center} y={center - 8} textAnchor="middle" className="fill-white font-bold text-2xl">
             {overallScore}
           </text>
-          <text x={center} y={center + 15} textAnchor="middle" className="fill-white text-xs">
-            <Star className="w-3 h-3 inline" />
+          <text x={center} y={center + 8} textAnchor="middle" className="fill-white text-xs opacity-90">
+            คะแนนรวม
           </text>
+          <Star className="w-4 h-4 fill-white" x={center - 8} y={center + 15} />
 
-          {/* Skill labels */}
+          {/* Enhanced skill labels */}
           {displaySkills.map((skill, i) => {
             const angle = -Math.PI / 2 + (2 * Math.PI * i) / skillCount
-            const labelRadius = maxRadius + 60
+            const labelRadius = maxRadius + 80
             const x = center + labelRadius * Math.cos(angle)
             const y = center + labelRadius * Math.sin(angle)
+            const isHovered = hoveredSkill === skill.name
             
             return (
               <g key={i}>
                 <rect
-                  x={x - 50}
-                  y={y - 15}
-                  width={100}
-                  height={30}
-                  rx={15}
-                  fill="white"
-                  stroke="#e5e7eb"
-                  strokeWidth={1}
+                  x={x - 60}
+                  y={y - 20}
+                  width={120}
+                  height={40}
+                  rx={20}
+                  fill={isHovered ? "#6366f1" : "white"}
+                  stroke={isHovered ? "#6366f1" : "#e2e8f0"}
+                  strokeWidth={2}
+                  filter="url(#dropShadow)"
+                  className="transition-all duration-300"
                 />
-                <text x={x} y={y - 2} textAnchor="middle" className="text-xs font-medium fill-gray-800">
-                  {skill.name}
+                <text 
+                  x={x} 
+                  y={y - 5} 
+                  textAnchor="middle" 
+                  className={`text-xs font-semibold transition-colors duration-300 ${
+                    isHovered ? 'fill-white' : 'fill-gray-800'
+                  }`}
+                >
+                  {skill.name.length > 12 ? skill.name.substring(0, 12) + '...' : skill.name}
                 </text>
-                <text x={x} y={y + 10} textAnchor="middle" className={`text-xs font-bold ${getScoreColor(skill.score)}`}>
-                  {skill.score}/100
+                <rect
+                  x={x - 25}
+                  y={y + 2}
+                  width={50}
+                  height={16}
+                  rx={8}
+                  fill={
+                    skill.score >= 90 ? '#10b981' :
+                    skill.score >= 80 ? '#3b82f6' :
+                    skill.score >= 70 ? '#f59e0b' :
+                    skill.score >= 60 ? '#f97316' :
+                    '#ef4444'
+                  }
+                  className="transition-all duration-300"
+                />
+                <text 
+                  x={x} 
+                  y={y + 13} 
+                  textAnchor="middle" 
+                  className="text-xs font-bold fill-white"
+                >
+                  {skill.score}%
                 </text>
               </g>
             )
           })}
         </svg>
 
-        {/* Tooltip */}
+        {/* Enhanced tooltip */}
         {hoveredSkill && (
-          <div className="absolute top-4 left-4 bg-white p-3 rounded-lg shadow-lg border z-10">
-            <div className="text-sm font-medium">{hoveredSkill}</div>
-            <div className="text-xs text-gray-500 border-b pb-1 mb-1">─────────────────</div>
-            {displaySkills.map(skill => {
-              if (skill.name === hoveredSkill) {
-                return (
-                  <div key={skill.name}>
-                    <div className="text-xs">คะแนน: {skill.score}/100</div>
-                    <div className="text-xs">ค่าเฉลี่ย: {skill.average ?? 0}</div>
-                    <div className="text-xs">สูงกว่า: +{skill.score - (skill.average ?? 0)}</div>
-                    <div className="text-xs font-medium text-green-600">Top 25%</div>
-                  </div>
-                )
-              }
-              return null
-            })}
+          <div className="absolute top-6 left-6 bg-white p-4 rounded-xl shadow-2xl border-2 border-indigo-100 z-20 min-w-[200px]">
+            <div className="text-sm font-bold text-gray-900 mb-2">{hoveredSkill}</div>
+            <div className="space-y-1">
+              {displaySkills.map(skill => {
+                if (skill.name === hoveredSkill) {
+                  const avgScore = skill.average ?? 75
+                  const difference = skill.score - avgScore
+                  return (
+                    <div key={skill.name} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">คะแนนของคุณ:</span>
+                        <span className={`font-bold ${getScoreColor(skill.score)}`}>{skill.score}/100</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">ค่าเฉลี่ย:</span>
+                        <span className="font-medium text-gray-700">{avgScore}/100</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">ความแตกต่าง:</span>
+                        <span className={`font-bold ${
+                          difference > 0 ? 'text-green-600' : difference < 0 ? 'text-red-600' : 'text-gray-600'
+                        }`}>
+                          {difference > 0 ? '+' : ''}{difference}
+                        </span>
+                      </div>
+                      <div className="pt-1 border-t border-gray-200">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                          skill.score >= 90 ? 'bg-green-100 text-green-800' :
+                          skill.score >= 80 ? 'bg-blue-100 text-blue-800' :
+                          skill.score >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                          skill.score >= 60 ? 'bg-orange-100 text-orange-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {getScoreDescription(skill.score)}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })}
+            </div>
           </div>
         )}
 
-        {/* Legend */}
-        <div className="flex justify-center gap-6 mt-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
-            <span>คะแนนของคุณ</span>
+        {/* Enhanced legend */}
+        <div className="flex justify-center gap-8 mt-6">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full shadow-lg"></div>
+            <span className="text-sm font-medium text-gray-700">คะแนนของคุณ</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-gray-400 border-dashed rounded-full"></div>
-            <span>ค่าเฉลี่ย</span>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-gray-400 border-dashed rounded-full bg-gray-100"></div>
+            <span className="text-sm font-medium text-gray-700">ค่าเฉลี่ย</span>
           </div>
         </div>
       </div>

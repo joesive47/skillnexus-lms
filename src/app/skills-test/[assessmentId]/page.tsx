@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Brain, Clock, Target, CheckCircle, XCircle, BarChart3, BookOpen } from "lucide-react"
+import { Brain, Clock, Target, CheckCircle, XCircle, BarChart3, BookOpen, AlertCircle } from "lucide-react"
 import { useParams } from "next/navigation"
 
 interface Question {
@@ -32,147 +32,223 @@ interface Assessment {
   recommendedCourses: string[]
 }
 
+interface UserAnswer {
+  questionId: string
+  selectedAnswer: number
+  timestamp: number
+}
+
 export default function PublicSkillsTest() {
   const params = useParams()
   const assessmentId = params.assessmentId as string
   
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [userAnswers, setUserAnswers] = useState<any[]>([])
+  const [userAnswers, setUserAnswers] = useState<Map<string, UserAnswer>>(new Map())
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const [isStarted, setIsStarted] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const [results, setResults] = useState<any>(null)
   const [userEmail, setUserEmail] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
+  // Load assessment data
   useEffect(() => {
-    // Create sample assessment if not exists
-    const sampleAssessment: Assessment = {
-      id: "1",
-      title: "Web Development Skills Assessment",
-      description: "ประเมินทักษะการพัฒนาเว็บไซต์ HTML, CSS, JavaScript",
-      category: "programming",
-      questions: [
-        {
-          id: "q1",
-          text: "HTML ย่อมาจากอะไร?",
-          options: [
-            "HyperText Markup Language",
-            "High Tech Modern Language", 
-            "Home Tool Markup Language",
-            "Hyperlink and Text Markup Language"
-          ],
-          correctAnswer: 0,
-          skill: "HTML",
-          difficulty: "beginner",
-          weight: 1
-        },
-        {
-          id: "q2", 
-          text: "CSS ใช้สำหรับอะไร?",
-          options: [
-            "จัดการฐานข้อมูล",
-            "จัดรูปแบบและการแสดงผล",
-            "เขียนโปรแกรม JavaScript",
-            "สร้างเซิร์ฟเวอร์"
-          ],
-          correctAnswer: 1,
-          skill: "CSS",
-          difficulty: "beginner", 
-          weight: 1
-        },
-        {
-          id: "q3",
-          text: "JavaScript เป็นภาษาโปรแกรมประเภทใด?",
-          options: [
-            "Compiled Language",
-            "Assembly Language", 
-            "Interpreted Language",
-            "Machine Language"
-          ],
-          correctAnswer: 2,
-          skill: "JavaScript",
-          difficulty: "intermediate",
-          weight: 2
-        }
-      ],
-      timeLimit: 10,
-      passingScore: 70,
-      enabled: true,
-      recommendedCourses: [
-        "HTML & CSS Fundamentals",
-        "JavaScript Mastery", 
-        "React Development"
-      ]
-    }
-
-    // Load or create assessment
-    const savedAssessments = localStorage.getItem('skillAssessments')
-    if (savedAssessments) {
-      const assessments: Assessment[] = JSON.parse(savedAssessments)
-      const foundAssessment = assessments.find(a => a.id === assessmentId && a.enabled)
-      if (foundAssessment) {
-        setAssessment(foundAssessment)
-        setTimeLeft(foundAssessment.timeLimit * 60)
-      } else {
-        setAssessment(sampleAssessment)
-        setTimeLeft(sampleAssessment.timeLimit * 60)
-      }
-    } else {
-      localStorage.setItem('skillAssessments', JSON.stringify([sampleAssessment]))
-      setAssessment(sampleAssessment)
-      setTimeLeft(sampleAssessment.timeLimit * 60)
-    }
+    loadAssessment()
   }, [assessmentId])
 
+  // Timer effect
   useEffect(() => {
     let timer: NodeJS.Timeout
     if (isStarted && timeLeft > 0 && !isCompleted) {
       timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1)
+        setTimeLeft(prev => prev - 1)
       }, 1000)
-    } else if (timeLeft === 0 && isStarted) {
+    } else if (timeLeft === 0 && isStarted && !isCompleted) {
       handleSubmitTest()
     }
     return () => clearTimeout(timer)
   }, [timeLeft, isStarted, isCompleted])
+
+  // Load existing answer when question changes
+  useEffect(() => {
+    if (assessment && assessment.questions[currentQuestionIndex]) {
+      const currentQuestion = assessment.questions[currentQuestionIndex]
+      const existingAnswer = userAnswers.get(currentQuestion.id)
+      setSelectedAnswer(existingAnswer?.selectedAnswer ?? null)
+    }
+  }, [currentQuestionIndex, assessment, userAnswers])
+
+  const loadAssessment = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch(`/api/skills-assessment/${assessmentId}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Assessment loaded:', data.title, 'Questions:', data.questions.length)
+        setAssessment(data)
+        setTimeLeft(data.timeLimit * 60)
+      } else {
+        console.log('⚠️ Using fallback assessment')
+        // Enhanced fallback assessment
+        const sampleAssessment: Assessment = {
+          id: "sample-1",
+          title: "Web Development Skills Assessment",
+          description: "ประเมินทักษะการพัฒนาเว็บไซต์ HTML, CSS, JavaScript",
+          category: "programming",
+          questions: [
+            {
+              id: "q1",
+              text: "HTML ย่อมาจากอะไร?",
+              options: [
+                "HyperText Markup Language",
+                "High Tech Modern Language", 
+                "Home Tool Markup Language",
+                "Hyperlink and Text Markup Language"
+              ],
+              correctAnswer: 0,
+              skill: "HTML",
+              difficulty: "beginner",
+              weight: 1
+            },
+            {
+              id: "q2", 
+              text: "CSS ใช้สำหรับอะไร?",
+              options: [
+                "จัดการฐานข้อมูล",
+                "จัดรูปแบบและการแสดงผล",
+                "เขียนโปรแกรม JavaScript",
+                "สร้างเซิร์ฟเวอร์"
+              ],
+              correctAnswer: 1,
+              skill: "CSS",
+              difficulty: "beginner", 
+              weight: 1
+            },
+            {
+              id: "q3",
+              text: "JavaScript เป็นภาษาโปรแกรมประเภทใด?",
+              options: [
+                "Compiled Language",
+                "Assembly Language", 
+                "Interpreted Language",
+                "Machine Language"
+              ],
+              correctAnswer: 2,
+              skill: "JavaScript",
+              difficulty: "intermediate",
+              weight: 2
+            },
+            {
+              id: "q4",
+              text: "React เป็นอะไร?",
+              options: [
+                "Database",
+                "JavaScript Library",
+                "Web Server",
+                "Operating System"
+              ],
+              correctAnswer: 1,
+              skill: "React",
+              difficulty: "intermediate",
+              weight: 2
+            },
+            {
+              id: "q5",
+              text: "Node.js ใช้สำหรับอะไร?",
+              options: [
+                "Frontend Development",
+                "Database Management",
+                "Backend Development",
+                "Mobile Development"
+              ],
+              correctAnswer: 2,
+              skill: "Node.js",
+              difficulty: "advanced",
+              weight: 3
+            }
+          ],
+          timeLimit: 15,
+          passingScore: 70,
+          enabled: true,
+          recommendedCourses: [
+            "HTML & CSS Fundamentals",
+            "JavaScript Mastery", 
+            "React Development",
+            "Node.js Backend"
+          ]
+        }
+        setAssessment(sampleAssessment)
+        setTimeLeft(sampleAssessment.timeLimit * 60)
+      }
+    } catch (error) {
+      console.error('❌ Failed to load assessment:', error)
+      setError('ไม่สามารถโหลดแบบประเมินได้ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const startTest = () => {
     if (!userEmail.trim()) {
       alert('กรุณากรอกอีเมลก่อนเริ่มทดสอบ')
       return
     }
+    console.log('🚀 Starting test for:', userEmail)
     setIsStarted(true)
+    // Clear any existing answers
+    setUserAnswers(new Map())
+    setSelectedAnswer(null)
+    setCurrentQuestionIndex(0)
   }
 
-  const handleAnswerSelect = (answerIndex: number) => {
+  const handleAnswerSelect = useCallback((answerIndex: number) => {
+    console.log('📝 Answer selected:', answerIndex, 'for question:', currentQuestionIndex + 1)
     setSelectedAnswer(answerIndex)
-  }
+  }, [currentQuestionIndex])
+
+  const saveCurrentAnswer = useCallback(() => {
+    if (!assessment || selectedAnswer === null) return
+    
+    const currentQuestion = assessment.questions[currentQuestionIndex]
+    const newAnswers = new Map(userAnswers)
+    
+    newAnswers.set(currentQuestion.id, {
+      questionId: currentQuestion.id,
+      selectedAnswer: selectedAnswer,
+      timestamp: Date.now()
+    })
+    
+    setUserAnswers(newAnswers)
+    console.log('💾 Answer saved:', {
+      questionId: currentQuestion.id,
+      selectedAnswer: selectedAnswer,
+      questionText: currentQuestion.text.substring(0, 50) + '...'
+    })
+  }, [assessment, currentQuestionIndex, selectedAnswer, userAnswers])
 
   const nextQuestion = () => {
-    if (selectedAnswer === null) return
-
-    const currentQuestion = assessment!.questions[currentQuestionIndex]
-    const existingAnswerIndex = userAnswers.findIndex(a => a.questionId === currentQuestion.id)
-    
-    if (existingAnswerIndex >= 0) {
-      const newAnswers = [...userAnswers]
-      newAnswers[existingAnswerIndex] = {
-        questionId: currentQuestion.id,
-        selectedAnswer: selectedAnswer
-      }
-      setUserAnswers(newAnswers)
-    } else {
-      setUserAnswers([...userAnswers, {
-        questionId: currentQuestion.id,
-        selectedAnswer: selectedAnswer
-      }])
+    if (selectedAnswer === null) {
+      alert('กรุณาเลือกคำตอบก่อนดำเนินการต่อ')
+      return
     }
 
+    // Save current answer
+    saveCurrentAnswer()
+
     if (currentQuestionIndex < assessment!.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
-      setSelectedAnswer(null)
+      setCurrentQuestionIndex(prev => prev + 1)
+      // selectedAnswer will be set by useEffect
     } else {
       handleSubmitTest()
     }
@@ -180,22 +256,33 @@ export default function PublicSkillsTest() {
 
   const previousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1)
-      const prevQuestion = assessment!.questions[currentQuestionIndex - 1]
-      const prevAnswer = userAnswers.find(a => a.questionId === prevQuestion.id)
-      setSelectedAnswer(prevAnswer?.selectedAnswer ?? null)
+      // Save current answer if selected
+      if (selectedAnswer !== null) {
+        saveCurrentAnswer()
+      }
+      setCurrentQuestionIndex(prev => prev - 1)
+      // selectedAnswer will be set by useEffect
     }
   }
 
-  const handleSubmitTest = () => {
+  const handleSubmitTest = useCallback(() => {
     if (!assessment) return
 
+    // Save current answer if selected
+    if (selectedAnswer !== null) {
+      saveCurrentAnswer()
+    }
+
+    console.log('📊 Calculating results...')
+    console.log('Total answers collected:', userAnswers.size)
+    
     let totalScore = 0
     let maxScore = 0
     const skillBreakdown: Record<string, { correct: number, total: number }> = {}
+    const detailedResults: any[] = []
 
-    assessment.questions.forEach(question => {
-      const userAnswer = userAnswers.find(a => a.questionId === question.id)
+    assessment.questions.forEach((question, index) => {
+      const userAnswer = userAnswers.get(question.id)
       maxScore += question.weight
       
       if (!skillBreakdown[question.skill]) {
@@ -203,24 +290,38 @@ export default function PublicSkillsTest() {
       }
       skillBreakdown[question.skill].total += question.weight
 
-      if (userAnswer && userAnswer.selectedAnswer === question.correctAnswer) {
+      const isCorrect = userAnswer && userAnswer.selectedAnswer === question.correctAnswer
+      
+      if (isCorrect) {
         totalScore += question.weight
         skillBreakdown[question.skill].correct += question.weight
       }
+
+      detailedResults.push({
+        questionIndex: index + 1,
+        questionText: question.text,
+        userAnswer: userAnswer?.selectedAnswer ?? -1,
+        correctAnswer: question.correctAnswer,
+        isCorrect: isCorrect,
+        skill: question.skill,
+        weight: question.weight
+      })
+
+      console.log(`Q${index + 1}: ${isCorrect ? '✅' : '❌'} User: ${userAnswer?.selectedAnswer ?? 'No answer'}, Correct: ${question.correctAnswer}`)
     })
 
-    const finalScore = Math.round((totalScore / maxScore) * 100)
+    const finalScore = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0
     const skillScores: Record<string, number> = {}
     
     Object.entries(skillBreakdown).forEach(([skill, data]) => {
-      skillScores[skill] = Math.round((data.correct / data.total) * 100)
+      skillScores[skill] = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0
     })
 
-    const recommendations = assessment.recommendedCourses.filter((_, index) => {
-      const skillEntries = Object.entries(skillScores)
-      if (skillEntries.length === 0) return true
-      const avgScore = skillEntries.reduce((sum, [_, score]) => sum + score, 0) / skillEntries.length
-      return avgScore < 80
+    console.log('📈 Final Results:', {
+      finalScore,
+      totalScore,
+      maxScore,
+      skillScores
     })
 
     const testResults = {
@@ -228,20 +329,29 @@ export default function PublicSkillsTest() {
       assessmentId: assessment.id,
       userEmail: userEmail,
       score: finalScore,
+      totalScore,
+      maxScore,
       completedAt: new Date().toISOString(),
       skillBreakdown: skillScores,
-      recommendations: recommendations,
-      passed: finalScore >= assessment.passingScore
+      detailedResults,
+      recommendations: assessment.recommendedCourses.filter(() => finalScore < 80),
+      passed: finalScore >= assessment.passingScore,
+      timeSpent: (assessment.timeLimit * 60) - timeLeft
     }
 
-    const savedResults = localStorage.getItem('assessmentResults')
-    const existingResults = savedResults ? JSON.parse(savedResults) : []
-    existingResults.push(testResults)
-    localStorage.setItem('assessmentResults', JSON.stringify(existingResults))
+    // Save to localStorage
+    try {
+      const savedResults = localStorage.getItem('assessmentResults')
+      const existingResults = savedResults ? JSON.parse(savedResults) : []
+      existingResults.push(testResults)
+      localStorage.setItem('assessmentResults', JSON.stringify(existingResults))
+    } catch (error) {
+      console.error('Failed to save results to localStorage:', error)
+    }
 
     setResults(testResults)
     setIsCompleted(true)
-  }
+  }, [assessment, userAnswers, selectedAnswer, userEmail, timeLeft, saveCurrentAnswer])
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -261,20 +371,54 @@ export default function PublicSkillsTest() {
     return "bg-red-100 text-red-800"
   }
 
-  if (!assessment) {
+  // Loading state
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">ไม่พบการประเมิน</h2>
-            <p className="text-gray-600">การประเมินนี้อาจถูกปิดใช้งานหรือไม่มีอยู่</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold mb-2">กำลังโหลดแบบประเมิน...</h2>
+            <p className="text-gray-600">กรุณารอสักครู่</p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2 text-red-600">เกิดข้อผิดพลาด</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              ลองใหม่อีกครั้ง
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!assessment) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">ไม่พบแบบประเมิน</h2>
+            <p className="text-gray-600">แบบประเมินที่คุณต้องการไม่พบในระบบ</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Results screen
   if (isCompleted && results) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -303,6 +447,9 @@ export default function PublicSkillsTest() {
                 <Badge className={getScoreBadge(results.score)}>
                   {results.passed ? `ผ่าน (ต้องการ ${assessment.passingScore}%)` : `ไม่ผ่าน (ต้องการ ${assessment.passingScore}%)`}
                 </Badge>
+                <div className="mt-2 text-sm text-gray-600">
+                  คะแนนรวม: {results.totalScore}/{results.maxScore} คะแนน
+                </div>
               </div>
 
               <div>
@@ -343,7 +490,10 @@ export default function PublicSkillsTest() {
                 </div>
               )}
 
-              <div className="text-center">
+              <div className="text-center space-y-2">
+                <div className="text-sm text-gray-600">
+                  เวลาที่ใช้: {Math.floor(results.timeSpent / 60)} นาที {results.timeSpent % 60} วินาที
+                </div>
                 <Button onClick={() => window.location.reload()}>
                   ทำการประเมินใหม่
                 </Button>
@@ -355,6 +505,7 @@ export default function PublicSkillsTest() {
     )
   }
 
+  // Start screen
   if (!isStarted) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -381,9 +532,19 @@ export default function PublicSkillsTest() {
                 </div>
               </div>
 
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-800 mb-2">📋 คำแนะนำก่อนเริ่มทดสอบ:</h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• อ่านคำถามให้ละเอียดก่อนตอบ</li>
+                  <li>• คุณสามารถย้อนกลับไปแก้ไขคำตอบได้</li>
+                  <li>• ระบบจะบันทึกคำตอบอัตโนมัติ</li>
+                  <li>• หากหมดเวลา ระบบจะส่งคำตอบให้อัตโนมัติ</li>
+                </ul>
+              </div>
+
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="email">อีเมลของคุณ</Label>
+                  <Label htmlFor="email">อีเมลของคุณ *</Label>
                   <input
                     id="email"
                     type="email"
@@ -391,6 +552,7 @@ export default function PublicSkillsTest() {
                     onChange={(e) => setUserEmail(e.target.value)}
                     placeholder="กรอกอีเมลเพื่อรับผลการประเมิน"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
                   />
                 </div>
 
@@ -400,6 +562,7 @@ export default function PublicSkillsTest() {
                   size="lg"
                   disabled={!userEmail.trim()}
                 >
+                  <Target className="w-4 h-4 mr-2" />
                   เริ่มการประเมิน
                 </Button>
               </div>
@@ -410,8 +573,10 @@ export default function PublicSkillsTest() {
     )
   }
 
+  // Test screen
   const currentQuestion = assessment.questions[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / assessment.questions.length) * 100
+  const answeredCount = userAnswers.size
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -422,14 +587,17 @@ export default function PublicSkillsTest() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-red-600">
                 <Clock className="w-4 h-4" />
-                <span className="font-mono">{formatTime(timeLeft)}</span>
+                <span className="font-mono text-lg">{formatTime(timeLeft)}</span>
               </div>
               <Badge variant="outline">
                 {currentQuestionIndex + 1} / {assessment.questions.length}
               </Badge>
+              <Badge variant="secondary">
+                ตอบแล้ว: {answeredCount}
+              </Badge>
             </div>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-3" />
         </div>
 
         <Card>
@@ -439,33 +607,34 @@ export default function PublicSkillsTest() {
                 <CardTitle className="text-lg">
                   คำถามที่ {currentQuestionIndex + 1}
                 </CardTitle>
-                <CardDescription className="mt-2 text-base">
+                <CardDescription className="mt-2 text-base leading-relaxed">
                   {currentQuestion.text}
                 </CardDescription>
               </div>
               <div className="flex gap-2">
                 <Badge variant="secondary">{currentQuestion.skill}</Badge>
                 <Badge variant="outline">{currentQuestion.difficulty}</Badge>
+                <Badge variant="outline">น้ำหนัก: {currentQuestion.weight}</Badge>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <RadioGroup 
-              value={selectedAnswer?.toString()} 
+              value={selectedAnswer?.toString() || ""} 
               onValueChange={(value) => handleAnswerSelect(parseInt(value))}
               className="space-y-4"
             >
               {currentQuestion.options.map((option, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
-                  <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                  <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
+                <div key={`${currentQuestion.id}-${index}`} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <RadioGroupItem value={index.toString()} id={`option-${currentQuestion.id}-${index}`} />
+                  <Label htmlFor={`option-${currentQuestion.id}-${index}`} className="flex-1 cursor-pointer text-base">
                     {option}
                   </Label>
                 </div>
               ))}
             </RadioGroup>
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between items-center mt-6">
               <Button 
                 variant="outline" 
                 onClick={previousQuestion}
@@ -474,11 +643,24 @@ export default function PublicSkillsTest() {
                 ← ก่อนหน้า
               </Button>
               
+              <div className="text-sm text-gray-600">
+                {selectedAnswer !== null ? (
+                  <span className="text-green-600">✓ เลือกคำตอบแล้ว</span>
+                ) : (
+                  <span className="text-orange-600">⚠ กรุณาเลือกคำตอบ</span>
+                )}
+              </div>
+              
               <Button 
                 onClick={nextQuestion}
                 disabled={selectedAnswer === null}
+                className={selectedAnswer !== null ? 'bg-green-600 hover:bg-green-700' : ''}
               >
-                {currentQuestionIndex === assessment.questions.length - 1 ? 'ส่งคำตอบ' : 'ถัดไป →'}
+                {currentQuestionIndex === assessment.questions.length - 1 ? (
+                  <>ส่งคำตอบ <CheckCircle className="w-4 h-4 ml-2" /></>
+                ) : (
+                  'ถัดไป →'
+                )}
               </Button>
             </div>
           </CardContent>

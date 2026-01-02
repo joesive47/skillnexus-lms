@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Development)
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: skillnexus-postgres-dev
+    environment:
+      POSTGRES_DB: skillnexus_dev
+      POSTGRES_USER: skillnexus
+      POSTGRES_PASSWORD: skillnexus123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - skillnexus-dev-network
+
+  # Redis Cache (Development)
+  redis-dev:
+    image: redis:7-alpine
+    container_name: skillnexus-redis-dev
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - skillnexus-dev-network
+
+  # SkillNexus Development
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: skillnexus-app-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://skillnexus:skillnexus123@postgres-dev:5432/skillnexus_dev
+      - REDIS_URL=redis://redis-dev:6379
+      - NEXTAUTH_URL=http://localhost:3001
+      - NEXTAUTH_SECRET=dev-secret-key
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - skillnexus-dev-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  skillnexus-dev-network:
+    driver: bridge

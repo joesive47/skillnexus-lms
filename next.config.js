@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Docker optimization
+  output: 'standalone',
+  
   // Minimal config for stability
   serverExternalPackages: ['pdf-parse', '@napi-rs/canvas', 'canvas'],
   
@@ -24,6 +27,9 @@ const nextConfig = {
   // Basic settings
   poweredByHeader: false,
   compress: true,
+  
+  // Docker-specific settings
+  outputFileTracingRoot: process.cwd(),
 }
 
 module.exports = nextConfig

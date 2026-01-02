@@ -7,13 +7,19 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { AssessmentAnalyzer } from '@/lib/assessment-analyzer'
 
 export async function importAssessmentQuestions(data: any[]) {
-  console.log('Server: Import function called with', data.length, 'questions')
+  console.log('=== IMPORT FUNCTION START ===')
+  console.log('Data length:', data.length)
+  console.log('Sample data:', data[0])
   
   if (!data || data.length === 0) {
     return { success: false, error: 'ไม่มีข้อมูลในไฟล์' }
   }
 
   try {
+    // Test database connection first
+    await prisma.$connect()
+    console.log('Database connected successfully')
+    
     const results = {
       careers: new Set(),
       skills: new Set(),
@@ -21,60 +27,78 @@ export async function importAssessmentQuestions(data: any[]) {
       errors: [] as string[]
     }
 
-    // Required fields (คอลัมน์พื้นฐาน)
+    // Required fields validation
     const requiredFields = ['question_id', 'career_title', 'skill_name', 'question_text', 'option_1', 'option_2', 'option_3', 'option_4', 'correct_answer', 'score']
     
-    // Optional fields (คอลัมน์เพิ่มเติมสำหรับการวิเคราะห์)
-    const optionalFields = ['skill_category', 'skill_importance', 'question_type', 'difficulty_level', 'explanation', 'course_link', 'course_title', 'learning_resource', 'estimated_time', 'prerequisite_skills']
-    
+    // Validate data first
     for (let i = 0; i < data.length; i++) {
       const row = data[i]
-      const rowNum = i + 2 // Excel row number (accounting for header)
+      const rowNum = i + 2
       
-      // Check required fields
       for (const field of requiredFields) {
         if (!row[field] || row[field].toString().trim() === '') {
           results.errors.push(`แถว ${rowNum}: ขาดข้อมูล ${field}`)
-          continue
         }
       }
       
       if (results.errors.length > 10) {
-        results.errors.push('พบข้อผิดพลาดมากเกินไป กรุณาตรวจสอบข้อมูลในไฟล์')
+        results.errors.push('พบข้อผิดพลาดมากเกินไป')
         break
       }
     }
     
     if (results.errors.length > 0) {
+      console.log('Validation errors:', results.errors)
       return { success: false, error: results.errors.join(', ') }
     }
 
-    // Process data in transaction
-    await prisma.$transaction(async (tx) => {
-      for (const row of data) {
+    console.log('Starting database transaction...')
+    
+    // Process data in transaction with better error handling
+    const transactionResult = await prisma.$transaction(async (tx) => {
+      console.log('Transaction started')
+      
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i]
+        console.log(`Processing row ${i + 1}/${data.length}: ${row.question_id}`)
+        
         try {
           // Create or get career
+          const careerTitle = row.career_title.toString().trim()
+          console.log('Creating/finding career:', careerTitle)
+          
           const career = await tx.career.upsert({
-            where: { title: row.career_title.toString().trim() },
-            update: {},
+            where: { title: careerTitle },
+            update: {
+              description: `ประเมินทักษะด้าน ${careerTitle}`,
+              updatedAt: new Date()
+            },
             create: {
-              title: row.career_title.toString().trim(),
+              title: careerTitle,
+              description: `ประเมินทักษะด้าน ${careerTitle}`,
               category: 'General'
             }
           })
-          results.careers.add(row.career_title)
+          console.log('Career created/found:', career.id)
+          results.careers.add(careerTitle)
 
           // Create or get skill
+          const skillName = row.skill_name.toString().trim()
+          console.log('Creating/finding skill:', skillName)
+          
           const skill = await tx.careerSkill.upsert({
-            where: { name: row.skill_name.toString().trim() },
+            where: { name: skillName },
             update: {},
             create: {
-              name: row.skill_name.toString().trim()
+              name: skillName,
+              description: `ทักษะด้าน ${skillName}`
             }
           })
-          results.skills.add(row.skill_name)
+          console.log('Skill created/found:', skill.id)
+          results.skills.add(skillName)
 
-          // Prepare question data with enhanced fields
+          // Prepare question data
+          const questionId = row.question_id.toString().trim()
           const questionData = {
             careerId: career.id,
             skillId: skill.id,
@@ -85,7 +109,6 @@ export async function importAssessmentQuestions(data: any[]) {
             option4: row.option_4.toString().trim(),
             correctAnswer: row.correct_answer.toString().trim(),
             score: parseInt(row.score.toString()) || 1,
-            // Enhanced fields
             skillCategory: row.skill_category?.toString().trim() || 'General',
             skillImportance: row.skill_importance?.toString().trim() || 'Medium',
             questionType: row.question_type?.toString().trim() || 'single',
@@ -98,38 +121,70 @@ export async function importAssessmentQuestions(data: any[]) {
             prerequisiteSkills: row.prerequisite_skills?.toString().trim() || null
           }
 
-          // Create question
-          await tx.assessmentQuestion.upsert({
-            where: { questionId: row.question_id.toString().trim() },
+          console.log('Creating/updating question:', questionId)
+          
+          // Create or update question
+          const question = await tx.assessmentQuestion.upsert({
+            where: { questionId: questionId },
             update: questionData,
             create: {
-              questionId: row.question_id.toString().trim(),
+              questionId: questionId,
               ...questionData
             }
           })
+          
+          console.log('Question created/updated:', question.id)
           results.questions++
+          
         } catch (rowError) {
-          console.error(`Error processing row ${row.question_id}:`, rowError)
-          throw new Error(`เกิดข้อผิดพลาดในคำถาม ID: ${row.question_id}`)
+          console.error(`Error processing row ${i + 1} (${row.question_id}):`, rowError)
+          throw new Error(`เกิดข้อผิดพลาดในคำถาม ID: ${row.question_id} - ${rowError instanceof Error ? rowError.message : 'Unknown error'}`)
         }
       }
+      
+      console.log('Transaction completed successfully')
+      return results
+    }, {
+      timeout: 60000 // 60 seconds timeout
     })
 
+    console.log('=== IMPORT RESULTS ===')
+    console.log('Questions imported:', transactionResult.questions)
+    console.log('Careers created:', transactionResult.careers.size)
+    console.log('Skills created:', transactionResult.skills.size)
+    
+    // Revalidate cache and force refresh
     revalidatePath('/skills-assessment')
+    revalidatePath('/api/admin/skills-assessment')
+    revalidatePath('/dashboard/admin/skills-assessment')
+    
+    // Clear Next.js cache
+    try {
+      const { unstable_cache } = await import('next/cache')
+      // Force cache invalidation
+    } catch (e) {
+      console.log('Cache clearing not available')
+    }
+    
     return {
       success: true,
       data: {
-        questions: results.questions,
-        careers: results.careers.size,
-        skills: results.skills.size
+        questions: transactionResult.questions,
+        careers: transactionResult.careers.size,
+        skills: transactionResult.skills.size
       }
     }
+    
   } catch (error) {
-    console.error('Import error:', error)
+    console.error('=== IMPORT ERROR ===')
+    console.error('Error details:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล' 
     }
+  } finally {
+    await prisma.$disconnect()
+    console.log('Database disconnected')
   }
 }
 

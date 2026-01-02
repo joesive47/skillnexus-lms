@@ -55,7 +55,7 @@ export function AssessmentPage({
   const question = questions[currentQuestion]
   const progress = ((currentQuestion + 1) / questions.length) * 100
   const isLastQuestion = currentQuestion === questions.length - 1
-  const canGoNext = selectedOptions.length > 0
+  const canGoNext = true // Always allow navigation
   const canGoPrev = currentQuestion > 0
 
   useEffect(() => {
@@ -78,6 +78,7 @@ export function AssessmentPage({
   }
 
   const handleOptionSelect = (optionNumber: string) => {
+    // Select the new option
     const newSelection = [optionNumber]
     setSelectedOptions(newSelection)
     onAnswer(question.id, newSelection)
@@ -168,6 +169,11 @@ export function AssessmentPage({
                 <Badge className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
                   {question.score} คะแนน
                 </Badge>
+                {selectedOptions.length > 0 && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    ✓ ตอบแล้ว
+                  </Badge>
+                )}
               </div>
               <h2 className="text-2xl font-semibold leading-relaxed">
                 {question.questionText}
@@ -219,7 +225,6 @@ export function AssessmentPage({
           
           <Button
             onClick={handleNext}
-            disabled={!canGoNext}
             className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
           >
             {isLastQuestion ? 'ดูผลประเมิน' : 'ถัดไป'}

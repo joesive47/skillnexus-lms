@@ -1,6 +1,6 @@
 'use client'
 
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts'
+import EnhancedSpiderChart from './enhanced-spider-chart'
 import { groupSkills } from '@/lib/skill-grouping'
 
 interface SkillData {
@@ -10,32 +10,39 @@ interface SkillData {
 
 interface SkillRadarChartProps {
   skillData: SkillData[]
+  title?: string
+  colorScheme?: 'default' | 'green' | 'blue' | 'purple'
 }
 
-export default function SkillRadarChart({ skillData }: SkillRadarChartProps) {
-  const displaySkills = groupSkills(skillData, 6)
+export default function SkillRadarChart({ 
+  skillData, 
+  title = "วิเคราะห์ทักษะรอบด้าน",
+  colorScheme = 'blue'
+}: SkillRadarChartProps) {
+  const displaySkills = groupSkills(skillData, 8)
+  
+  // Add mock averages and categories
+  const enhancedSkills = displaySkills.map(skill => ({
+    ...skill,
+    average: 70 + Math.random() * 15, // Mock average 70-85%
+    category: 'ทักษะหลัก'
+  }))
+
+  const overallScore = Math.round(
+    displaySkills.reduce((sum, skill) => sum + skill.score, 0) / displaySkills.length
+  )
 
   return (
-    <div className="w-full h-96">
-      <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={displaySkills}>
-          <PolarGrid />
-          <PolarAngleAxis dataKey="name" />
-          <PolarRadiusAxis 
-            angle={90} 
-            domain={[0, 100]} 
-            tick={false}
-          />
-          <Radar
-            name="Skills"
-            dataKey="score"
-            stroke="#3b82f6"
-            fill="#3b82f6"
-            fillOpacity={0.3}
-            strokeWidth={2}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
+    <div className="w-full">
+      <EnhancedSpiderChart
+        skillData={enhancedSkills}
+        overallScore={overallScore}
+        title={title}
+        size={450}
+        showAnimation={true}
+        showTooltip={true}
+        colorScheme={colorScheme}
+      />
     </div>
   )
 }

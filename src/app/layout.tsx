@@ -1,8 +1,5 @@
 import "./globals.css"
 import { Providers } from "@/components/providers"
-import { ChatbotWidget } from "@/components/chatbot/chatbot-widget"
-import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
-import { UserAnalytics } from "@/components/analytics/user-analytics"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -75,9 +72,6 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
-          <ChatbotWidget />
-          <OnboardingTour />
-          <UserAnalytics />
         </Providers>
       </body>
     </html>

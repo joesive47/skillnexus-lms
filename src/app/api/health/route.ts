@@ -1,40 +1,26 @@
 import { NextResponse } from 'next/server'
-import { checkApiHealth } from '@/lib/api-manager'
-
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const health = await checkApiHealth()
-    
-    const isHealthy = health.database && health.auth
+    // Test database connection
+    await prisma.$connect()
+    const userCount = await prisma.user.count()
+    await prisma.$disconnect()
     
     return NextResponse.json({
-      status: isHealthy ? 'healthy' : 'degraded',
-      timestamp: health.timestamp,
-      services: {
-        database: health.database ? 'connected' : 'disconnected',
-        redis: health.redis ? 'connected' : 'optional',
-        auth: health.auth ? 'active' : 'inactive',
-        api: 'running'
-      },
-      uptime: process.uptime(),
-      memory: {
-        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
-      }
-    }, { 
-      status: isHealthy ? 200 : 503,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
-      }
+      status: 'healthy',
+      database: 'connected',
+      userCount,
+      timestamp: new Date().toISOString()
     })
   } catch (error) {
+    console.error('Health check failed:', error)
     return NextResponse.json({
       status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Unknown error'
+      database: 'disconnected',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
     }, { status: 500 })
   }
 }

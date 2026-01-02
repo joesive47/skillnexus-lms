@@ -1,301 +1,322 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, ChevronRight, CheckCircle, Award, Target, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { getAssessmentQuestions, saveAssessmentResult } from '@/app/actions/assessment'
+import { Badge } from '@/components/ui/badge'
+import { Clock, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useSession } from 'next-auth/react'
+import { QuestionOption } from '@/components/skill-assessment/question-option'
+
+interface Question {
+  id: string
+  questionText: string
+  option1: string
+  option2: string
+  option3: string
+  option4: string
+  correctAnswer: string
+  skillName: string
+  skillCategory: string
+  difficultyLevel: string
+}
+
+interface Career {
+  id: string
+  title: string
+  description: string
+  category: string
+  questionCount: number
+  estimatedTime: number
+}
 
 export default function AssessmentPage() {
-  const router = useRouter()
   const params = useParams()
+  const router = useRouter()
   const { data: session } = useSession()
   const careerId = params.careerId as string
 
-  const [questions, setQuestions] = useState<any[]>([])
+  // Core state - simplified
+  const [career, setCareer] = useState<Career | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, string[]>>({})
-  const [startTime, setStartTime] = useState<number>(Date.now())
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [timeLeft, setTimeLeft] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [currentSkill, setCurrentSkill] = useState('')
 
+  // Load assessment data
   useEffect(() => {
-    loadQuestions()
+    const loadAssessment = async () => {
+      try {
+        const response = await fetch(`/api/admin/skills-assessment/${careerId}`)
+        if (response.ok) {
+          const assessment = await response.json()
+          
+          setCareer({
+            id: careerId,
+            title: assessment.title,
+            description: assessment.description,
+            category: assessment.category,
+            questionCount: assessment.questions?.length || 0,
+            estimatedTime: assessment.timeLimit || 30
+          })
+          
+          const transformedQuestions = assessment.questions?.map((q: any) => ({
+            id: q.id,
+            questionText: q.text,
+            option1: q.options[0] || '',
+            option2: q.options[1] || '',
+            option3: q.options[2] || '',
+            option4: q.options[3] || '',
+            correctAnswer: `option${q.correctAnswer + 1}`,
+            skillName: q.skill,
+            skillCategory: assessment.category,
+            difficultyLevel: q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)
+          })) || []
+          
+          setQuestions(transformedQuestions)
+          setTimeLeft(assessment.timeLimit * 60)
+        }
+      } catch (error) {
+        console.error('Error loading assessment:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadAssessment()
   }, [careerId])
 
+  // Debug effect to track state changes
   useEffect(() => {
-    if (questions.length > 0) {
-      setCurrentSkill(questions[currentIndex]?.skill?.name || '')
-    }
-  }, [currentIndex, questions])
-
-  const loadQuestions = async () => {
-    try {
-      const data = await getAssessmentQuestions(careerId)
-      setQuestions(data)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error loading questions:', error)
-      setLoading(false)
-    }
-  }
-
-  const handleAnswerSelect = (questionId: string, optionIndex: string) => {
-    const question = questions.find(q => q.id === questionId)
-    const isMultipleChoice = question?.correctAnswer.includes(',')
-    
-    if (isMultipleChoice) {
-      const currentAnswers = answers[questionId] || []
-      const newAnswers = currentAnswers.includes(optionIndex)
-        ? currentAnswers.filter(a => a !== optionIndex)
-        : [...currentAnswers, optionIndex]
+    if (questions.length > 0 && currentIndex >= 0) {
+      const currentQuestion = questions[currentIndex]
+      const currentAnswer = answers[currentQuestion?.id]
       
-      setAnswers(prev => ({
-        ...prev,
-        [questionId]: newAnswers
-      }))
-    } else {
-      setAnswers(prev => ({
-        ...prev,
-        [questionId]: [optionIndex]
-      }))
+      // Only log if there's an actual issue
+      if (currentAnswer && !['option1', 'option2', 'option3', 'option4'].includes(currentAnswer)) {
+        console.warn('Invalid answer detected:', {
+          currentIndex,
+          questionId: currentQuestion?.id,
+          currentAnswer
+        })
+      }
     }
+  }, [currentIndex, answers, questions])
+
+  // Timer
+  useEffect(() => {
+    if (timeLeft > 0 && questions.length > 0 && !loading) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
+      return () => clearTimeout(timer)
+    } else if (timeLeft === 0 && questions.length > 0) {
+      handleSubmit()
+    }
+  }, [timeLeft, questions.length, loading])
+
+  // Fixed answer handler - ensure clean state per question
+  const selectAnswer = (optionKey: string) => {
+    const questionId = questions[currentIndex].id
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: optionKey
+    }))
   }
 
-  const handleNext = () => {
+  // Fixed navigation - clear any temporary selection state
+  const goNext = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1)
     } else {
-      handleFinish()
+      handleSubmit()
     }
   }
 
-  const handlePrevious = () => {
+  const goPrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1)
     }
   }
 
-  const handleFinish = async () => {
-    if (!session?.user?.id) {
-      router.push('/login')
-      return
-    }
+  const goToQuestion = (index: number) => {
+    setCurrentIndex(index)
+  }
 
-    setSaving(true)
-    try {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000)
-      const result = await saveAssessmentResult({
-        userId: session.user.id,
-        careerId,
-        answers,
-        timeSpent
-      })
-
-      if (result.success) {
-        router.push(`/skills-assessment/results/${result.resultId}`)
+  const handleSubmit = async () => {
+    let correctAnswers = 0
+    questions.forEach(question => {
+      if (answers[question.id] === question.correctAnswer) {
+        correctAnswers++
       }
-    } catch (error) {
-      console.error('Error saving result:', error)
-    } finally {
-      setSaving(false)
-    }
+    })
+
+    const score = Math.round((correctAnswers / questions.length) * 100)
+    router.push(`/skills-assessment/results?careerId=${careerId}&score=${score}&total=${questions.length}&correct=${correctAnswers}`)
   }
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
-
-  const [elapsedTime, setElapsedTime] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setElapsedTime(Math.floor((Date.now() - startTime) / 1000))
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [startTime])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">กำลังโหลดข้อสอบ...</p>
+      <div className="container mx-auto p-6">
+        <div className="max-w-4xl mx-auto text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">กำลังโหลดแบบประเมิน...</p>
         </div>
       </div>
     )
   }
 
-  if (questions.length === 0) {
+  if (!career || questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-        <Card className="max-w-md mx-auto text-center">
-          <CardContent className="p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">ไม่พบข้อสอบ</h2>
-            <p className="text-gray-600 mb-6">ไม่มีข้อสอบสำหรับสาขาอาชีพนี้</p>
-            <Button onClick={() => router.push('/skills-assessment')}>
-              กลับไปเลือกสาขาอาชีพ
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto p-6">
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <h2 className="text-2xl font-bold mb-2">แบบประเมินยังไม่พร้อม</h2>
+              <p className="text-muted-foreground mb-6">
+                แบบประเมินสำหรับ {career?.title} ไม่พบหรือยังไม่พร้อมใช้งาน
+              </p>
+              <Button onClick={() => router.back()}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                กลับไปหน้าหลัก
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
 
   const currentQuestion = questions[currentIndex]
   const progress = ((currentIndex + 1) / questions.length) * 100
-  const currentAnswers = answers[currentQuestion.id] || []
-  const isMultipleChoice = currentQuestion.correctAnswer.includes(',')
+  const answeredCount = Object.keys(answers).length
+  // Fixed: Get current answer only for the current question
+  const currentAnswer = currentQuestion ? answers[currentQuestion.id] : undefined
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
-      {/* Top Navigation */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => router.push('/skills-assessment')}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                กลับไปเลือกสาขาอาชีพ
-              </Button>
-              <div>
-                <h1 className="font-semibold text-gray-900">{questions[0]?.career?.title}</h1>
-              </div>
+    <div className="container mx-auto p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold">{career.title}</h1>
+              <p className="text-muted-foreground">{career.description}</p>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span className="font-mono">{formatTime(elapsedTime)}</span>
-              </div>
-              <div className="text-sm font-medium text-gray-600">
-                {currentIndex + 1} / {questions.length}
+            <div className="text-right">
+              <div className="flex items-center gap-2 text-lg font-mono">
+                <Clock className="w-5 h-5" />
+                <span className={timeLeft < 300 ? 'text-red-500' : 'text-green-600'}>
+                  {formatTime(timeLeft)}
+                </span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Progress Bar */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-700">ความคืบหน้า</span>
-              <span className="text-sm font-medium text-indigo-600">{Math.round(progress)}%</span>
+          {/* Progress */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>ข้อ {currentIndex + 1} จาก {questions.length}</span>
+              <span>ตอบแล้ว {answeredCount}/{questions.length} ข้อ</span>
             </div>
-            <Progress value={progress} className="h-2 mb-4" />
-            
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Target className="w-4 h-4" />
-              <span>ทักษะที่กำลังประเมิน: <span className="font-medium text-gray-900">{currentSkill}</span></span>
-            </div>
-          </CardContent>
-        </Card>
+            <Progress value={progress} className="h-2" />
+          </div>
+        </div>
+
+
 
         {/* Question Card */}
-        <Card className="mb-6 shadow-lg">
-          <CardContent className="p-8">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                    <Award className="w-4 h-4" />
-                    {currentQuestion.score} คะแนน
-                  </span>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 leading-relaxed">
-                  คำถามที่ {currentIndex + 1}: {currentQuestion.questionText}
-                </h2>
-                {isMultipleChoice && (
-                  <p className="text-sm text-gray-600 mt-2">* สามารถเลือกได้หลายคำตอบ</p>
-                )}
-              </div>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">
+              ข้อ {currentIndex + 1}: {currentQuestion.questionText}
+            </CardTitle>
+            <div className="flex gap-2">
+              <Badge variant="outline">{currentQuestion.skillName}</Badge>
+              <Badge variant="secondary">{currentQuestion.difficultyLevel}</Badge>
+              {currentAnswer && (
+                <Badge className="bg-green-100 text-green-700">✓ ตอบแล้ว</Badge>
+              )}
             </div>
-
-            {/* Answer Options */}
+          </CardHeader>
+          <CardContent>
             <div className="space-y-3">
-              {[
-                { key: '1', text: currentQuestion.option1 },
-                { key: '2', text: currentQuestion.option2 },
-                { key: '3', text: currentQuestion.option3 },
-                { key: '4', text: currentQuestion.option4 }
-              ].map((option) => (
-                <Card
-                  key={option.key}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    currentAnswers.includes(option.key)
-                      ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                      : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
-                  }`}
-                  onClick={() => handleAnswerSelect(currentQuestion.id, option.key)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        currentAnswers.includes(option.key)
-                          ? 'border-indigo-500 bg-indigo-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {currentAnswers.includes(option.key) && (
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        )}
-                      </div>
-                      <span className="text-gray-900 font-medium">{option.key}.</span>
-                      <span className="text-gray-900">{option.text}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+              {['option1', 'option2', 'option3', 'option4'].map((optionKey, index) => (
+                <QuestionOption
+                  key={`${currentQuestion.id}-${optionKey}`}
+                  optionKey={optionKey}
+                  optionText={currentQuestion[optionKey as keyof Question] as string}
+                  optionIndex={index}
+                  isSelected={currentAnswer === optionKey}
+                  onSelect={selectAnswer}
+                  questionId={currentQuestion.id}
+                />
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
+        {/* Navigation - Always enabled */}
+        <div className="flex justify-between mb-6">
           <Button
             variant="outline"
-            onClick={handlePrevious}
+            onClick={goPrev}
             disabled={currentIndex === 0}
-            className="px-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            ย้อนกลับ
+            ข้อก่อนหน้า
           </Button>
 
           <Button
-            onClick={handleNext}
-            disabled={currentAnswers.length === 0 || saving}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 px-6"
+            onClick={goNext}
+            className={currentIndex === questions.length - 1 ? 'bg-green-600 hover:bg-green-700' : ''}
           >
-            {saving ? (
-              'กำลังบันทึก...'
-            ) : currentIndex === questions.length - 1 ? (
-              <>
-                ดูผลประเมิน
-                <CheckCircle className="w-4 h-4 ml-2" />
-              </>
-            ) : (
-              <>
-                ถัดไป
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </>
-            )}
+            {currentIndex === questions.length - 1 ? 'ส่งคำตอบ' : 'ข้อถัดไป'}
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
 
-        {/* Auto-save Indicator */}
-        <div className="text-center mt-4">
-          <span className="text-sm text-gray-500">
-            บันทึกอัตโนมัติ ✓
-          </span>
-        </div>
+        {/* Question Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">ภาพรวมคำตอบ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-10 gap-2">
+              {questions.map((question, index) => {
+                const hasAnswer = answers[question.id] !== undefined
+                const isCurrent = index === currentIndex
+                
+                return (
+                  <button
+                    key={`overview-${question.id}`}
+                    onClick={() => goToQuestion(index)}
+                    className={`w-10 h-10 rounded border-2 font-medium transition-all ${
+                      isCurrent
+                        ? 'border-blue-500 bg-blue-500 text-white'
+                        : hasAnswer
+                        ? 'border-green-500 bg-green-100 text-green-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              <p>💡 เคล็ดลับ: คลิกหมายเลขข้อเพื่อข้ามไปข้อนั้นได้ทันที</p>
+              <p>✅ สีเขียว = ตอบแล้ว | ⚪ สีขาว = ยังไม่ตอบ | 🔵 สีน้ำเงิน = ข้อปัจจุบัน</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

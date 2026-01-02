@@ -1,18 +1,72 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: skillnexus-postgres
     environment:
       POSTGRES_DB: skillnexus
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: skillnexus
+      POSTGRES_PASSWORD: skillnexus123
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - skillnexus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillnexus -d skillnexus"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: skillnexus-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - skillnexus-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SkillNexus Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: skillnexus-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://skillnexus:skillnexus123@postgres:5432/skillnexus
+      - REDIS_URL=redis://redis:6379
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-secret-key-here
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - skillnexus-network
+    volumes:
+      - ./uploads:/app/uploads
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  redis_data:
+
+networks:
+  skillnexus-network:
+    driver: bridge

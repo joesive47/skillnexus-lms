@@ -66,9 +66,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
-
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
@@ -107,4 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   debug: process.env.NODE_ENV === 'development',
   trustHost: true,
+  experimental: {
+    enableWebAuthn: false,
+  },
 })

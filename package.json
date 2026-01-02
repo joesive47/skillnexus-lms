@@ -28,10 +28,23 @@
 
     "load-test": "tsx scripts/essential/load-test.ts",
     "security:scan": "tsx scripts/essential/security-scan.ts",
+    "test:import": "node test-import-system.js",
     "setup": "npm run db:generate && npm run db:push && npm run db:seed",
     "setup:postgresql": "node scripts/essential/setup-postgresql.js",
     "build:clean": "rimraf .next && npm run db:generate && next build",
-    "build:force": "rimraf .next node_modules/.cache && npm install && npm run db:generate && next build"
+    "build:force": "rimraf .next node_modules/.cache && npm install && npm run db:generate && next build",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "docker:clean": "docker-compose down -v && docker system prune -f",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:setup": "npm run docker:build && npm run docker:up",
+    "docker:init": "node scripts/docker-setup.bat",
+    "docker:env": "copy .env.docker .env",
+    "docker:db": "npm run db:generate && npm run db:push && npm run db:seed",
+    "docker:full": "npm run docker:env && npm run docker:up && timeout /t 10 && npm run docker:db"
   },
   "dependencies": {
 

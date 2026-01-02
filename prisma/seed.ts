@@ -262,8 +262,117 @@ async function main() {
     })
   }
 
+  // Create sample careers and assessment questions
+  const careers = [
+    {
+      title: 'Full Stack Developer',
+      description: 'ประเมินทักษะการพัฒนาเว็บแอปพลิเคชันแบบครบวงจร',
+      category: 'Technology'
+    },
+    {
+      title: 'Data Scientist', 
+      description: 'ประเมินทักษะการวิเคราะห์ข้อมูลและ Machine Learning',
+      category: 'Technology'
+    },
+    {
+      title: 'Digital Marketing',
+      description: 'ประเมินทักษะการตลาดดิจิทัลและ Social Media',
+      category: 'Marketing'
+    }
+  ]
+
+  for (const careerData of careers) {
+    const career = await prisma.career.create({
+      data: careerData
+    })
+
+    // Create skills for each career
+    const skills = {
+      'Full Stack Developer': ['JavaScript', 'React', 'Node.js', 'Database Design'],
+      'Data Scientist': ['Python', 'Statistics', 'Machine Learning', 'Data Visualization'],
+      'Digital Marketing': ['SEO', 'Social Media', 'Content Marketing', 'Analytics']
+    }
+
+    const careerSkills = skills[career.title as keyof typeof skills] || []
+    
+    for (const skillName of careerSkills) {
+      const skill = await prisma.careerSkill.upsert({
+        where: { name: skillName },
+        update: {},
+        create: { name: skillName }
+      })
+
+      // Create sample questions for each skill
+      const questions = {
+        'JavaScript': [
+          {
+            questionId: `JS001_${career.id}`,
+            questionText: 'What is closure in JavaScript?',
+            option1: 'Function with access to parent scope',
+            option2: 'Loop structure', 
+            option3: 'Data type',
+            option4: 'Operator',
+            correctAnswer: '1',
+            score: 5
+          },
+          {
+            questionId: `JS002_${career.id}`,
+            questionText: 'Which method is used to add elements to an array?',
+            option1: 'append()',
+            option2: 'push()',
+            option3: 'add()',
+            option4: 'insert()',
+            correctAnswer: '2',
+            score: 3
+          }
+        ],
+        'Python': [
+          {
+            questionId: `PY001_${career.id}`,
+            questionText: 'What is Pandas DataFrame used for?',
+            option1: 'Managing tabular data',
+            option2: 'Creating graphs',
+            option3: 'Building websites',
+            option4: 'File management',
+            correctAnswer: '1',
+            score: 5
+          }
+        ],
+        'SEO': [
+          {
+            questionId: `SEO001_${career.id}`,
+            questionText: 'What does SEO stand for?',
+            option1: 'Search Engine Optimization',
+            option2: 'Social Engine Optimization',
+            option3: 'Site Engine Optimization',
+            option4: 'Search Email Optimization',
+            correctAnswer: '1',
+            score: 3
+          }
+        ]
+      }
+
+      const skillQuestions = questions[skillName as keyof typeof questions] || []
+      
+      for (const questionData of skillQuestions) {
+        await prisma.assessmentQuestion.create({
+          data: {
+            ...questionData,
+            careerId: career.id,
+            skillId: skill.id,
+            skillCategory: 'Technical',
+            skillImportance: 'Critical',
+            questionType: 'single',
+            difficultyLevel: 'Intermediate'
+          }
+        })
+      }
+    }
+  }
+
   console.log('Database seeded successfully')
   console.log(`Created ${students.length} student users with credits`)
+  console.log(`Created ${careers.length} sample career assessments`)
   console.log('\n=== ข้อมูลการเข้าสู่ระบบ SkillNexus LMS ===')
   console.log('\n## บัญชีผู้ดูแลระบบ (Admin)')
   console.log('- อีเมล: admin@skillnexus.com | รหัสผ่าน: Admin@123!')
@@ -278,6 +387,9 @@ async function main() {
   console.log('- อีเมล: alice@example.com | รหัสผ่าน: Student@123!')
   console.log('- อีเมล: joesive47@gmail.com | รหัสผ่าน: Student@123! | เครดิต: 1000')
   console.log('(และอีก 6 บัญชีนักเรียนใช้รหัสผ่าน: Student@123!)')
+  console.log('\n## Skills Assessment')
+  console.log('- ไปที่: http://localhost:3000/skills-assessment')
+  console.log('- หรือ Import ข้อสอบเพิ่มเติม: http://localhost:3000/skills-assessment/import')
 }
 
 main()

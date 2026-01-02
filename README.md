@@ -166,11 +166,11 @@ SkillNexus LMS พร้อม Deploy ไปยัง Vercel แล้ว!
 
 **Enhanced Excel Import:**
 ```bash
-# 1. Download template
-http://localhost:3000/skills-assessment/import
+# 1. Go to admin dashboard
+http://localhost:3000/dashboard/admin/skills-assessment
 
-# 2. Fill with 20 columns (10 new analysis fields)
-# 3. Import and get instant validation
+# 2. Create new assessment and import Excel/CSV
+# 3. Download template and fill with data
 ```
 
 **Advanced Analysis:**
@@ -210,12 +210,10 @@ http://localhost:3000/skills-assessment/import
 # 1. Update database
 npx prisma generate && npx prisma db push
 
-# 2. Go to import page
-http://localhost:3000/skills-assessment/import
+# 2. Go to admin dashboard
+http://localhost:3000/dashboard/admin/skills-assessment
 
-# 3. Download template and fill data
-
-# 4. Import and test
+# 3. Create assessment and import data
 ```
 
 📖 **Full Guide:** [QUICK-START-ASSESSMENT.md](./QUICK-START-ASSESSMENT.md)

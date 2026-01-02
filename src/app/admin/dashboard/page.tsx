@@ -143,7 +143,7 @@ export default async function AdminDashboard() {
             <Link href="/dashboard/admin/voice-assignments" className="block p-2 hover:bg-gray-100 rounded text-sm">
               🎤 Voice Assignments
             </Link>
-            <Link href="/skills-assessment/manage" className="block p-2 hover:bg-gray-100 rounded text-sm">
+            <Link href="/dashboard/admin/skills-assessment" className="block p-2 hover:bg-gray-100 rounded text-sm">
               ⚙️ Manage Assessments
             </Link>
           </CardContent>

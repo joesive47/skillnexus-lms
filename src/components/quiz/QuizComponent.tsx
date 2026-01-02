@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { useRouter } from 'next/navigation'
@@ -131,19 +130,24 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
         <CardContent className="space-y-6">
           <div>
             <h3 className="text-lg font-medium mb-4">{currentQ.text}</h3>
-            <RadioGroup
-              value={answers[currentQ.id] || ''}
-              onValueChange={(value) => handleAnswerChange(currentQ.id, value)}
-            >
+            <div className="space-y-3">
               {currentQ.options.map((option) => (
                 <div key={option.id} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option.id} id={option.id} />
-                  <Label htmlFor={option.id} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    id={option.id}
+                    name={`question-${currentQ.id}`}
+                    value={option.id}
+                    checked={answers[currentQ.id] === option.id}
+                    onChange={(e) => handleAnswerChange(currentQ.id, e.target.value)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <Label htmlFor={option.id} className="cursor-pointer text-sm font-medium text-gray-900">
                     {option.text}
                   </Label>
                 </div>
               ))}
-            </RadioGroup>
+            </div>
           </div>
 
           <div className="flex justify-between">
