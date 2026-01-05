@@ -7,8 +7,8 @@ services:
     container_name: skillnexus-postgres
     environment:
       POSTGRES_DB: skillnexus
-      POSTGRES_USER: skillnexus
-      POSTGRES_PASSWORD: skillnexus123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
@@ -17,7 +17,7 @@ services:
     networks:
       - skillnexus-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U skillnexus -d skillnexus"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d skillnexus"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -48,7 +48,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://skillnexus:skillnexus123@postgres:5432/skillnexus
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/skillnexus
       - REDIS_URL=redis://redis:6379
       - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=your-secret-key-here

@@ -2,11 +2,17 @@
 
 import Link from 'next/link'
 import { SafeWrapper } from '@/components/safe-wrapper'
+import LiveStatsCounter from '@/components/marketing/live-stats-counter'
+import SocialProof from '@/components/marketing/social-proof'
+import TrustBadges from '@/components/marketing/trust-badges'
+import CountdownTimer from '@/components/marketing/countdown-timer'
+import PromoPopup from '@/components/marketing/promo-popup'
+import VisitorCounter from '@/components/visitor-counter'
 
 // Safe components ที่ไม่ใช้ client-side features
 function SafeFloatingActions() {
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-40">
       <Link
         href="/skills-assessment"
         className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
@@ -20,7 +26,7 @@ function SafeFloatingActions() {
 
 function SafeStatusIndicator() {
   return (
-    <div className="fixed top-4 left-4 z-40">
+    <div className="fixed top-24 left-4 z-40">
       <div className="bg-black/20 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white text-sm">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -60,7 +66,7 @@ export default function SafeLandingPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
+      <header className="relative z-50 bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -70,7 +76,13 @@ export default function SafeLandingPage() {
               upPowerSkill
             </h1>
           </div>
-          <div className="flex space-x-4">
+          
+          {/* Visitor Counter - Center */}
+          <div className="bg-black/30 backdrop-blur-md border border-white/20 rounded-xl px-4 py-2">
+            <VisitorCounter />
+          </div>
+          
+          <div className="flex items-center space-x-4">
             <Link href="/login" className="bg-white/10 border border-white/30 text-white px-6 py-2 rounded-lg hover:bg-white/20 transition-all duration-300 hover:scale-105">
               เข้าสู่ระบบ
             </Link>
@@ -80,6 +92,11 @@ export default function SafeLandingPage() {
           </div>
         </div>
       </header>
+
+      {/* Countdown Timer */}
+      <SafeWrapper>
+        <CountdownTimer endDate={new Date('2025-02-28')} />
+      </SafeWrapper>
 
       {/* Hero Section */}
       <section className="relative z-10 py-24">
@@ -216,6 +233,20 @@ export default function SafeLandingPage() {
         </div>
       </section>
 
+      {/* Live Stats Counter */}
+      <div className="relative z-10">
+        <SafeWrapper>
+          <LiveStatsCounter />
+        </SafeWrapper>
+      </div>
+
+      {/* Trust Badges */}
+      <div className="relative z-10">
+        <SafeWrapper>
+          <TrustBadges />
+        </SafeWrapper>
+      </div>
+
       {/* CTA */}
       <section className="relative z-10 py-24 bg-gradient-to-br from-indigo-900 to-purple-900">
         <div className="container mx-auto px-6 text-center">
@@ -253,6 +284,20 @@ export default function SafeLandingPage() {
       <SafeWrapper>
         <SafeFloatingActions />
       </SafeWrapper>
+
+      {/* Social Proof */}
+      <div className="relative z-20">
+        <SafeWrapper>
+          <SocialProof />
+        </SafeWrapper>
+      </div>
+
+      {/* Promo Popup */}
+      <div className="relative z-30">
+        <SafeWrapper>
+          <PromoPopup />
+        </SafeWrapper>
+      </div>
     </div>
   )
 }

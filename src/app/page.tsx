@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { FloatingActions } from '@/components/ui/floating-actions'
 import { StatusIndicator } from '@/components/ui/status-indicator'
 import { NewsletterSignup } from '@/components/ui/newsletter-signup'
+import LiveVisitorStats from '@/components/live-visitor-stats'
 
 export default function HomePage() {
   return (
@@ -12,6 +13,8 @@ export default function HomePage() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
         <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
+
+
 
       {/* Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
@@ -202,6 +205,9 @@ export default function HomePage() {
       
       {/* Floating Actions */}
       <FloatingActions />
+      
+      {/* Live Visitor Stats */}
+      <LiveVisitorStats />
     </div>
   )
 }

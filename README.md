@@ -446,3 +446,14 @@ src/
 - 📜 Compliance Ready: GDPR, SOC 2, ISO 27001
 # Force rebuild
 # Force rebuild 12/06/2025 15:35:00
+
+## 🔧 Troubleshooting
+
+### Database Connection Issues
+หากพบปัญหา "Can't reach database server" ดูคู่มือแก้ไข:
+- 📖 **[TROUBLESHOOTING-DATABASE.md](./TROUBLESHOOTING-DATABASE.md)** - แก้ไขปัญหา Database Connection
+
+### Common Issues
+- ✅ Schema provider ไม่ตรงกับ Database URL
+- ✅ Prisma Client ไม่ได้ regenerate
+- ✅ Environment Variables ไม่ถูกต้อง

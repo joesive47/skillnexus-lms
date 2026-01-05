@@ -1474,3 +1474,12 @@ model VerificationRecord {
   @@index([verificationCode])
   @@map("verification_records")
 }
+
+model VisitorStats {
+  id           Int      @id @default(1)
+  totalVisitors Int     @default(0)
+  lastVisit    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("visitor_stats")
+}

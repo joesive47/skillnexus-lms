@@ -1,61 +1,46 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database (Development)
-  postgres-dev:
+  # PostgreSQL Database
+  postgres:
     image: postgres:15-alpine
-    container_name: skillnexus-postgres-dev
+    container_name: skillnexus-postgres
     environment:
-      POSTGRES_DB: skillnexus_dev
-      POSTGRES_USER: skillnexus
-      POSTGRES_PASSWORD: skillnexus123
+      POSTGRES_DB: skillnexus
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
       - "5433:5432"
     volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - skillnexus-dev-network
+      - skillnexus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d skillnexus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Redis Cache (Development)
-  redis-dev:
+  # Redis Cache
+  redis:
     image: redis:7-alpine
-    container_name: skillnexus-redis-dev
+    container_name: skillnexus-redis
     ports:
-      - "6380:6379"
+      - "6379:6379"
     volumes:
-      - redis_dev_data:/data
+      - redis_data:/data
     networks:
-      - skillnexus-dev-network
-
-  # SkillNexus Development
-  app-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: skillnexus-app-dev
-    ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://skillnexus:skillnexus123@postgres-dev:5432/skillnexus_dev
-      - REDIS_URL=redis://redis-dev:6379
-      - NEXTAUTH_URL=http://localhost:3001
-      - NEXTAUTH_SECRET=dev-secret-key
-    depends_on:
-      - postgres-dev
-      - redis-dev
-    networks:
-      - skillnexus-dev-network
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    restart: unless-stopped
+      - skillnexus-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  postgres_dev_data:
-  redis_dev_data:
+  postgres_data:
+  redis_data:
 
 networks:
-  skillnexus-dev-network:
+  skillnexus-network:
     driver: bridge

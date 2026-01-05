@@ -8,11 +8,21 @@ let redis: any = null
 try {
   if (process.env.REDIS_URL) {
     const Redis = require('ioredis')
-    redis = new Redis(process.env.REDIS_URL, {
+    // Use individual host/port to avoid deprecation warning
+    const redisConfig = process.env.REDIS_HOST && process.env.REDIS_PORT ? {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT),
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
-    })
+    } : {
+      url: process.env.REDIS_URL,
+      retryDelayOnFailover: 100,
+      maxRetriesPerRequest: 3,
+      lazyConnect: true,
+    }
+    
+    redis = new Redis(redisConfig)
     
     redis.on('error', (error: Error) => {
       console.warn('Redis connection error:', error.message)

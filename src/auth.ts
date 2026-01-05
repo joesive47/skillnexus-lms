@@ -74,8 +74,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async redirect({ url, baseUrl }) {
       console.log('[AUTH] Redirect - url:', url, 'baseUrl:', baseUrl)
       
-      // Use environment-based URL
-      const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || baseUrl
+      // Force localhost for development
+      const siteUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000'
+        : (process.env.NEXTAUTH_URL || process.env.AUTH_URL || baseUrl)
       
       // If url is relative, prepend site URL
       if (url.startsWith('/')) {
@@ -85,6 +87,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // If url matches site URL, allow it
       if (url.startsWith(siteUrl)) {
         return url
+      }
+      
+      // For development, force localhost
+      if (process.env.NODE_ENV === 'development' && !url.startsWith('http://localhost:3000')) {
+        return 'http://localhost:3000/dashboard'
       }
       
       // Default to dashboard
