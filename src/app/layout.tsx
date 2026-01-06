@@ -1,5 +1,6 @@
 import "./globals.css"
 import { Providers } from "@/components/providers"
+import GlobalWidgets from "@/components/global-widgets"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
+          <GlobalWidgets />
         </Providers>
       </body>
     </html>
