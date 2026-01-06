@@ -8,6 +8,9 @@ import TrustBadges from '@/components/marketing/trust-badges'
 import CountdownTimer from '@/components/marketing/countdown-timer'
 import PromoPopup from '@/components/marketing/promo-popup'
 import VisitorCounter from '@/components/visitor-counter'
+import dynamic from 'next/dynamic'
+
+const UnifiedChatWidget = dynamic(() => import('@/components/chatbot/UnifiedChatWidget'), { ssr: false })
 
 export default function SafeLandingPageNew() {
   return (
@@ -63,8 +66,9 @@ export default function SafeLandingPageNew() {
         </div>
       </div>
 
-      {/* Floating Action Button - Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-20">
+      {/* Floating Widgets - Bottom Right */}
+      <div className="fixed bottom-6 right-6 z-20 flex flex-col gap-3">
+        {/* Skill Assessment Button */}
         <Link
           href="/skills-assessment"
           className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
@@ -73,6 +77,9 @@ export default function SafeLandingPageNew() {
           <span className="text-xl">🎯</span>
         </Link>
       </div>
+
+      {/* Chatbot Widget */}
+      <UnifiedChatWidget />
 
       {/* Countdown Timer */}
       <SafeWrapper>
