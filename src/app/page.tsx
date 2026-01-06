@@ -1,42 +1,13 @@
-import Link from 'next/link'
-import { FloatingActions } from '@/components/ui/floating-actions'
-import { StatusIndicator } from '@/components/ui/status-indicator'
-import { NewsletterSignup } from '@/components/ui/newsletter-signup'
-import LiveVisitorStats from '@/components/live-visitor-stats'
+import { SafeWrapper } from '@/components/safe-wrapper'
+import SafeLandingPageNew from '@/components/safe-landing-page-new'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
-
-
-
-      {/* Header */}
-      <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">S</span>
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-              upPowerSkill
-            </h1>
-          </div>
-          <div className="flex space-x-4">
-            <Link href="/login" className="bg-white/10 border border-white/30 text-white px-6 py-2 rounded-lg hover:bg-white/20 transition-all duration-300 hover:scale-105">
-              เข้าสู่ระบบ
-            </Link>
-            <Link href="/register" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg">
-              เริ่มต้นเลย
-            </Link>
-          </div>
-        </div>
-      </header>
+    <SafeWrapper>
+      <SafeLandingPageNew />
+    </SafeWrapper>
+  )
+}
 
       {/* Hero Section */}
       <section className="relative z-10 py-24">
