@@ -25,10 +25,10 @@ export default function LandingPage() {
           {/* Language Switcher */}
           <button
             onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
-            className="flex items-center gap-2 bg-white/10 border border-white/30 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-300"
+            className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 border-2 border-white/30 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            <span className="text-xl">{lang === 'th' ? '🇹🇭' : '🇬🇧'}</span>
-            <span className="font-medium">{lang === 'th' ? 'TH' : 'EN'}</span>
+            <span className="text-2xl">{lang === 'th' ? '🇹🇭' : '🇬🇧'}</span>
+            <span className="font-bold text-lg">{lang === 'th' ? 'ไทย' : 'ENG'}</span>
           </button>
         </div>
       </header>
