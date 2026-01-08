@@ -13,7 +13,7 @@ export const translations = {
     },
     features: {
       title: "⚡ เครื่องมือที่ทรงพลัง",
-      subtitle: "เทคโนโลยีล้ำสมัยสำหรับการเรียนรู้ยุคใหม่",
+      subtitle: "เทคโนโลジีล้ำสมัยสำหรับการเรียนรู้ยุคใหม่",
       skill: {
         title: "AI ทดสอบทักษะ",
         desc: "วิเคราะห์ความสามารถด้วย AI และสร้างเส้นทางการเรียนรู้ที่เหมาะสม",
@@ -74,7 +74,45 @@ export const translations = {
       loginBtn: "🎯 Sign In",
       assessmentBtn: "📊 Free Skill Assessment"
     }
+  },
+  ja: {
+    header: {
+      title: "upPowerSkill"
+    },
+    hero: {
+      title: "upPowerSkill",
+      subtitle: "🚀 AI搭載エンタープライズ学習管理システム",
+      description: "スキップ防止技術とエンタープライズグレードのセキュリティを搭載",
+      loginBtn: "🎯 ログイン",
+      registerBtn: "🚀 今すぐ始める",
+      assessmentBtn: "📊 スキル診断"
+    },
+    features: {
+      title: "⚡ 強力なツール",
+      subtitle: "最先端技術による現代的な学習体験",
+      skill: {
+        title: "AIスキル診断",
+        desc: "AIであなたの能力を分析し、最適な学習パスを作成します",
+        link: "診断を始める →"
+      },
+      course: {
+        title: "AI搭載コース",
+        desc: "スキップ防止システムと24時間365日のAIチューターサポートで新しいスキルを学習",
+        link: "コースを見る →"
+      },
+      certificate: {
+        title: "ブロックチェーン証明書",
+        desc: "業界で認められたブロックチェーン検証済み証明書を取得",
+        link: "証明書を見る →"
+      }
+    },
+    cta: {
+      title: "🚀 始める準備はできましたか？",
+      subtitle: "AIと最先端技術で明るい未来を創造する数十万人の仲間に参加しましょう",
+      loginBtn: "🎯 ログイン",
+      assessmentBtn: "📊 無料スキル診断"
+    }
   }
 }
 
-export type Language = 'th' | 'en'
+export type Language = 'th' | 'en' | 'ja'

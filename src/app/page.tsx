@@ -23,13 +23,38 @@ export default function HomePage() {
           </div>
           
           {/* Language Switcher */}
-          <button
-            onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg transition-all duration-200 border border-gray-300"
-          >
-            <span className="text-xl">{lang === 'th' ? '🇹🇭' : '🇬🇧'}</span>
-            <span className="font-semibold">{lang === 'th' ? 'ไทย' : 'ENG'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLang('th')}
+              className={`px-3 py-2 rounded-lg transition-all duration-200 ${
+                lang === 'th' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+              }`}
+            >
+              🇹🇭
+            </button>
+            <button
+              onClick={() => setLang('en')}
+              className={`px-3 py-2 rounded-lg transition-all duration-200 ${
+                lang === 'en' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+              }`}
+            >
+              🇬🇧
+            </button>
+            <button
+              onClick={() => setLang('ja')}
+              className={`px-3 py-2 rounded-lg transition-all duration-200 ${
+                lang === 'ja' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+              }`}
+            >
+              🇯🇵
+            </button>
+          </div>
         </div>
       </header>
 
