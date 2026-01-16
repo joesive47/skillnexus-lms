@@ -118,17 +118,20 @@ export default function AssessmentResultsPage() {
                 {score}%
               </div>
               <Badge className={`text-lg px-4 py-2 ${scoreInfo.bgColor} ${scoreInfo.color}`}>
-                {scoreInfo.level}
+                {score >= 70 ? '✅ ผ่าน' : '❌ ไม่ผ่าน'} ({scoreInfo.level})
               </Badge>
-              <div className="mt-4 space-y-1">
-                <div className="text-muted-foreground">
-                  ตอบถูก {correct} จาก {total} ข้อ
+              <div className="mt-6 grid grid-cols-2 gap-4 max-w-md mx-auto">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{correct}/{total}</div>
+                  <div className="text-sm text-muted-foreground">ตอบถูก/ทั้งหมด</div>
                 </div>
-                {totalScore > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    ได้คะแนน {earned} จาก {totalScore} คะแนน
-                  </div>
-                )}
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{earned}/{totalScore}</div>
+                  <div className="text-sm text-muted-foreground">คะแนนที่ได้</div>
+                </div>
+              </div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                {score >= 70 ? '🎉 ยินดีด้วย! คุณผ่านการประเมิน' : '💪 พยายามอีกครั้ง! (ต้องการ 70%)'}
               </div>
             </div>
           </CardContent>

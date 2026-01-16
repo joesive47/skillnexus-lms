@@ -43,7 +43,7 @@ export async function GET() {
       passingScore: 70,
       enabled: true,
       questions: career.assessmentQuestions?.map(q => {
-        // Smart correct answer detection
+        // Ensure correctAnswer is 0-based index for frontend
         let correctAnswerIndex = 0;
         const correctAnswerStr = q.correctAnswer.trim();
         
@@ -66,6 +66,8 @@ export async function GET() {
           );
           correctAnswerIndex = matchIndex >= 0 ? matchIndex : 0;
         }
+        
+        console.log(`Question ${q.questionId}: correctAnswer="${q.correctAnswer}" → index=${correctAnswerIndex} → option${correctAnswerIndex + 1}`)
         
         return {
           id: q.questionId,
