@@ -47,8 +47,15 @@ export async function GET() {
         let correctAnswerIndex = 0;
         const correctAnswerStr = q.correctAnswer.trim();
         
+        // Normalize: option_2 → option2, option_1 → option1
+        const normalizedAnswer = correctAnswerStr.replace(/_/g, '');
+        
+        // Check if it's option1-4 format
+        if (/^option[1-4]$/i.test(normalizedAnswer)) {
+          correctAnswerIndex = parseInt(normalizedAnswer.replace(/option/i, '')) - 1;
+        }
         // Check if it's a number (1-4)
-        if (/^[1-4]$/.test(correctAnswerStr)) {
+        else if (/^[1-4]$/.test(correctAnswerStr)) {
           correctAnswerIndex = parseInt(correctAnswerStr) - 1;
         } 
         // Check if it matches option text
