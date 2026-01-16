@@ -157,8 +157,28 @@ export default function AssessmentPage() {
     // Calculate scores
     questions.forEach(question => {
       const userAnswer = answers[question.id]
-      const isCorrect = userAnswer === question.correctAnswer
-      const questionScore = question.score || 1
+      
+      // Smart answer comparison
+      let isCorrect = false
+      
+      // Method 1: Direct comparison (option1, option2, etc.)
+      if (userAnswer === question.correctAnswer) {
+        isCorrect = true
+      }
+      // Method 2: Compare by index (if correctAnswer is a number)
+      else if (/^[0-4]$/.test(question.correctAnswer)) {
+        const correctIndex = parseInt(question.correctAnswer)
+        const userIndex = parseInt(userAnswer?.replace('option', '') || '0')
+        isCorrect = userIndex === correctIndex
+      }
+      // Method 3: Compare option text
+      else {
+        const userOptionKey = userAnswer as keyof Question
+        const userText = question[userOptionKey] as string
+        isCorrect = userText?.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
+      }
+      
+      const questionScore = question.score || question.weight || 1
       
       totalScore += questionScore
       
