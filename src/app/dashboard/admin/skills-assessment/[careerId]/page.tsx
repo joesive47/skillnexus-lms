@@ -201,22 +201,26 @@ export default function CareerDetailPage() {
                 <p className="font-medium mb-3">{question.questionText}</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <div className={`p-2 rounded ${question.correctAnswer.includes('1') ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-gray-50'}`}>
+                  <div className={`p-2 rounded ${question.correctAnswer === '1' ? 'bg-green-50 border border-green-200 text-green-800 font-semibold' : 'bg-gray-50'}`}>
                     <span className="font-medium">1.</span> {question.option1}
+                    {question.correctAnswer === '1' && <span className="ml-2 text-green-600">✓ คำตอบที่ถูก</span>}
                   </div>
-                  <div className={`p-2 rounded ${question.correctAnswer.includes('2') ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-gray-50'}`}>
+                  <div className={`p-2 rounded ${question.correctAnswer === '2' ? 'bg-green-50 border border-green-200 text-green-800 font-semibold' : 'bg-gray-50'}`}>
                     <span className="font-medium">2.</span> {question.option2}
+                    {question.correctAnswer === '2' && <span className="ml-2 text-green-600">✓ คำตอบที่ถูก</span>}
                   </div>
-                  <div className={`p-2 rounded ${question.correctAnswer.includes('3') ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-gray-50'}`}>
+                  <div className={`p-2 rounded ${question.correctAnswer === '3' ? 'bg-green-50 border border-green-200 text-green-800 font-semibold' : 'bg-gray-50'}`}>
                     <span className="font-medium">3.</span> {question.option3}
+                    {question.correctAnswer === '3' && <span className="ml-2 text-green-600">✓ คำตอบที่ถูก</span>}
                   </div>
-                  <div className={`p-2 rounded ${question.correctAnswer.includes('4') ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-gray-50'}`}>
+                  <div className={`p-2 rounded ${question.correctAnswer === '4' ? 'bg-green-50 border border-green-200 text-green-800 font-semibold' : 'bg-gray-50'}`}>
                     <span className="font-medium">4.</span> {question.option4}
+                    {question.correctAnswer === '4' && <span className="ml-2 text-green-600">✓ คำตอบที่ถูก</span>}
                   </div>
                 </div>
                 
                 <div className="mt-2 text-xs text-gray-500">
-                  คำตอบที่ถูก: {question.correctAnswer}
+                  คำตอบที่ถูก: ข้อ {question.correctAnswer}
                 </div>
               </div>
             ))}
