@@ -42,16 +42,35 @@ export async function GET() {
       timeLimit: Math.max(30, Math.ceil((career.assessmentQuestions?.length || 0) * 2)),
       passingScore: 70,
       enabled: true,
-      questions: career.assessmentQuestions?.map(q => ({
-        id: q.questionId,
-        text: q.questionText,
-        options: [q.option1, q.option2, q.option3, q.option4],
-        correctAnswer: parseInt(q.correctAnswer) - 1, // Keep as 0-based for compatibility
-        correctAnswerKey: `option${q.correctAnswer}`, // Add this for direct comparison
-        skill: q.skill?.name || 'General',
-        difficulty: (q.difficultyLevel?.toLowerCase() as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
-        weight: q.score
-      })) || [],
+      questions: career.assessmentQuestions?.map(q => {
+        // Smart correct answer detection
+        let correctAnswerIndex = 0;
+        const correctAnswerStr = q.correctAnswer.trim();
+        
+        // Check if it's a number (1-4)
+        if (/^[1-4]$/.test(correctAnswerStr)) {
+          correctAnswerIndex = parseInt(correctAnswerStr) - 1;
+        } 
+        // Check if it matches option text
+        else {
+          const options = [q.option1, q.option2, q.option3, q.option4];
+          const matchIndex = options.findIndex(opt => 
+            opt.trim().toLowerCase() === correctAnswerStr.toLowerCase()
+          );
+          correctAnswerIndex = matchIndex >= 0 ? matchIndex : 0;
+        }
+        
+        return {
+          id: q.questionId,
+          text: q.questionText,
+          options: [q.option1, q.option2, q.option3, q.option4],
+          correctAnswer: correctAnswerIndex,
+          correctAnswerText: q.correctAnswer,
+          skill: q.skill?.name || 'General',
+          difficulty: (q.difficultyLevel?.toLowerCase() as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
+          weight: q.score
+        }
+      }) || [],
       recommendedCourses: []
     }))
     
