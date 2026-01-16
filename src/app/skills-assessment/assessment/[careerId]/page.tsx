@@ -154,8 +154,10 @@ export default function AssessmentPage() {
     let earnedScore = 0
     const skillScores: Record<string, { correct: number; total: number; score: number; maxScore: number }> = {}
 
-    // Calculate scores
-    questions.forEach(question => {
+    // Calculate scores with detailed logging
+    const debugResults: any[] = []
+    
+    questions.forEach((question, index) => {
       const userAnswer = answers[question.id]
       
       // Smart answer comparison
@@ -180,6 +182,17 @@ export default function AssessmentPage() {
       
       const questionScore = question.score || question.weight || 1
       
+      // Debug log
+      debugResults.push({
+        q: index + 1,
+        userAnswer,
+        correctAnswer: question.correctAnswer,
+        isCorrect,
+        score: isCorrect ? questionScore : 0
+      })
+      
+      console.log(`Q${index + 1}: User=${userAnswer}, Correct=${question.correctAnswer}, Match=${isCorrect}`)
+      
       totalScore += questionScore
       
       if (isCorrect) {
@@ -199,6 +212,13 @@ export default function AssessmentPage() {
         skillScores[skillName].score += questionScore
       }
     })
+    
+    // Log summary
+    console.log('=== Assessment Results ====')
+    console.log('Debug Results:', debugResults)
+    console.log(`Total: ${correctAnswers}/${questions.length} correct`)
+    console.log(`Score: ${earnedScore}/${totalScore} (${scorePercentage}%)`)
+    console.log('==========================')
 
     // Calculate percentage
     const scorePercentage = totalScore > 0 ? Math.round((earnedScore / totalScore) * 100) : 0
