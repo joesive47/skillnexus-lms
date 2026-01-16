@@ -72,7 +72,7 @@ export default function AssessmentPage() {
             option2: q.options[1] || '',
             option3: q.options[2] || '',
             option4: q.options[3] || '',
-            correctAnswer: q.correctAnswerKey || `option${q.correctAnswer + 1}`,
+            correctAnswer: `option${q.correctAnswer + 1}`, // Always use option1-4 format
             skillName: q.skill,
             skillCategory: assessment.category,
             difficultyLevel: q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1),
@@ -159,27 +159,7 @@ export default function AssessmentPage() {
     
     questions.forEach((question, index) => {
       const userAnswer = answers[question.id]
-      
-      // Smart answer comparison
-      let isCorrect = false
-      
-      // Method 1: Direct comparison (option1, option2, etc.)
-      if (userAnswer === question.correctAnswer) {
-        isCorrect = true
-      }
-      // Method 2: Compare by index (if correctAnswer is a number)
-      else if (/^[0-4]$/.test(question.correctAnswer)) {
-        const correctIndex = parseInt(question.correctAnswer)
-        const userIndex = parseInt(userAnswer?.replace('option', '') || '0')
-        isCorrect = userIndex === correctIndex
-      }
-      // Method 3: Compare option text
-      else {
-        const userOptionKey = userAnswer as keyof Question
-        const userText = question[userOptionKey] as string
-        isCorrect = userText?.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
-      }
-      
+      const isCorrect = userAnswer === question.correctAnswer
       const questionScore = question.score || question.weight || 1
       
       // Debug log
