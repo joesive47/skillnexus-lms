@@ -212,6 +212,9 @@ export default function AssessmentPage() {
         skillScores[skillName].score += questionScore
       }
     })
+
+    // Calculate percentage
+    const scorePercentage = totalScore > 0 ? Math.round((earnedScore / totalScore) * 100) : 0
     
     // Log summary
     console.log('=== Assessment Results ====')
@@ -219,9 +222,6 @@ export default function AssessmentPage() {
     console.log(`Total: ${correctAnswers}/${questions.length} correct`)
     console.log(`Score: ${earnedScore}/${totalScore} (${scorePercentage}%)`)
     console.log('==========================')
-
-    // Calculate percentage
-    const scorePercentage = totalScore > 0 ? Math.round((earnedScore / totalScore) * 100) : 0
     
     // Build query params with skill breakdown
     const skillParams = Object.entries(skillScores)
