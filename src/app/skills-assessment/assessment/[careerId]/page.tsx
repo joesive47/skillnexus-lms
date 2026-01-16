@@ -70,7 +70,7 @@ export default function AssessmentPage() {
             option2: q.options[1] || '',
             option3: q.options[2] || '',
             option4: q.options[3] || '',
-            correctAnswer: `option${q.correctAnswer + 1}`,
+            correctAnswer: q.correctAnswerKey || `option${q.correctAnswer + 1}`, // Use correctAnswerKey if available
             skillName: q.skill,
             skillCategory: assessment.category,
             difficultyLevel: q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)

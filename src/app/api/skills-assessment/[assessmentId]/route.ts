@@ -27,9 +27,9 @@ export async function GET(
       id: q.id,
       text: q.questionText,
       options: [q.option1, q.option2, q.option3, q.option4],
-      correctAnswer: parseInt(q.correctAnswer) - 1, // Convert to 0-based index
+      correctAnswer: parseInt(q.correctAnswer) - 1, // Convert "1","2","3","4" to 0,1,2,3
       skill: q.skill.name,
-      difficulty: 'beginner', // Default difficulty
+      difficulty: 'beginner',
       weight: 1
     }))
 

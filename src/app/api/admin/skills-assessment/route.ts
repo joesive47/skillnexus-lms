@@ -46,7 +46,8 @@ export async function GET() {
         id: q.questionId,
         text: q.questionText,
         options: [q.option1, q.option2, q.option3, q.option4],
-        correctAnswer: Math.max(0, parseInt(q.correctAnswer) - 1),
+        correctAnswer: parseInt(q.correctAnswer) - 1, // Keep as 0-based for compatibility
+        correctAnswerKey: `option${q.correctAnswer}`, // Add this for direct comparison
         skill: q.skill?.name || 'General',
         difficulty: (q.difficultyLevel?.toLowerCase() as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
         weight: q.score
