@@ -1,6 +1,6 @@
 question_id,career_title,skill_name,question_text,option_1,option_2,option_3,option_4,correct_answer,score,difficulty_level
-Q001,Full Stack Developer,JavaScript,What is a closure in JavaScript?,A function that has access to variables in its outer scope,A loop structure for iterating arrays,A data type for storing objects,An operator for comparing values,1,5,Intermediate
-Q002,Full Stack Developer,React,Which React Hook is used for side effects?,useState,useEffect,useContext,useReducer,2,5,Intermediate
-Q003,Full Stack Developer,Node.js,What is the correct way to handle errors in async/await?,Using .catch() method,Using try-catch block,Using callback functions,Using Promise.reject(),2,5,Advanced
-Q004,Full Stack Developer,Database Design,Which SQL JOIN returns all records from both tables?,INNER JOIN,LEFT JOIN,RIGHT JOIN,FULL OUTER JOIN,4,5,Intermediate
-Q005,Full Stack Developer,Git,What Git command is used to combine branches?,git combine,git merge,git join,git unite,2,3,Beginner
+Q001,Full Stack Developer,JavaScript,What is a closure in JavaScript?,A function that has access to variables in its outer scope,A loop structure for iterating arrays,A data type for storing objects,An operator for comparing values,1,10,Intermediate
+Q002,Full Stack Developer,React,Which React Hook is used for side effects?,useState,useEffect,useContext,useReducer,2,10,Intermediate
+Q003,Full Stack Developer,Node.js,What is the correct way to handle errors in async/await?,Using .catch() method,Using try-catch block,Using callback functions,Using Promise.reject(),2,15,Advanced
+Q004,Full Stack Developer,Database Design,Which SQL JOIN returns all records from both tables?,INNER JOIN,LEFT JOIN,RIGHT JOIN,FULL OUTER JOIN,4,10,Intermediate
+Q005,Full Stack Developer,Git,What Git command is used to combine branches?,git combine,git merge,git join,git unite,2,5,Beginner

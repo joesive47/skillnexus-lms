@@ -34,46 +34,33 @@ export default function AssessmentResultsPage() {
   const score = parseInt(searchParams.get('score') || '0')
   const total = parseInt(searchParams.get('total') || '0')
   const correct = parseInt(searchParams.get('correct') || '0')
+  const earned = parseInt(searchParams.get('earned') || '0')
+  const totalScore = parseInt(searchParams.get('totalScore') || '0')
+  const skillsParam = searchParams.get('skills') || ''
 
   const [careerTitle, setCareerTitle] = useState('')
   const [skillAnalysis, setSkillAnalysis] = useState<SkillAnalysis[]>([])
 
   useEffect(() => {
-    // Set career title based on ID
-    if (careerId === 'prompt-engineering-001') {
-      setCareerTitle('Prompt Engineering')
-      
-      // Generate skill analysis based on score
-      const skills: SkillAnalysis[] = [
-        {
-          skillName: 'Prompt Design',
-          score: Math.max(0, score - 10 + Math.random() * 20),
-          level: score >= 80 ? 'Expert' : score >= 60 ? 'Intermediate' : 'Beginner',
-          recommendation: score >= 80 ? 'ทักษะดีมาก! ลองท้าทายตัวเองกับ Advanced Prompting' : 'ควรฝึกฝนการเขียน Prompt ที่ชัดเจนและเฉพาะเจาะจง'
-        },
-        {
-          skillName: 'AI Model Understanding',
-          score: Math.max(0, score - 5 + Math.random() * 15),
-          level: score >= 75 ? 'Expert' : score >= 55 ? 'Intermediate' : 'Beginner',
-          recommendation: score >= 75 ? 'เข้าใจ AI Model ได้ดี ลองศึกษา Fine-tuning' : 'ควรศึกษาเพิ่มเติมเกี่ยวกับการทำงานของ AI Model'
-        },
-        {
-          skillName: 'Prompting Techniques',
-          score: Math.max(0, score + Math.random() * 10 - 5),
-          level: score >= 70 ? 'Expert' : score >= 50 ? 'Intermediate' : 'Beginner',
-          recommendation: score >= 70 ? 'เทคนิคการใช้งานดีมาก!' : 'ควรฝึกฝน Few-shot และ Chain-of-Thought prompting'
-        },
-        {
-          skillName: 'AI Safety & Ethics',
-          score: Math.max(0, score - 15 + Math.random() * 25),
-          level: score >= 65 ? 'Expert' : score >= 45 ? 'Intermediate' : 'Beginner',
-          recommendation: score >= 65 ? 'มีความรู้ด้านความปลอดภัยดี' : 'ควรศึกษาเพิ่มเติมเกี่ยวกับ AI Safety และ Prompt Injection'
+    // Parse skill scores from URL
+    if (skillsParam) {
+      const skills = skillsParam.split(',').map(item => {
+        const [skillName, scoreStr] = item.split(':')
+        const skillScore = parseInt(scoreStr) || 0
+        return {
+          skillName: decodeURIComponent(skillName),
+          score: skillScore,
+          level: skillScore >= 80 ? 'Expert' : skillScore >= 60 ? 'Intermediate' : 'Beginner',
+          recommendation: skillScore >= 80 
+            ? 'ทักษะดีมาก! พร้อมสำหรับงานระดับสูง' 
+            : skillScore >= 60
+            ? 'ทักษะอยู่ในระดับดี ควรฝึกฝนเพิ่มเติม'
+            : 'ควรเริ่มต้นเรียนรู้พื้นฐานเพิ่มเติม'
         }
-      ]
-      
+      })
       setSkillAnalysis(skills)
     }
-  }, [careerId, score])
+  }, [skillsParam])
 
   const getScoreLevel = (score: number) => {
     if (score >= 80) return { level: 'Expert', color: 'text-green-600', bgColor: 'bg-green-100' }
@@ -133,8 +120,15 @@ export default function AssessmentResultsPage() {
               <Badge className={`text-lg px-4 py-2 ${scoreInfo.bgColor} ${scoreInfo.color}`}>
                 {scoreInfo.level}
               </Badge>
-              <div className="mt-4 text-muted-foreground">
-                ตอบถูก {correct} จาก {total} ข้อ
+              <div className="mt-4 space-y-1">
+                <div className="text-muted-foreground">
+                  ตอบถูก {correct} จาก {total} ข้อ
+                </div>
+                {totalScore > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    ได้คะแนน {earned} จาก {totalScore} คะแนน
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

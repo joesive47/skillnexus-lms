@@ -146,14 +146,50 @@ export default function AssessmentPage() {
 
   const handleSubmit = async () => {
     let correctAnswers = 0
+    let totalScore = 0
+    let earnedScore = 0
+    const skillScores: Record<string, { correct: number; total: number; score: number; maxScore: number }> = {}
+
+    // Calculate scores
     questions.forEach(question => {
-      if (answers[question.id] === question.correctAnswer) {
+      const userAnswer = answers[question.id]
+      const isCorrect = userAnswer === question.correctAnswer
+      const questionScore = question.score || 1
+      
+      totalScore += questionScore
+      
+      if (isCorrect) {
         correctAnswers++
+        earnedScore += questionScore
+      }
+      
+      // Track by skill
+      const skillName = question.skillName
+      if (!skillScores[skillName]) {
+        skillScores[skillName] = { correct: 0, total: 0, score: 0, maxScore: 0 }
+      }
+      skillScores[skillName].total++
+      skillScores[skillName].maxScore += questionScore
+      if (isCorrect) {
+        skillScores[skillName].correct++
+        skillScores[skillName].score += questionScore
       }
     })
 
-    const score = Math.round((correctAnswers / questions.length) * 100)
-    router.push(`/skills-assessment/results?careerId=${careerId}&score=${score}&total=${questions.length}&correct=${correctAnswers}`)
+    // Calculate percentage
+    const scorePercentage = totalScore > 0 ? Math.round((earnedScore / totalScore) * 100) : 0
+    
+    // Build query params with skill breakdown
+    const skillParams = Object.entries(skillScores)
+      .map(([skill, data]) => {
+        const skillPercent = data.maxScore > 0 ? Math.round((data.score / data.maxScore) * 100) : 0
+        return `${encodeURIComponent(skill)}:${skillPercent}`
+      })
+      .join(',')
+
+    router.push(
+      `/skills-assessment/results?careerId=${careerId}&score=${scorePercentage}&total=${questions.length}&correct=${correctAnswers}&earned=${earnedScore}&totalScore=${totalScore}&skills=${skillParams}`
+    )
   }
 
   const formatTime = (seconds: number) => {
