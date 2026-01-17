@@ -17,7 +17,7 @@ interface Question {
   option2: string
   option3: string
   option4: string
-  correctAnswer: string
+  correctAnswer: number // 0-based index
   skillName: string
   skillCategory: string
   difficultyLevel: string
@@ -40,11 +40,11 @@ export default function AssessmentPage() {
   const { data: session } = useSession()
   const careerId = params.careerId as string
 
-  // Core state - simplified
+  // Core state - answers stored as numeric indices (0-3)
   const [career, setCareer] = useState<Career | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [answers, setAnswers] = useState<Record<string, number>>({})
   const [timeLeft, setTimeLeft] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -72,7 +72,7 @@ export default function AssessmentPage() {
             option2: q.options[1] || '',
             option3: q.options[2] || '',
             option4: q.options[3] || '',
-            correctAnswer: `option${q.correctAnswer + 1}`, // Always use option1-4 format
+            correctAnswer: q.correctAnswer, // Already 0-based index from API
             skillName: q.skill,
             skillCategory: assessment.category,
             difficultyLevel: q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1),
@@ -93,19 +93,15 @@ export default function AssessmentPage() {
     loadAssessment()
   }, [careerId])
 
-  // Debug effect to track state changes
+  // Debug effect removed - using simple numeric comparison
   useEffect(() => {
     if (questions.length > 0 && currentIndex >= 0) {
       const currentQuestion = questions[currentIndex]
       const currentAnswer = answers[currentQuestion?.id]
       
-      // Only log if there's an actual issue
-      if (currentAnswer && !['option1', 'option2', 'option3', 'option4'].includes(currentAnswer)) {
-        console.warn('Invalid answer detected:', {
-          currentIndex,
-          questionId: currentQuestion?.id,
-          currentAnswer
-        })
+      // Validate answer is 0-3 index
+      if (currentAnswer !== undefined && (currentAnswer < 0 || currentAnswer > 3)) {
+        console.warn('Invalid answer index:', currentAnswer)
       }
     }
   }, [currentIndex, answers, questions])
@@ -120,12 +116,14 @@ export default function AssessmentPage() {
     }
   }, [timeLeft, questions.length, loading])
 
-  // Fixed answer handler - ensure clean state per question
+  // Fixed answer handler - store as numeric index (0-3)
   const selectAnswer = (optionKey: string) => {
     const questionId = questions[currentIndex].id
+    // Convert option1-4 to 0-3 index
+    const optionIndex = parseInt(optionKey.replace('option', '')) - 1
     setAnswers(prev => ({
       ...prev,
-      [questionId]: optionKey
+      [questionId]: optionIndex
     }))
   }
 
@@ -154,24 +152,12 @@ export default function AssessmentPage() {
     let earnedScore = 0
     const skillScores: Record<string, { correct: number; total: number; score: number; maxScore: number }> = {}
 
-    // Calculate scores with detailed logging
-    const debugResults: any[] = []
-    
+    // Calculate scores - compare numeric indices directly
     questions.forEach((question, index) => {
-      const userAnswer = answers[question.id]
-      const isCorrect = userAnswer === question.correctAnswer
+      const userAnswer = answers[question.id] // 0-3 index
+      const correctAnswer = question.correctAnswer // 0-3 index from API
+      const isCorrect = userAnswer === correctAnswer
       const questionScore = question.score || question.weight || 1
-      
-      // Debug log
-      debugResults.push({
-        q: index + 1,
-        userAnswer,
-        correctAnswer: question.correctAnswer,
-        isCorrect,
-        score: isCorrect ? questionScore : 0
-      })
-      
-      console.log(`Q${index + 1}: User=${userAnswer}, Correct=${question.correctAnswer}, Match=${isCorrect}`)
       
       totalScore += questionScore
       
@@ -195,13 +181,6 @@ export default function AssessmentPage() {
 
     // Calculate percentage
     const scorePercentage = totalScore > 0 ? Math.round((earnedScore / totalScore) * 100) : 0
-    
-    // Log summary
-    console.log('=== Assessment Results ====')
-    console.log('Debug Results:', debugResults)
-    console.log(`Total: ${correctAnswers}/${questions.length} correct`)
-    console.log(`Score: ${earnedScore}/${totalScore} (${scorePercentage}%)`)
-    console.log('==========================')
     
     // Build query params with skill breakdown
     const skillParams = Object.entries(skillScores)
@@ -308,17 +287,20 @@ export default function AssessmentPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {['option1', 'option2', 'option3', 'option4'].map((optionKey, index) => (
-                <QuestionOption
-                  key={`${currentQuestion.id}-${optionKey}`}
-                  optionKey={optionKey}
-                  optionText={currentQuestion[optionKey as keyof Question] as string}
-                  optionIndex={index}
-                  isSelected={currentAnswer === optionKey}
-                  onSelect={selectAnswer}
-                  questionId={currentQuestion.id}
-                />
-              ))}
+              {['option1', 'option2', 'option3', 'option4'].map((optionKey, index) => {
+                const isSelected = currentAnswer === index
+                return (
+                  <QuestionOption
+                    key={`${currentQuestion.id}-${optionKey}`}
+                    optionKey={optionKey}
+                    optionText={currentQuestion[optionKey as keyof Question] as string}
+                    optionIndex={index}
+                    isSelected={isSelected}
+                    onSelect={selectAnswer}
+                    questionId={currentQuestion.id}
+                  />
+                )
+              })}
             </div>
           </CardContent>
         </Card>

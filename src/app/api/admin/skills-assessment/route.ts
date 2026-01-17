@@ -67,14 +67,11 @@ export async function GET() {
           correctAnswerIndex = matchIndex >= 0 ? matchIndex : 0;
         }
         
-        console.log(`Question ${q.questionId}: correctAnswer="${q.correctAnswer}" → index=${correctAnswerIndex} → option${correctAnswerIndex + 1}`)
-        
         return {
           id: q.questionId,
           text: q.questionText,
           options: [q.option1, q.option2, q.option3, q.option4],
-          correctAnswer: correctAnswerIndex,
-          correctAnswerText: q.correctAnswer,
+          correctAnswer: correctAnswerIndex, // Always 0-based index
           skill: q.skill?.name || 'General',
           difficulty: (q.difficultyLevel?.toLowerCase() as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
           weight: q.score

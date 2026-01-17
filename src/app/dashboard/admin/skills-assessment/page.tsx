@@ -681,19 +681,44 @@ export default function SkillsAssessmentManagement() {
                 {questions.length > 0 && (
                   <div className="border-t pt-4">
                     <h3 className="font-semibold mb-4">คำถามที่เพิ่มแล้ว ({questions.length})</h3>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       {questions.map((question, index) => (
-                        <div key={question.id} className="flex items-center justify-between p-3 border rounded">
-                          <div>
-                            <p className="font-medium">{index + 1}. {question.text}</p>
-                            <div className="flex gap-2 mt-1">
-                              <Badge variant="outline">{question.skill}</Badge>
-                              <Badge variant="secondary">{question.difficulty}</Badge>
+                        <div key={question.id} className="border rounded-lg p-4 bg-gray-50">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <p className="font-medium text-lg mb-2">{index + 1}. {question.text}</p>
+                              <div className="flex gap-2">
+                                <Badge variant="outline">{question.skill}</Badge>
+                                <Badge variant="secondary">{question.difficulty}</Badge>
+                                <Badge className="bg-blue-100 text-blue-700">คะแนน: {question.weight}</Badge>
+                              </div>
                             </div>
+                            <Button size="sm" variant="ghost" onClick={() => removeQuestion(question.id)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <Button size="sm" variant="ghost" onClick={() => removeQuestion(question.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          
+                          {/* Show options with correct answer marked */}
+                          <div className="space-y-2 mt-3">
+                            {question.options.map((option, optIndex) => (
+                              <div 
+                                key={optIndex} 
+                                className={`p-3 rounded border-2 ${
+                                  question.correctAnswer === optIndex 
+                                    ? 'border-green-500 bg-green-50' 
+                                    : 'border-gray-200 bg-white'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {question.correctAnswer === optIndex && (
+                                    <span className="text-green-600 font-bold">✓</span>
+                                  )}
+                                  <span className="font-medium">{optIndex + 1}.</span>
+                                  <span>{option}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
