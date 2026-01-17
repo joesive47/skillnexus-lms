@@ -420,6 +420,20 @@ export default function PublicSkillsTest() {
 
   // Results screen
   if (isCompleted && results) {
+    // Prepare wrong questions list
+    const wrongQuestions = results.detailedResults
+      .filter((r: any) => !r.isCorrect)
+      .map((r: any) => {
+        const question = assessment.questions[r.questionIndex - 1]
+        return {
+          number: r.questionIndex,
+          question: r.questionText,
+          userAnswerText: r.userAnswer >= 0 ? question.options[r.userAnswer] : 'ไม่ได้ตอบ',
+          correctAnswerText: question.options[r.correctAnswer],
+          skill: r.skill
+        }
+      })
+
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -447,8 +461,17 @@ export default function PublicSkillsTest() {
                 <Badge className={getScoreBadge(results.score)}>
                   {results.passed ? `ผ่าน (ต้องการ ${assessment.passingScore}%)` : `ไม่ผ่าน (ต้องการ ${assessment.passingScore}%)`}
                 </Badge>
-                <div className="mt-2 text-sm text-gray-600">
-                  คะแนนรวม: {results.totalScore}/{results.maxScore} คะแนน
+                <div className="mt-4 grid grid-cols-2 gap-4 max-w-md mx-auto">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {results.detailedResults.filter((r: any) => r.isCorrect).length}/{assessment.questions.length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">ตอบถูก/ทั้งหมด</div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{results.totalScore}/{results.maxScore}</div>
+                    <div className="text-sm text-muted-foreground">คะแนนที่ได้</div>
+                  </div>
                 </div>
               </div>
 
@@ -472,6 +495,43 @@ export default function PublicSkillsTest() {
                   })}
                 </div>
               </div>
+
+              {/* Wrong Questions */}
+              {wrongQuestions.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-red-600">
+                    <XCircle className="w-5 h-5" />
+                    ข้อที่ตอบผิด ({wrongQuestions.length} ข้อ)
+                  </h3>
+                  <div className="space-y-4">
+                    {wrongQuestions.map((item: any, index: number) => (
+                      <div key={index} className="border-2 border-red-200 rounded-lg p-4 bg-red-50">
+                        <div className="flex items-start gap-3 mb-3">
+                          <Badge variant="destructive">ข้อ {item.number}</Badge>
+                          <Badge variant="outline">{item.skill}</Badge>
+                        </div>
+                        <p className="font-medium mb-3">{item.question}</p>
+                        <div className="space-y-2">
+                          <div className="flex items-start gap-2">
+                            <span className="text-red-600 font-bold">✗</span>
+                            <div>
+                              <span className="text-sm text-red-600 font-medium">คำตอบของคุณ:</span>
+                              <p className="text-red-700">{item.userAnswerText}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-green-600 font-bold">✓</span>
+                            <div>
+                              <span className="text-sm text-green-600 font-medium">คำตอบที่ถูกต้อง:</span>
+                              <p className="text-green-700 font-medium">{item.correctAnswerText}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {results.recommendations.length > 0 && (
                 <div>
