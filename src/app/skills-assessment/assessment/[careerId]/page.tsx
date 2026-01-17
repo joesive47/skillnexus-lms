@@ -127,12 +127,21 @@ export default function AssessmentPage() {
     }))
   }
 
-  // Fixed navigation - clear any temporary selection state
+  // Fixed navigation - save answer before moving
   const goNext = () => {
+    // Save current answer if selected
+    if (currentAnswer !== undefined) {
+      const questionId = questions[currentIndex].id
+      setAnswers(prev => ({ ...prev, [questionId]: currentAnswer }))
+    }
+
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1)
     } else {
-      handleSubmit()
+      // For last question, ensure answer is saved before submit
+      setTimeout(() => {
+        handleSubmit()
+      }, 50)
     }
   }
 
@@ -147,6 +156,12 @@ export default function AssessmentPage() {
   }
 
   const handleSubmit = async () => {
+    // Ensure current answer is saved
+    const finalAnswers = { ...answers }
+    if (currentAnswer !== undefined && questions[currentIndex]) {
+      finalAnswers[questions[currentIndex].id] = currentAnswer
+    }
+
     let correctAnswers = 0
     let totalScore = 0
     let earnedScore = 0
@@ -155,7 +170,7 @@ export default function AssessmentPage() {
 
     // Calculate scores - compare numeric indices directly
     questions.forEach((question, index) => {
-      const userAnswer = answers[question.id] // 0-3 index
+      const userAnswer = finalAnswers[question.id] // 0-3 index
       const correctAnswer = question.correctAnswer // 0-3 index from API
       const isCorrect = userAnswer === correctAnswer
       const questionScore = question.score || question.weight || 1

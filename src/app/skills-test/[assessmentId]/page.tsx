@@ -243,14 +243,16 @@ export default function PublicSkillsTest() {
       return
     }
 
-    // Save current answer
+    // Save current answer first
     saveCurrentAnswer()
 
     if (currentQuestionIndex < assessment!.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1)
-      // selectedAnswer will be set by useEffect
     } else {
-      handleSubmitTest()
+      // For last question, wait a bit to ensure state is updated
+      setTimeout(() => {
+        handleSubmitTest()
+      }, 100)
     }
   }
 
@@ -268,13 +270,21 @@ export default function PublicSkillsTest() {
   const handleSubmitTest = useCallback(() => {
     if (!assessment) return
 
-    // Save current answer if selected
-    if (selectedAnswer !== null) {
-      saveCurrentAnswer()
+    // Make sure we have the latest userAnswers from state
+    const finalAnswers = new Map(userAnswers)
+    
+    // If there's a selected answer for current question that hasn't been saved yet, save it
+    if (selectedAnswer !== null && assessment.questions[currentQuestionIndex]) {
+      const currentQuestion = assessment.questions[currentQuestionIndex]
+      finalAnswers.set(currentQuestion.id, {
+        questionId: currentQuestion.id,
+        selectedAnswer: selectedAnswer,
+        timestamp: Date.now()
+      })
     }
 
     console.log('📊 Calculating results...')
-    console.log('Total answers collected:', userAnswers.size)
+    console.log('Total answers collected:', finalAnswers.size)
     
     let totalScore = 0
     let maxScore = 0
@@ -282,7 +292,7 @@ export default function PublicSkillsTest() {
     const detailedResults: any[] = []
 
     assessment.questions.forEach((question, index) => {
-      const userAnswer = userAnswers.get(question.id)
+      const userAnswer = finalAnswers.get(question.id)
       maxScore += question.weight
       
       if (!skillBreakdown[question.skill]) {
@@ -351,7 +361,7 @@ export default function PublicSkillsTest() {
 
     setResults(testResults)
     setIsCompleted(true)
-  }, [assessment, userAnswers, selectedAnswer, userEmail, timeLeft, saveCurrentAnswer])
+  }, [assessment, userAnswers, selectedAnswer, currentQuestionIndex, userEmail, timeLeft])
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
