@@ -40,6 +40,7 @@ export default function AssessmentResultsPage() {
 
   const [careerTitle, setCareerTitle] = useState('')
   const [skillAnalysis, setSkillAnalysis] = useState<SkillAnalysis[]>([])
+  const [wrongQuestions, setWrongQuestions] = useState<any[]>([])
 
   useEffect(() => {
     // Parse skill scores from URL
@@ -59,6 +60,12 @@ export default function AssessmentResultsPage() {
         }
       })
       setSkillAnalysis(skills)
+    }
+
+    // Load wrong questions from sessionStorage
+    const stored = sessionStorage.getItem('wrongQuestions')
+    if (stored) {
+      setWrongQuestions(JSON.parse(stored))
     }
   }, [skillsParam])
 
@@ -165,6 +172,47 @@ export default function AssessmentResultsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Wrong Questions */}
+        {wrongQuestions.length > 0 && (
+          <Card className="mb-6 border-red-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600">
+                <Target className="w-5 h-5" />
+                ข้อที่ตอบผิด ({wrongQuestions.length} ข้อ)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {wrongQuestions.map((item, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-red-50">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Badge variant="destructive">ข้อ {item.number}</Badge>
+                      <Badge variant="outline">{item.skill}</Badge>
+                    </div>
+                    <p className="font-medium mb-3">{item.question}</p>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-600 font-bold">❌</span>
+                        <div>
+                          <span className="text-sm text-red-600 font-medium">คำตอบของคุณ:</span>
+                          <p className="text-red-700">{item.userAnswerText}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-600 font-bold">✓</span>
+                        <div>
+                          <span className="text-sm text-green-600 font-medium">คำตอบที่ถูกต้อง:</span>
+                          <p className="text-green-700 font-medium">{item.correctAnswerText}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Recommendations */}
         <Card className="mb-6">

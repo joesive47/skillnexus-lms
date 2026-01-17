@@ -151,6 +151,7 @@ export default function AssessmentPage() {
     let totalScore = 0
     let earnedScore = 0
     const skillScores: Record<string, { correct: number; total: number; score: number; maxScore: number }> = {}
+    const wrongQuestions: any[] = []
 
     // Calculate scores - compare numeric indices directly
     questions.forEach((question, index) => {
@@ -164,6 +165,17 @@ export default function AssessmentPage() {
       if (isCorrect) {
         correctAnswers++
         earnedScore += questionScore
+      } else {
+        // Store wrong questions
+        wrongQuestions.push({
+          number: index + 1,
+          question: question.questionText,
+          userAnswer: userAnswer !== undefined ? ['option1', 'option2', 'option3', 'option4'][userAnswer] : 'ไม่ได้ตอบ',
+          correctAnswer: ['option1', 'option2', 'option3', 'option4'][correctAnswer],
+          userAnswerText: userAnswer !== undefined ? question[`option${userAnswer + 1}` as keyof Question] : 'ไม่ได้ตอบ',
+          correctAnswerText: question[`option${correctAnswer + 1}` as keyof Question],
+          skill: question.skillName
+        })
       }
       
       // Track by skill
@@ -189,6 +201,11 @@ export default function AssessmentPage() {
         return `${encodeURIComponent(skill)}:${skillPercent}`
       })
       .join(',')
+
+    // Store wrong questions in sessionStorage
+    if (wrongQuestions.length > 0) {
+      sessionStorage.setItem('wrongQuestions', JSON.stringify(wrongQuestions))
+    }
 
     router.push(
       `/skills-assessment/results?careerId=${careerId}&score=${scorePercentage}&total=${questions.length}&correct=${correctAnswers}&earned=${earnedScore}&totalScore=${totalScore}&skills=${skillParams}`
