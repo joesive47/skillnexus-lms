@@ -10,21 +10,47 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
-    // Increment visitor count on first load
-    fetch('/api/visitor', { method: 'POST' })
-      .then(res => res.json())
-      .then(data => setVisitors(data.totalVisitors))
-      .catch(() => setVisitors(0))
+    let mounted = true
+    
+    const trackVisitor = async () => {
+      try {
+        console.log('[PAGE] Tracking visitor...')
+        const response = await fetch('/api/visitor', { 
+          method: 'POST',
+          cache: 'no-store'
+        })
+        const data = await response.json()
+        console.log('[PAGE] Visitor tracked:', data)
+        if (mounted) {
+          setVisitors(data.totalVisitors || 0)
+        }
+      } catch (error) {
+        console.error('[PAGE] Error tracking:', error)
+        if (mounted) setVisitors(0)
+      }
+    }
 
-    // Poll for updates every 5 seconds
-    const interval = setInterval(() => {
-      fetch('/api/visitor', { method: 'GET' })
-        .then(res => res.json())
-        .then(data => setVisitors(data.totalVisitors))
-        .catch(() => {})
+    trackVisitor()
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/visitor', { 
+          method: 'GET',
+          cache: 'no-store'
+        })
+        const data = await response.json()
+        if (mounted) {
+          setVisitors(data.totalVisitors || 0)
+        }
+      } catch (error) {
+        console.error('[PAGE] Error fetching:', error)
+      }
     }, 5000)
 
-    return () => clearInterval(interval)
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   return (
