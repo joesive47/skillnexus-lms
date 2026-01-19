@@ -2,21 +2,32 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function GET() {
   try {
     const [totalUsers, totalCertificates, visitorStats] = await Promise.all([
       prisma.user.count(),
       prisma.certificate.count(),
-      prisma.visitorStats.findUnique({ where: { id: 1 } })
+      prisma.visitorStats.findFirst({ where: { id: 1 } })
     ])
 
-    return NextResponse.json({
+    const stats = {
       visitors: visitorStats?.totalVisitors || 0,
       members: totalUsers,
       certificates: totalCertificates
+    }
+
+    console.log('[STATS API] GET:', stats)
+
+    return NextResponse.json(stats, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     })
   } catch (error) {
+    console.error('[STATS API] GET Error:', error)
     return NextResponse.json({
       visitors: 0,
       members: 0,
@@ -42,13 +53,15 @@ export async function POST() {
       }
     })
 
-    console.log('[STATS API] Updated:', stats)
+    console.log('[STATS API] Updated visitors:', stats.totalVisitors)
+    
     return NextResponse.json({ 
       success: true, 
       visitors: stats.totalVisitors 
     }, {
       headers: {
-        'Cache-Control': 'no-store'
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
       }
     })
   } catch (error) {

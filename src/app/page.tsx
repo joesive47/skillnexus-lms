@@ -14,23 +14,30 @@ export default function HomePage() {
       try {
         const res = await fetch('/api/stats', { 
           method: 'POST',
-          cache: 'no-store'
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
         })
         const data = await res.json()
-        console.log('Track result:', data)
+        console.log('✅ Tracked:', data)
+        if (data.success) {
+          setStats(prev => ({ ...prev, visitors: data.visitors }))
+        }
       } catch (e) {
-        console.error('Track error:', e)
+        console.error('❌ Track error:', e)
       }
     }
     
     const fetchStats = async () => {
       try {
-        const r = await fetch('/api/stats', { cache: 'no-store' })
+        const r = await fetch('/api/stats?' + Date.now(), { 
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        })
         const d = await r.json()
-        console.log('Stats:', d)
+        console.log('📊 Stats:', d)
         setStats(d)
       } catch (e) {
-        console.error('Fetch error:', e)
+        console.error('❌ Fetch error:', e)
       }
     }
     
