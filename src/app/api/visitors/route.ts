@@ -1,40 +1,48 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import fs from 'fs'
+import path from 'path'
 
-export async function POST() {
+const COUNTER_FILE = path.join(process.cwd(), 'visitor-count.txt')
+
+export const dynamic = 'force-dynamic'
+
+function getCount(): number {
   try {
-    // Initialize if not exists
-    const existing = await prisma.visitorStats.findUnique({ where: { id: 1 } })
-    
-    if (!existing) {
-      const result = await prisma.visitorStats.create({
-        data: { id: 1, totalVisitors: 1, lastVisit: new Date() }
-      })
-      return NextResponse.json({ count: result.totalVisitors })
+    if (fs.existsSync(COUNTER_FILE)) {
+      return parseInt(fs.readFileSync(COUNTER_FILE, 'utf-8')) || 0
     }
-    
-    // Increment visitor count
-    const result = await prisma.visitorStats.update({
-      where: { id: 1 },
-      data: {
-        totalVisitors: { increment: 1 },
-        lastVisit: new Date(),
-      },
-    })
+  } catch (e) {
+    console.error('Read error:', e)
+  }
+  return 0
+}
 
-    return NextResponse.json({ count: result.totalVisitors })
-  } catch (error) {
-    console.error('Visitor POST error:', error)
-    return NextResponse.json({ count: 0 })
+function incrementCount(): number {
+  try {
+    const current = getCount()
+    const newCount = current + 1
+    fs.writeFileSync(COUNTER_FILE, newCount.toString())
+    return newCount
+  } catch (e) {
+    console.error('Write error:', e)
+    return 0
   }
 }
 
 export async function GET() {
-  try {
-    const stats = await prisma.visitorStats.findUnique({ where: { id: 1 } })
-    return NextResponse.json({ count: stats?.totalVisitors || 0 })
-  } catch (error) {
-    console.error('Visitor GET error:', error)
-    return NextResponse.json({ count: 0 })
-  }
+  const count = getCount()
+  return NextResponse.json({ count }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    }
+  })
+}
+
+export async function POST() {
+  const count = incrementCount()
+  return NextResponse.json({ count }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    }
+  })
 }

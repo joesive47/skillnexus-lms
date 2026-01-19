@@ -6,63 +6,23 @@ import { translations, Language } from '@/lib/i18n'
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>('th')
-  const [visitors, setVisitors] = useState<number>(0)
+  const [visitors, setVisitors] = useState(0)
   const t = translations[lang]
 
   useEffect(() => {
-    let mounted = true
-    let hasTracked = false
-    
-    const trackVisitor = async () => {
-      if (hasTracked) return
-      hasTracked = true
-      
-      try {
-        const response = await fetch('/api/visitor', { 
-          method: 'POST',
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        })
-        const data = await response.json()
-        
-        if (mounted && data.success) {
-          setVisitors(data.totalVisitors)
-        }
-      } catch (error) {
-        console.error('[PAGE] Track error:', error)
-      }
-    }
+    fetch('/api/visitors', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => setVisitors(d.count))
+      .catch(() => {})
 
-    const fetchVisitors = async () => {
-      try {
-        const response = await fetch('/api/visitor?' + Date.now(), { 
-          method: 'GET',
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        })
-        const data = await response.json()
-        
-        if (mounted && data.success) {
-          setVisitors(data.totalVisitors)
-        }
-      } catch (error) {
-        console.error('[PAGE] Fetch error:', error)
-      }
-    }
+    const timer = setInterval(() => {
+      fetch('/api/visitors')
+        .then(r => r.json())
+        .then(d => setVisitors(d.count))
+        .catch(() => {})
+    }, 5000)
 
-    trackVisitor()
-    const interval = setInterval(fetchVisitors, 3000)
-
-    return () => {
-      mounted = false
-      clearInterval(interval)
-    }
+    return () => clearInterval(timer)
   }, [])
 
   return (
@@ -79,12 +39,12 @@ export default function HomePage() {
             </h1>
           </div>
           
-          {/* Visitor Counter - Center */}
+          {/* Visitor Counter */}
           <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-lg border border-blue-200">
             <span className="text-xl">👥</span>
             <div>
               <p className="text-xs text-gray-500">{t.header.visitors}</p>
-              <p className="text-sm font-bold text-gray-900">{(visitors || 0).toLocaleString()}</p>
+              <p className="text-sm font-bold text-gray-900">{visitors.toLocaleString()}</p>
             </div>
           </div>
           
