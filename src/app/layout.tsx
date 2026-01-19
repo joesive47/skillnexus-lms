@@ -4,12 +4,12 @@ import GlobalWidgets from "@/components/global-widgets"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'SkillNexus - AI-Powered Learning Management System',
+  title: 'upPowerSkill - AI-Powered Learning Management System',
   description: 'แพลตฟอร์มการเรียนรู้ที่ขับเคลื่อนด้วย AI ระดับองค์กร พร้อมเทคโนโลยี Anti-Skip และระบบรักษาความปลอดภัยระดับ Enterprise',
-  keywords: 'LMS, AI Learning, SkillNexus, การเรียนรู้ออนไลน์, ทดสอบทักษะ, ใบรับรอง, Enterprise Learning',
-  authors: [{ name: 'SkillNexus Team' }],
-  creator: 'SkillNexus',
-  publisher: 'SkillNexus',
+  keywords: 'LMS, AI Learning, upPowerSkill, การเรียนรู้ออนไลน์, ทดสอบทักษะ, ใบรับรอง, Enterprise Learning',
+  authors: [{ name: 'upPowerSkill Team' }],
+  creator: 'upPowerSkill',
+  publisher: 'upPowerSkill',
   formatDetection: {
     email: false,
     address: false,
@@ -20,16 +20,16 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'SkillNexus - AI-Powered Learning Management System',
+    title: 'upPowerSkill - AI-Powered Learning Management System',
     description: 'แพลตฟอร์มการเรียนรู้ที่ขับเคลื่อนด้วย AI ระดับองค์กร',
     url: 'https://skillnexus.vercel.app',
-    siteName: 'SkillNexus',
+    siteName: 'upPowerSkill',
     images: [
       {
         url: '/logoupPowerskill.png',
         width: 1200,
         height: 630,
-        alt: 'SkillNexus LMS Platform',
+        alt: 'upPowerSkill LMS Platform',
       },
     ],
     locale: 'th_TH',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SkillNexus - AI-Powered Learning Management System',
+    title: 'upPowerSkill - AI-Powered Learning Management System',
     description: 'แพลตฟอร์มการเรียนรู้ที่ขับเคลื่อนด้วย AI ระดับองค์กร',
     images: ['/logoupPowerskill.png'],
   },

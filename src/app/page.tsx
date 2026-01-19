@@ -1,13 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { translations, Language } from '@/lib/i18n'
-import VisitorCounter from '@/components/visitor-counter'
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>('th')
+  const [visitors, setVisitors] = useState<number>(0)
   const t = translations[lang]
+
+  useEffect(() => {
+    fetch('/api/visitors', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => setVisitors(data.count))
+      .catch(() => setVisitors(0))
+  }, [])
 
   return (
     <div className="min-h-screen bg-white">
@@ -16,11 +23,20 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
+              <span className="text-white font-bold text-lg">U</span>
             </div>
             <h1 className="text-xl font-bold text-gray-900">
               {t.header.title}
             </h1>
+          </div>
+          
+          {/* Visitor Counter - Center */}
+          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-lg border border-blue-200">
+            <span className="text-xl">👥</span>
+            <div>
+              <p className="text-xs text-gray-500">ผู้เข้าชม</p>
+              <p className="text-sm font-bold text-gray-900">{visitors.toLocaleString()}</p>
+            </div>
           </div>
           
           {/* Language Switcher */}
@@ -160,8 +176,6 @@ export default function HomePage() {
           <p className="text-gray-400">© 2024 upPowerSkill. All rights reserved.</p>
         </div>
       </footer>
-
-      <VisitorCounter />
     </div>
   )
 }
