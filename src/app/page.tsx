@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { translations, Language } from '@/lib/i18n'
+import VisitorCounter from '@/components/visitor-counter'
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>('th')
@@ -159,6 +160,8 @@ export default function HomePage() {
           <p className="text-gray-400">© 2024 upPowerSkill. All rights reserved.</p>
         </div>
       </footer>
+
+      <VisitorCounter />
     </div>
   )
 }

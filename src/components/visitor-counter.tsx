@@ -1,71 +1,33 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Eye, Users, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react'
 
 export default function VisitorCounter() {
-  const [count, setCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [todayCount, setTodayCount] = useState(0);
+  const [visitors, setVisitors] = useState<number>(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const trackVisit = async () => {
-      try {
-        // Track the visit
-        const response = await fetch('/api/visitor-count', {
-          method: 'POST'
-        });
-        const data = await response.json();
-        setCount(data.count);
-        setTodayCount(data.todayCount || Math.floor(data.count * 0.1)); // Estimate today's count
-      } catch (error) {
-        // Fallback to just get count
-        try {
-          const response = await fetch('/api/visitor-count');
-          const data = await response.json();
-          setCount(data.count);
-          setTodayCount(data.todayCount || Math.floor(data.count * 0.1));
-        } catch (fallbackError) {
-          // Set default values if API fails
-          setCount(12847);
-          setTodayCount(234);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Increment visitor count
+    fetch('/api/visitors', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        setVisitors(data.count)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
 
-    trackVisit();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2 text-white/80">
-        <Users className="h-4 w-4 animate-pulse" />
-        <span className="text-sm font-medium">กำลังโหลด...</span>
-      </div>
-    );
-  }
+  if (loading) return null
 
   return (
-    <div className="flex items-center gap-3 text-white">
-      <div className="flex items-center gap-1">
-        <Eye className="h-4 w-4 text-blue-400 animate-pulse" />
-        <TrendingUp className="h-3 w-3 text-green-400" />
-      </div>
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-white">
-            {count.toLocaleString()}
-          </span>
-          <span className="text-xs bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full">
-            +{todayCount}
-          </span>
+    <div className="fixed bottom-4 right-4 bg-white border-2 border-gray-200 rounded-lg px-4 py-2 shadow-lg">
+      <div className="flex items-center gap-2">
+        <span className="text-2xl">👥</span>
+        <div>
+          <p className="text-xs text-gray-500">ผู้เข้าชม</p>
+          <p className="text-lg font-bold text-gray-900">{visitors.toLocaleString()}</p>
         </div>
-        <span className="text-xs text-white/70 -mt-1">
-          ผู้เข้าชมทั้งหมด
-        </span>
       </div>
     </div>
-  );
+  )
 }
