@@ -1,7 +1,8 @@
 export const translations = {
   th: {
     header: {
-      title: "upPowerSkill"
+      title: "upPowerSkill",
+      visitors: "ผู้เข้าชม"
     },
     hero: {
       title: "upPowerSkill",
@@ -39,7 +40,8 @@ export const translations = {
   },
   en: {
     header: {
-      title: "upPowerSkill"
+      title: "upPowerSkill",
+      visitors: "Visitors"
     },
     hero: {
       title: "upPowerSkill",
@@ -77,7 +79,8 @@ export const translations = {
   },
   ja: {
     header: {
-      title: "upPowerSkill"
+      title: "upPowerSkill",
+      visitors: "訪問者"
     },
     hero: {
       title: "upPowerSkill",

@@ -11,18 +11,18 @@ export default function HomePage() {
 
   useEffect(() => {
     // Increment visitor count on first load
-    fetch('/api/visitors', { method: 'POST' })
+    fetch('/api/visitor', { method: 'POST' })
       .then(res => res.json())
-      .then(data => setVisitors(data.count))
+      .then(data => setVisitors(data.totalVisitors))
       .catch(() => setVisitors(0))
 
-    // Poll for updates every 3 seconds
+    // Poll for updates every 5 seconds
     const interval = setInterval(() => {
-      fetch('/api/visitors', { method: 'GET' })
+      fetch('/api/visitor', { method: 'GET' })
         .then(res => res.json())
-        .then(data => setVisitors(data.count))
+        .then(data => setVisitors(data.totalVisitors))
         .catch(() => {})
-    }, 3000)
+    }, 5000)
 
     return () => clearInterval(interval)
   }, [])
@@ -45,7 +45,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-lg border border-blue-200">
             <span className="text-xl">👥</span>
             <div>
-              <p className="text-xs text-gray-500">ผู้เข้าชม</p>
+              <p className="text-xs text-gray-500">{t.header.visitors}</p>
               <p className="text-sm font-bold text-gray-900">{visitors.toLocaleString()}</p>
             </div>
           </div>
