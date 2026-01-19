@@ -11,41 +11,53 @@ export default function HomePage() {
 
   useEffect(() => {
     let mounted = true
+    let hasTracked = false
     
     const trackVisitor = async () => {
+      if (hasTracked) return
+      hasTracked = true
+      
       try {
-        console.log('[PAGE] Tracking visitor...')
         const response = await fetch('/api/visitor', { 
           method: 'POST',
-          cache: 'no-store'
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
         })
         const data = await response.json()
-        console.log('[PAGE] Visitor tracked:', data)
-        if (mounted) {
-          setVisitors(data.totalVisitors || 0)
+        
+        if (mounted && data.success) {
+          setVisitors(data.totalVisitors)
         }
       } catch (error) {
-        console.error('[PAGE] Error tracking:', error)
-        if (mounted) setVisitors(0)
+        console.error('[PAGE] Track error:', error)
+      }
+    }
+
+    const fetchVisitors = async () => {
+      try {
+        const response = await fetch('/api/visitor?' + Date.now(), { 
+          method: 'GET',
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        })
+        const data = await response.json()
+        
+        if (mounted && data.success) {
+          setVisitors(data.totalVisitors)
+        }
+      } catch (error) {
+        console.error('[PAGE] Fetch error:', error)
       }
     }
 
     trackVisitor()
-
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch('/api/visitor', { 
-          method: 'GET',
-          cache: 'no-store'
-        })
-        const data = await response.json()
-        if (mounted) {
-          setVisitors(data.totalVisitors || 0)
-        }
-      } catch (error) {
-        console.error('[PAGE] Error fetching:', error)
-      }
-    }, 5000)
+    const interval = setInterval(fetchVisitors, 3000)
 
     return () => {
       mounted = false
