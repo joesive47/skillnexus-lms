@@ -10,10 +10,21 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
+    // Increment visitor count on first load
     fetch('/api/visitors', { method: 'POST' })
       .then(res => res.json())
       .then(data => setVisitors(data.count))
       .catch(() => setVisitors(0))
+
+    // Poll for updates every 3 seconds
+    const interval = setInterval(() => {
+      fetch('/api/visitors', { method: 'GET' })
+        .then(res => res.json())
+        .then(data => setVisitors(data.count))
+        .catch(() => {})
+    }, 3000)
+
+    return () => clearInterval(interval)
   }, [])
 
   return (
