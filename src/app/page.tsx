@@ -10,13 +10,26 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
-    const fetchStats = () => {
-      fetch('/api/stats')
-        .then(r => r.json())
-        .then(d => setStats(d))
-        .catch(() => {})
+    let tracked = false
+    
+    const trackVisit = async () => {
+      if (tracked) return
+      tracked = true
+      
+      try {
+        await fetch('/api/stats', { method: 'POST' })
+      } catch (e) {}
     }
     
+    const fetchStats = async () => {
+      try {
+        const r = await fetch('/api/stats')
+        const d = await r.json()
+        setStats(d)
+      } catch (e) {}
+    }
+    
+    trackVisit()
     fetchStats()
     const timer = setInterval(fetchStats, 10000)
     return () => clearInterval(timer)
