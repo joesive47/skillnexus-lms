@@ -2,7 +2,9 @@ export const translations = {
   th: {
     header: {
       title: "upPowerSkill",
-      visitors: "ผู้เข้าชม"
+      visitors: "ผู้เยี่ยมชม",
+      members: "สมาชิก",
+      certificates: "ใบรับรอง"
     },
     hero: {
       title: "upPowerSkill",
@@ -41,7 +43,9 @@ export const translations = {
   en: {
     header: {
       title: "upPowerSkill",
-      visitors: "Visitors"
+      visitors: "Visitors",
+      members: "Members",
+      certificates: "Certificates"
     },
     hero: {
       title: "upPowerSkill",
@@ -80,7 +84,9 @@ export const translations = {
   ja: {
     header: {
       title: "upPowerSkill",
-      visitors: "訪問者"
+      visitors: "訪問者",
+      members: "会員",
+      certificates: "証明書"
     },
     hero: {
       title: "upPowerSkill",

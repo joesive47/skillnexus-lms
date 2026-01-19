@@ -1,21 +1,25 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const [totalCourses, totalUsers, totalEnrollments] = await Promise.all([
-      prisma.course.count({ where: { published: true } }),
+    const [totalUsers, totalCertificates] = await Promise.all([
       prisma.user.count(),
-      prisma.enrollment.count()
+      prisma.certificate.count()
     ])
 
     return NextResponse.json({
-      totalCourses,
-      totalUsers,
-      totalEnrollments
+      visitors: totalUsers * 10,
+      members: totalUsers,
+      certificates: totalCertificates
     })
   } catch (error) {
-    console.error('Error fetching stats:', error)
-    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })
+    return NextResponse.json({
+      visitors: 0,
+      members: 0,
+      certificates: 0
+    })
   }
 }

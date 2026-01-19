@@ -6,22 +6,19 @@ import { translations, Language } from '@/lib/i18n'
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>('th')
-  const [visitors, setVisitors] = useState(0)
+  const [stats, setStats] = useState({ visitors: 0, members: 0, certificates: 0 })
   const t = translations[lang]
 
   useEffect(() => {
-    fetch('/api/visitors', { method: 'POST' })
-      .then(r => r.json())
-      .then(d => setVisitors(d.count))
-      .catch(() => {})
-
-    const timer = setInterval(() => {
-      fetch('/api/visitors')
+    const fetchStats = () => {
+      fetch('/api/stats')
         .then(r => r.json())
-        .then(d => setVisitors(d.count))
+        .then(d => setStats(d))
         .catch(() => {})
-    }, 5000)
-
+    }
+    
+    fetchStats()
+    const timer = setInterval(fetchStats, 10000)
     return () => clearInterval(timer)
   }, [])
 
@@ -39,12 +36,28 @@ export default function HomePage() {
             </h1>
           </div>
           
-          {/* Visitor Counter */}
-          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-lg border border-blue-200">
-            <span className="text-xl">👥</span>
-            <div>
-              <p className="text-xs text-gray-500">{t.header.visitors}</p>
-              <p className="text-sm font-bold text-gray-900">{visitors.toLocaleString()}</p>
+          {/* Stats */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg">
+              <span>👥</span>
+              <div>
+                <p className="text-xs text-gray-500">{t.header.visitors}</p>
+                <p className="text-sm font-bold text-gray-900">{stats.visitors.toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg">
+              <span>👤</span>
+              <div>
+                <p className="text-xs text-gray-500">{t.header.members}</p>
+                <p className="text-sm font-bold text-gray-900">{stats.members.toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg">
+              <span>🏆</span>
+              <div>
+                <p className="text-xs text-gray-500">{t.header.certificates}</p>
+                <p className="text-sm font-bold text-gray-900">{stats.certificates.toLocaleString()}</p>
+              </div>
             </div>
           </div>
           
