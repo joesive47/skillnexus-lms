@@ -27,6 +27,8 @@ export async function GET() {
 
 export async function POST() {
   try {
+    console.log('[STATS API] POST - Tracking visitor')
+    
     const stats = await prisma.visitorStats.upsert({
       where: { id: 1 },
       update: {
@@ -40,8 +42,21 @@ export async function POST() {
       }
     })
 
-    return NextResponse.json({ success: true, visitors: stats.totalVisitors })
+    console.log('[STATS API] Updated:', stats)
+    return NextResponse.json({ 
+      success: true, 
+      visitors: stats.totalVisitors 
+    }, {
+      headers: {
+        'Cache-Control': 'no-store'
+      }
+    })
   } catch (error) {
-    return NextResponse.json({ success: false, visitors: 0 })
+    console.error('[STATS API] POST Error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      visitors: 0,
+      error: String(error)
+    })
   }
 }

@@ -10,28 +10,33 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
-    let tracked = false
-    
     const trackVisit = async () => {
-      if (tracked) return
-      tracked = true
-      
       try {
-        await fetch('/api/stats', { method: 'POST' })
-      } catch (e) {}
+        const res = await fetch('/api/stats', { 
+          method: 'POST',
+          cache: 'no-store'
+        })
+        const data = await res.json()
+        console.log('Track result:', data)
+      } catch (e) {
+        console.error('Track error:', e)
+      }
     }
     
     const fetchStats = async () => {
       try {
-        const r = await fetch('/api/stats')
+        const r = await fetch('/api/stats', { cache: 'no-store' })
         const d = await r.json()
+        console.log('Stats:', d)
         setStats(d)
-      } catch (e) {}
+      } catch (e) {
+        console.error('Fetch error:', e)
+      }
     }
     
     trackVisit()
     fetchStats()
-    const timer = setInterval(fetchStats, 10000)
+    const timer = setInterval(fetchStats, 5000)
     return () => clearInterval(timer)
   }, [])
 
