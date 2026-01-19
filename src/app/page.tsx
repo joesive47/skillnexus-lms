@@ -46,7 +46,7 @@ export default function HomePage() {
             <span className="text-xl">👥</span>
             <div>
               <p className="text-xs text-gray-500">{t.header.visitors}</p>
-              <p className="text-sm font-bold text-gray-900">{visitors.toLocaleString()}</p>
+              <p className="text-sm font-bold text-gray-900">{(visitors || 0).toLocaleString()}</p>
             </div>
           </div>
           
