@@ -10,40 +10,23 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
-    const trackVisit = async () => {
-      try {
-        const res = await fetch('/api/stats', { 
-          method: 'POST',
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
+    fetch('/api/stats', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => console.log('Tracked:', d))
+      .catch(e => console.error('Track error:', e))
+
+    const fetchStats = () => {
+      fetch('/api/stats')
+        .then(r => r.json())
+        .then(d => {
+          console.log('Stats:', d)
+          setStats(d)
         })
-        const data = await res.json()
-        console.log('✅ Tracked:', data)
-        if (data.success) {
-          setStats(prev => ({ ...prev, visitors: data.visitors }))
-        }
-      } catch (e) {
-        console.error('❌ Track error:', e)
-      }
+        .catch(e => console.error('Fetch error:', e))
     }
-    
-    const fetchStats = async () => {
-      try {
-        const r = await fetch('/api/stats?' + Date.now(), { 
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
-        })
-        const d = await r.json()
-        console.log('📊 Stats:', d)
-        setStats(d)
-      } catch (e) {
-        console.error('❌ Fetch error:', e)
-      }
-    }
-    
-    trackVisit()
+
     fetchStats()
-    const timer = setInterval(fetchStats, 5000)
+    const timer = setInterval(fetchStats, 10000)
     return () => clearInterval(timer)
   }, [])
 

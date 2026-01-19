@@ -2,74 +2,40 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
 export async function GET() {
   try {
-    const [totalUsers, totalCertificates, visitorStats] = await Promise.all([
+    const [users, certs, visits] = await Promise.all([
       prisma.user.count(),
       prisma.certificate.count(),
-      prisma.visitorStats.findFirst({ where: { id: 1 } })
+      prisma.analytics.count({ where: { event: 'page_view' } })
     ])
 
-    const stats = {
-      visitors: visitorStats?.totalVisitors || 0,
-      members: totalUsers,
-      certificates: totalCertificates
-    }
-
-    console.log('[STATS API] GET:', stats)
-
-    return NextResponse.json(stats, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache'
-      }
+    return NextResponse.json({
+      visitors: visits,
+      members: users,
+      certificates: certs
     })
   } catch (error) {
-    console.error('[STATS API] GET Error:', error)
-    return NextResponse.json({
-      visitors: 0,
-      members: 0,
-      certificates: 0
-    })
+    console.error('Stats error:', error)
+    return NextResponse.json({ visitors: 0, members: 0, certificates: 0 })
   }
 }
 
 export async function POST() {
   try {
-    console.log('[STATS API] POST - Tracking visitor')
-    
-    const stats = await prisma.visitorStats.upsert({
-      where: { id: 1 },
-      update: {
-        totalVisitors: { increment: 1 },
-        lastVisit: new Date()
-      },
-      create: {
-        id: 1,
-        totalVisitors: 1,
-        lastVisit: new Date()
+    await prisma.analytics.create({
+      data: {
+        event: 'page_view',
+        page: '/',
+        timestamp: new Date()
       }
     })
-
-    console.log('[STATS API] Updated visitors:', stats.totalVisitors)
     
-    return NextResponse.json({ 
-      success: true, 
-      visitors: stats.totalVisitors 
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache'
-      }
-    })
+    const count = await prisma.analytics.count({ where: { event: 'page_view' } })
+    return NextResponse.json({ success: true, visitors: count })
   } catch (error) {
-    console.error('[STATS API] POST Error:', error)
-    return NextResponse.json({ 
-      success: false, 
-      visitors: 0,
-      error: String(error)
-    })
+    console.error('Track error:', error)
+    return NextResponse.json({ success: false })
   }
 }
