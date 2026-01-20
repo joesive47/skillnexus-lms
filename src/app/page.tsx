@@ -10,23 +10,33 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
-    fetch('/api/stats', { method: 'POST' })
-      .then(r => r.json())
-      .then(d => console.log('Tracked:', d))
-      .catch(e => console.error('Track error:', e))
-
-    const fetchStats = () => {
-      fetch('/api/stats')
-        .then(r => r.json())
-        .then(d => {
-          console.log('Stats:', d)
-          setStats(d)
+    const track = async () => {
+      try {
+        const res = await fetch('/api/stats', { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
         })
-        .catch(e => console.error('Fetch error:', e))
+        const data = await res.json()
+        console.log('✅ Track:', data)
+      } catch (e) {
+        console.error('❌ Track:', e)
+      }
     }
 
-    fetchStats()
-    const timer = setInterval(fetchStats, 10000)
+    const load = async () => {
+      try {
+        const res = await fetch('/api/stats?t=' + Date.now())
+        const data = await res.json()
+        console.log('📊 Stats:', data)
+        setStats(data)
+      } catch (e) {
+        console.error('❌ Load:', e)
+      }
+    }
+
+    track()
+    load()
+    const timer = setInterval(load, 5000)
     return () => clearInterval(timer)
   }, [])
 
