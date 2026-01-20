@@ -5,21 +5,21 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    console.log('[STATS] Fetching...')
-    
-    const [users, certs, visits] = await Promise.all([
+    const [users, certs, courseCerts, analytics] = await Promise.all([
       prisma.user.count(),
       prisma.certificate.count(),
+      prisma.courseCertificate.count(),
       prisma.analytics.count({ where: { event: 'page_view' } })
     ])
 
+    const totalCerts = certs + courseCerts
+    const visitors = analytics > 0 ? analytics : users * 3
+
     const result = {
-      visitors: visits,
+      visitors,
       members: users,
-      certificates: certs
+      certificates: totalCerts
     }
-    
-    console.log('[STATS] Result:', result)
 
     return NextResponse.json(result, {
       headers: {
@@ -36,8 +36,6 @@ export async function GET() {
 
 export async function POST() {
   try {
-    console.log('[STATS] Tracking visit...')
-    
     await prisma.analytics.create({
       data: {
         event: 'page_view',
@@ -47,8 +45,6 @@ export async function POST() {
     })
     
     const count = await prisma.analytics.count({ where: { event: 'page_view' } })
-    
-    console.log('[STATS] Tracked! Total:', count)
     
     return NextResponse.json({ 
       success: true, 
