@@ -10,37 +10,19 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
-    const track = async () => {
-      try {
-        const res = await fetch('/api/stats', { 
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        const data = await res.json()
-        console.log('✅ Track:', data)
-      } catch (e) {
-        console.error('❌ Track:', e)
-      }
-    }
-
     const load = async () => {
       try {
         const res = await fetch('/api/stats?t=' + Date.now())
         if (res.ok) {
           const data = await res.json()
-          if (data.visitors > 0 || data.members > 0 || data.certificates > 0) {
-            setStats(data)
-          }
+          setStats(data)
         }
       } catch (e) {
         console.error('❌ Load:', e)
       }
     }
 
-    track()
     load()
-    const timer = setInterval(load, 5000)
-    return () => clearInterval(timer)
   }, [])
 
   return (
