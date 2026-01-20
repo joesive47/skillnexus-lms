@@ -19,14 +19,12 @@ export async function GET() {
     }
 
     const totalCerts = certs + courseCerts
-    const visitors = analytics > 0 ? analytics : (users > 0 ? users * 3 : 1250)
-    const members = users > 0 ? users : 350
-    const certificates = totalCerts > 0 ? totalCerts : 180
+    const visitors = analytics > 0 ? analytics : users * 3
 
     const result = {
       visitors,
-      members,
-      certificates
+      members: users,
+      certificates: totalCerts
     }
 
     return NextResponse.json(result, {
@@ -38,11 +36,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error('[STATS] Error:', error)
-    return NextResponse.json({ 
-      visitors: 1250, 
-      members: 350, 
-      certificates: 180 
-    })
+    return NextResponse.json({ visitors: 0, members: 0, certificates: 0 })
   }
 }
 

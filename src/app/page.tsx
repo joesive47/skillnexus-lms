@@ -6,7 +6,8 @@ import { translations, Language } from '@/lib/i18n'
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>('th')
-  const [stats, setStats] = useState({ visitors: 1250, members: 350, certificates: 180 })
+  const [stats, setStats] = useState({ visitors: 0, members: 0, certificates: 0 })
+  const [loading, setLoading] = useState(true)
   const t = translations[lang]
 
   useEffect(() => {
@@ -19,6 +20,8 @@ export default function HomePage() {
         }
       } catch (e) {
         console.error('❌ Load:', e)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -45,21 +48,21 @@ export default function HomePage() {
               <span>👥</span>
               <div>
                 <p className="text-xs text-gray-500">{t.header.visitors}</p>
-                <p className="text-sm font-bold text-gray-900">{stats.visitors.toLocaleString()}</p>
+                <p className="text-sm font-bold text-gray-900">{loading ? '...' : stats.visitors.toLocaleString()}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg">
               <span>👤</span>
               <div>
                 <p className="text-xs text-gray-500">{t.header.members}</p>
-                <p className="text-sm font-bold text-gray-900">{stats.members.toLocaleString()}</p>
+                <p className="text-sm font-bold text-gray-900">{loading ? '...' : stats.members.toLocaleString()}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg">
               <span>🏆</span>
               <div>
                 <p className="text-xs text-gray-500">{t.header.certificates}</p>
-                <p className="text-sm font-bold text-gray-900">{stats.certificates.toLocaleString()}</p>
+                <p className="text-sm font-bold text-gray-900">{loading ? '...' : stats.certificates.toLocaleString()}</p>
               </div>
             </div>
           </div>
