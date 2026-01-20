@@ -11,6 +11,8 @@ export default function HomePage() {
   const t = translations[lang]
 
   useEffect(() => {
+    fetch('/api/stats', { method: 'POST' }).catch(() => {})
+    
     const load = async () => {
       try {
         const res = await fetch('/api/stats?t=' + Date.now())
