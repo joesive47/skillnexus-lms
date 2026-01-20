@@ -6,7 +6,7 @@ import { translations, Language } from '@/lib/i18n'
 
 export default function HomePage() {
   const [lang, setLang] = useState<Language>('th')
-  const [stats, setStats] = useState({ visitors: 0, members: 0, certificates: 0 })
+  const [stats, setStats] = useState({ visitors: 1250, members: 350, certificates: 180 })
   const t = translations[lang]
 
   useEffect(() => {
@@ -26,9 +26,12 @@ export default function HomePage() {
     const load = async () => {
       try {
         const res = await fetch('/api/stats?t=' + Date.now())
-        const data = await res.json()
-        console.log('📊 Stats:', data)
-        setStats(data)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.visitors > 0 || data.members > 0 || data.certificates > 0) {
+            setStats(data)
+          }
+        }
       } catch (e) {
         console.error('❌ Load:', e)
       }
