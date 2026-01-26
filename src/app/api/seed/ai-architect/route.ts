@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export async function GET() {
+  return await seedCourse()
+}
+
 export async function POST() {
+  return await seedCourse()
+}
+
+async function seedCourse() {
   try {
+    const existing = await prisma.course.findUnique({ where: { id: 'ai-architect-001' } })
+    if (existing) {
+      return NextResponse.json({ success: true, message: 'Course already exists', courseId: existing.id })
+    }
+
     const course = await prisma.course.create({
       data: {
         id: 'ai-architect-001',
