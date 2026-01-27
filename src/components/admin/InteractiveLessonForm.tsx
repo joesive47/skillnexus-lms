@@ -112,17 +112,33 @@ export default function InteractiveLessonForm({
                 ไฟล์ที่เลือก: {file.name}
               </p>
             )}
+            <div className="bg-yellow-50 p-3 rounded-lg mt-2">
+              <p className="text-sm text-yellow-800">
+                ⚠️ <strong>สำหรับ Vercel:</strong> ใช้ "ใส่ URL" แทนการอัปโหลดไฟล์
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">
-            <Label htmlFor="url">Launch URL</Label>
+            <Label htmlFor="url">SCORM Package URL (jsDelivr CDN)</Label>
             <Input
               id="url"
               type="url"
-              placeholder="https://example.com/game"
+              placeholder="https://cdn.jsdelivr.net/gh/username/repo@main/scorm-packages/course.zip"
               value={launchUrl}
               onChange={(e) => setLaunchUrl(e.target.value)}
             />
+            <div className="bg-green-50 p-3 rounded-lg space-y-2">
+              <p className="text-sm font-semibold text-green-900">📦 SCORM Packages พร้อมใช้:</p>
+              <div className="space-y-1 text-xs text-green-800">
+                <p className="font-mono break-all">
+                  • AI Architect: https://cdn.jsdelivr.net/gh/joesive47/skillnexus-lms@main/scorm-packages/ai-architect-blueprint.zip
+                </p>
+                <p className="font-mono break-all">
+                  • Prompt Engineering: https://cdn.jsdelivr.net/gh/joesive47/skillnexus-lms@main/scorm-packages/prompt-engineering.zip
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
