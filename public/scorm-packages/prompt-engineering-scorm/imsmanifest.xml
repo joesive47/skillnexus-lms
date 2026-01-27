@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="com.uppowerskill.prompt-engineering" version="1.0"
+          xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+          xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3"
+          xmlns:adlnav="http://www.adlnet.org/xsd/adlnav_v1p3"
+          xmlns:imsss="http://www.imsglobal.org/xsd/imsss">
+  
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+  </metadata>
+  
+  <organizations default="ORG-001">
+    <organization identifier="ORG-001">
+      <title>Prompt Engineering: Master AI Communication</title>
+      <item identifier="ITEM-001" identifierref="RES-001">
+        <title>Introduction to Prompt Engineering</title>
+      </item>
+      <item identifier="ITEM-002" identifierref="RES-002">
+        <title>Basic Prompt Techniques</title>
+      </item>
+      <item identifier="ITEM-003" identifierref="RES-003">
+        <title>Advanced Strategies</title>
+      </item>
+      <item identifier="ITEM-004" identifierref="RES-004">
+        <title>Interactive Quiz</title>
+      </item>
+    </organization>
+  </organizations>
+  
+  <resources>
+    <resource identifier="RES-001" type="webcontent" adlcp:scormType="sco" href="lesson1.html">
+      <file href="lesson1.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-002" type="webcontent" adlcp:scormType="sco" href="lesson2.html">
+      <file href="lesson2.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-003" type="webcontent" adlcp:scormType="sco" href="lesson3.html">
+      <file href="lesson3.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-004" type="webcontent" adlcp:scormType="sco" href="quiz.html">
+      <file href="quiz.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+  </resources>
+</manifest>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Quiz: Prompt Engineering</title>
+  <link rel="stylesheet" href="res/style.css">
+  <script src="shared/scorm2004.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 แบบทดสอบ Prompt Engineering</h1>
+    
+    <div class="quiz-container" id="quizContainer">
+      <div class="question">
+        <h3>คำถามที่ 1: Prompt ที่ดีควรมีองค์ประกอบใดบ้าง?</h3>
+        <ul class="options">
+          <li onclick="selectAnswer(this, false)">A. เฉพาะคำสั่งเท่านั้น</li>
+          <li onclick="selectAnswer(this, true)">B. บริบท งาน รูปแบบ และข้อจำกัด</li>
+          <li onclick="selectAnswer(this, false)">C. ยิ่งสั้นยิ่งดี</li>
+          <li onclick="selectAnswer(this, false)">D. ใช้ภาษาที่ซับซ้อน</li>
+        </ul>
+      </div>
+
+      <div class="question">
+        <h3>คำถามที่ 2: Few-Shot Prompting คืออะไร?</h3>
+        <ul class="options">
+          <li onclick="selectAnswer(this, false)">A. ให้ AI ทำงานโดยไม่มีตัวอย่าง</li>
+          <li onclick="selectAnswer(this, true)">B. ให้ตัวอย่างก่อนให้ AI ทำงาน</li>
+          <li onclick="selectAnswer(this, false)">C. ใช้ Prompt สั้นๆ</li>
+          <li onclick="selectAnswer(this, false)">D. ให้ AI คิดเอง</li>
+        </ul>
+      </div>
+
+      <div class="question">
+        <h3>คำถามที่ 3: Chain-of-Thought มีประโยชน์อย่างไร?</h3>
+        <ul class="options">
+          <li onclick="selectAnswer(this, false)">A. ทำให้ AI ตอบเร็วขึ้น</li>
+          <li onclick="selectAnswer(this, true)">B. ช่วยให้ AI คิดทีละขั้นตอน ได้คำตอบที่แม่นยำ</li>
+          <li onclick="selectAnswer(this, false)">C. ลดความซับซ้อนของ Prompt</li>
+          <li onclick="selectAnswer(this, false)">D. ไม่มีประโยชน์</li>
+        </ul>
+      </div>
+
+      <div class="question">
+        <h3>คำถามที่ 4: Role Prompting คืออะไร?</h3>
+        <ul class="options">
+          <li onclick="selectAnswer(this, true)">A. กำหนดบทบาทให้ AI เช่น "คุณเป็นผู้เชี่ยวชาญ..."</li>
+          <li onclick="selectAnswer(this, false)">B. ให้ AI เล่นเกม</li>
+          <li onclick="selectAnswer(this, false)">C. สลับบทบาทกับ AI</li>
+          <li onclick="selectAnswer(this, false)">D. ไม่ต้องกำหนดอะไร</li>
+        </ul>
+      </div>
+
+      <div class="question">
+        <h3>คำถามที่ 5: ข้อใดเป็น Best Practice ของ Prompt Engineering?</h3>
+        <ul class="options">
+          <li onclick="selectAnswer(this, false)">A. ใช้ภาษาที่คลุมเครือ</li>
+          <li onclick="selectAnswer(this, false)">B. ไม่ต้องให้ตัวอย่าง</li>
+          <li onclick="selectAnswer(this, true)">C. ทดสอบและปรับปรุง Prompt อย่างสม่ำเสมอ</li>
+          <li onclick="selectAnswer(this, false)">D. ใช้ Prompt เดิมตลอด</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <button class="btn" onclick="submitQuiz()" id="submitBtn">ส่งคำตอบ</button>
+    </div>
+
+    <div id="result" class="result" style="display: none;">
+      <h2>🎉 ผลการทดสอบ</h2>
+      <div class="score" id="scoreDisplay">0%</div>
+      <p id="resultMessage"></p>
+      <a href="lesson1.html" class="btn">เริ่มต้นใหม่</a>
+    </div>
+  </div>
+
+  <script>
+    let answers = [];
+    let totalQuestions = 5;
+
+    function selectAnswer(element, isCorrect) {
+      const options = element.parentElement.querySelectorAll('li');
+      options.forEach(opt => opt.classList.remove('selected'));
+      element.classList.add('selected');
+      
+      const questionIndex = Array.from(document.querySelectorAll('.question')).indexOf(element.closest('.question'));
+      answers[questionIndex] = isCorrect;
+    }
+
+    function submitQuiz() {
+      if (answers.filter(a => a !== undefined).length < totalQuestions) {
+        alert('กรุณาตอบคำถามให้ครบทุกข้อ');
+        return;
+      }
+
+      document.querySelectorAll('.options li').forEach(li => {
+        li.style.pointerEvents = 'none';
+        if (li.classList.contains('selected')) {
+          const isCorrect = answers[Array.from(document.querySelectorAll('.question')).indexOf(li.closest('.question'))];
+          li.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+
+      const correctCount = answers.filter(a => a === true).length;
+      const score = Math.round((correctCount / totalQuestions) * 100);
+
+      document.getElementById('scoreDisplay').textContent = score + '%';
+      
+      let message = '';
+      if (score >= 80) {
+        message = '🌟 ยอดเยี่ยม! คุณเข้าใจ Prompt Engineering เป็นอย่างดี';
+      } else if (score >= 60) {
+        message = '👍 ดีมาก! แต่ยังมีที่ต้องพัฒนาอีกนิดหน่อย';
+      } else {
+        message = '📚 ลองทบทวนบทเรียนอีกครั้งนะ';
+      }
+      
+      document.getElementById('resultMessage').textContent = message;
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('submitBtn').style.display = 'none';
+      document.getElementById('quizContainer').style.opacity = '0.5';
+
+      setSCORMScore(score);
+      setSCORMComplete();
+    }
+  </script>
+</body>
+</html>
