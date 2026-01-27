@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="com.uppowerskill.ai-architect" version="1.0"
+          xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+          xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3"
+          xmlns:adlnav="http://www.adlnet.org/xsd/adlnav_v1p3"
+          xmlns:imsss="http://www.imsglobal.org/xsd/imsss">
+  
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+  </metadata>
+  
+  <organizations default="ORG-001">
+    <organization identifier="ORG-001">
+      <title>AI Architect's Blueprint: จากไอเดียฟุ้งสู่ระบบจริงด้วย Amazon Q &amp; VS Code</title>
+      <item identifier="ITEM-001" identifierref="RES-001">
+        <title>Module 1: รู้จัก Amazon Q Developer</title>
+      </item>
+      <item identifier="ITEM-002" identifierref="RES-002">
+        <title>Module 2: Setup VS Code + Amazon Q</title>
+      </item>
+      <item identifier="ITEM-003" identifierref="RES-003">
+        <title>Module 3: สร้างระบบจริงด้วย AI</title>
+      </item>
+      <item identifier="ITEM-004" identifierref="RES-004">
+        <title>Module 4: Best Practices</title>
+      </item>
+      <item identifier="ITEM-005" identifierref="RES-005">
+        <title>Final Assessment</title>
+      </item>
+    </organization>
+  </organizations>
+  
+  <resources>
+    <resource identifier="RES-001" type="webcontent" adlcp:scormType="sco" href="module1.html">
+      <file href="module1.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-002" type="webcontent" adlcp:scormType="sco" href="module2.html">
+      <file href="module2.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-003" type="webcontent" adlcp:scormType="sco" href="module3.html">
+      <file href="module3.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-004" type="webcontent" adlcp:scormType="sco" href="module4.html">
+      <file href="module4.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+    <resource identifier="RES-005" type="webcontent" adlcp:scormType="sco" href="assessment.html">
+      <file href="assessment.html"/>
+      <file href="shared/scorm2004.js"/>
+      <file href="res/style.css"/>
+    </resource>
+  </resources>
+</manifest>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2: Setup VS Code + Amazon Q</title>
+  <link rel="stylesheet" href="res/style.css">
+  <script src="shared/scorm2004.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Setup VS Code + Amazon Q</h1>
+    
+    <h2>📋 ขั้นตอนการติดตั้ง</h2>
+    
+    <div class="example">
+      <h3>Step 1: ติดตั้ง VS Code</h3>
+      <ol style="line-height: 2;">
+        <li>ดาวน์โหลดจาก <a href="https://code.visualstudio.com" target="_blank">code.visualstudio.com</a></li>
+        <li>เลือกเวอร์ชันตาม OS (Windows/Mac/Linux)</li>
+        <li>ติดตั้งตามขั้นตอน</li>
+      </ol>
+    </div>
+
+    <div class="example">
+      <h3>Step 2: ติดตั้ง Amazon Q Extension</h3>
+      <ol style="line-height: 2;">
+        <li>เปิด VS Code</li>
+        <li>กด <code style="background: #f0f0f0; padding: 4px 8px; border-radius: 4px;">Ctrl+Shift+X</code> (Extensions)</li>
+        <li>ค้นหา "Amazon Q"</li>
+        <li>คลิก Install</li>
+      </ol>
+    </div>
+
+    <div class="example">
+      <h3>Step 3: เชื่อมต่อ AWS Account</h3>
+      <ol style="line-height: 2;">
+        <li>คลิกไอคอน Amazon Q ที่ Sidebar</li>
+        <li>เลือก "Sign in with AWS Builder ID"</li>
+        <li>ทำตาม Authentication Flow</li>
+        <li>เสร็จแล้ว! พร้อมใช้งาน</li>
+      </ol>
+    </div>
+
+    <h2>🎮 ทดลองใช้งานครั้งแรก</h2>
+    <div class="interactive-box">
+      <h3>แบบฝึกหัด: สร้าง Hello World API</h3>
+      <p><strong>คำสั่ง:</strong> พิมพ์ใน Amazon Q Chat</p>
+      <textarea id="userPrompt" placeholder="ลองเขียนคำสั่งของคุณ..." style="width: 100%; min-height: 100px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: monospace;"></textarea>
+      
+      <div class="tip" style="margin-top: 15px;">
+        <strong>💡 ตัวอย่างคำสั่งที่ดี:</strong><br>
+        "สร้าง REST API ด้วย Node.js + Express ที่มี endpoint GET /hello ส่งกลับ JSON {message: 'Hello World'}"
+      </div>
+      
+      <button class="btn" onclick="checkPrompt()">ตรวจสอบคำสั่ง</button>
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <h2>⌨️ Keyboard Shortcuts ที่ควรรู้</h2>
+    <div class="interactive-box">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr style="background: #f0f0f0;">
+          <th style="padding: 12px; border: 1px solid #ddd;">Shortcut</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">คำอธิบาย</th>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border: 1px solid #ddd;"><code>Ctrl+I</code></td>
+          <td style="padding: 12px; border: 1px solid #ddd;">เปิด Amazon Q Chat</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border: 1px solid #ddd;"><code>Alt+C</code></td>
+          <td style="padding: 12px; border: 1px solid #ddd;">Code Completion</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border: 1px solid #ddd;"><code>Ctrl+Shift+P</code></td>
+          <td style="padding: 12px; border: 1px solid #ddd;">Command Palette</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="module1.html" class="btn">← ย้อนกลับ</a>
+      <a href="module3.html" class="btn">ถัดไป: สร้างระบบจริง →</a>
+    </div>
+  </div>
+
+  <script>
+    function checkPrompt() {
+      const prompt = document.getElementById('userPrompt').value.trim();
+      const feedback = document.getElementById('feedback');
+      
+      if (prompt.length < 20) {
+        feedback.className = 'feedback error show';
+        feedback.innerHTML = '❌ คำสั่งสั้นเกินไป ลองเพิ่มรายละเอียดมากขึ้น';
+        return;
+      }
+
+      const keywords = ['API', 'Node', 'Express', 'endpoint', 'สร้าง'];
+      const hasKeywords = keywords.some(k => prompt.toLowerCase().includes(k.toLowerCase()));
+
+      if (hasKeywords) {
+        feedback.className = 'feedback success show';
+        feedback.innerHTML = '✅ ยอดเยี่ยม! คำสั่งของคุณชัดเจนและมีรายละเอียดครบถ้วน';
+        setSCORMComplete();
+      } else {
+        feedback.className = 'feedback error show';
+        feedback.innerHTML = '⚠️ ลองเพิ่มรายละเอียดเกี่ยวกับเทคโนโลยีและ endpoint ที่ต้องการ';
+      }
+    }
+  </script>
+</body>
+</html>
