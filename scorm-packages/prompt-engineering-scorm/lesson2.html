@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2: Basic Prompt Techniques</title>
+  <link rel="stylesheet" href="res/style.css">
+  <script src="shared/scorm2004.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>⚡ เทคนิคพื้นฐาน Prompt Engineering</h1>
+    
+    <h2>1. Zero-Shot Prompting</h2>
+    <p>ให้ AI ทำงานโดยไม่ต้องให้ตัวอย่าง</p>
+    <div class="example">
+      <strong>ตัวอย่าง:</strong><br>
+      "แปลประโยคนี้เป็นภาษาอังกฤษ: สวัสดีครับ"
+    </div>
+
+    <h2>2. Few-Shot Prompting</h2>
+    <p>ให้ตัวอย่างก่อนให้ AI ทำงาน</p>
+    <div class="example">
+      <strong>ตัวอย่าง:</strong><br>
+      Input: สวัสดี → Output: Hello<br>
+      Input: ขอบคุณ → Output: Thank you<br>
+      Input: ลาก่อน → Output: ?
+    </div>
+
+    <h2>3. Chain-of-Thought (CoT)</h2>
+    <p>ให้ AI คิดทีละขั้นตอน</p>
+    <div class="example">
+      <strong>ตัวอย่าง:</strong><br>
+      "แก้โจทย์นี้ทีละขั้นตอน: ถ้าแอปเปิ้ล 3 ลูกราคา 30 บาท แอปเปิ้ล 10 ลูกราคาเท่าไร?"
+    </div>
+
+    <h2>🎮 ลองฝึกเขียน Prompt</h2>
+    <div class="interactive-box">
+      <p><strong>โจทย์:</strong> เขียน Prompt ให้ AI สร้างแผนการตลาดสำหรับร้านกาแฟใหม่</p>
+      <textarea id="userPrompt" placeholder="เขียน Prompt ของคุณที่นี่..."></textarea>
+      <button class="btn" onclick="checkPrompt()">ตรวจสอบ</button>
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="lesson1.html" class="btn">← ย้อนกลับ</a>
+      <a href="lesson3.html" class="btn">ถัดไป: Advanced →</a>
+    </div>
+  </div>
+
+  <script>
+    function checkPrompt() {
+      const prompt = document.getElementById('userPrompt').value.trim();
+      const feedback = document.getElementById('feedback');
+      
+      if (prompt.length < 20) {
+        feedback.className = 'feedback error show';
+        feedback.innerHTML = '❌ Prompt สั้นเกินไป ลองเพิ่มรายละเอียดมากขึ้น';
+        return;
+      }
+
+      const keywords = ['กาแฟ', 'ตลาด', 'แผน', 'กลุ่มเป้าหมาย', 'ช่องทาง'];
+      const hasKeywords = keywords.some(k => prompt.includes(k));
+
+      if (hasKeywords) {
+        feedback.className = 'feedback success show';
+        feedback.innerHTML = '✅ ดีมาก! Prompt ของคุณมีรายละเอียดที่ชัดเจน';
+        setSCORMComplete();
+      } else {
+        feedback.className = 'feedback error show';
+        feedback.innerHTML = '⚠️ ลองเพิ่มรายละเอียดเกี่ยวกับกลุ่มเป้าหมาย ช่องทาง หรือเป้าหมาย';
+      }
+    }
+  </script>
+</body>
+</html>

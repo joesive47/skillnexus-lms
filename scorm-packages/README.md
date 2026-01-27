@@ -1,49 +1,58 @@
 # 📦 SCORM Packages
 
-## ระบบรองรับ SCORM อย่างสมบูรณ์
+คอลเลกชัน SCORM 2004 packages สำหรับ upPowerSkill LMS
 
-### ✅ Features ที่มีอยู่แล้ว
-- SCORM 1.2 & 2004 Support
-- Upload & Extract ZIP
-- Parse Manifest (imsmanifest.xml)
-- Track Progress (CMI Data)
-- SCORM Player
-- SCORM Builder (Interactive)
+## 📚 Available Courses
 
-### 🚀 วิธีใช้งาน
+### 1. Prompt Engineering
+**Path:** `prompt-engineering-scorm/`  
+**Version:** SCORM 2004 4th Edition  
+**Duration:** ~30 minutes  
+**Language:** Thai  
 
-#### 1. ผ่าน Admin Dashboard
-```
-Admin → Courses → Add Lesson (Type: SCORM) → Upload ZIP
-```
+**Content:**
+- Lesson 1: Introduction to Prompt Engineering
+- Lesson 2: Basic Techniques (Zero-Shot, Few-Shot, CoT)
+- Lesson 3: Advanced Strategies (Role, Constraint, Template)
+- Quiz: Interactive 5-question assessment
 
-#### 2. ผ่าน SCORM Builder
-```
-/scorm-builder - สร้าง SCORM แบบ Interactive
-```
+**Features:**
+- ✅ Interactive exercises
+- ✅ Real-time feedback
+- ✅ Auto-grading quiz
+- ✅ Progress tracking
+- ✅ Responsive design
 
-#### 3. ผ่าน API
+## 🚀 How to Use
+
+### Upload to LMS:
+1. Go to Admin Dashboard
+2. Create/Edit Course
+3. Add Lesson → Upload SCORM
+4. Select folder or create ZIP
+5. Save
+
+### Create ZIP:
 ```bash
-POST /api/scorm/upload
-- file: SCORM ZIP
-- lessonId: Lesson ID
+cd prompt-engineering-scorm
+tar -czf ../prompt-engineering.zip .
 ```
 
-### 📁 โครงสร้าง
-```
-scorm-packages/
-├── README.md (this file)
-├── HOW-TO-USE.md (คำแนะนำ)
-└── prompt-engineering/ (ตัวอย่าง - ไม่ commit)
-```
+## 📝 SCORM 2004 Compliance
 
-### 🔧 SCORM Service
-- Upload: `/api/scorm/upload`
-- Progress: `/api/scorm/progress`
-- Player: `/lesson/[id]` (auto-detect SCORM)
+All packages support:
+- ✅ Completion tracking
+- ✅ Score tracking (0-100%)
+- ✅ Success status (Pass/Fail)
+- ✅ Time tracking
+- ✅ Suspend data
 
-### 📊 Database Tables
-- `ScormPackage` - Package metadata
-- `ScormProgress` - User progress tracking
+## 🔧 Technical Requirements
 
-### ✨ ระบบพร้อมใช้งาน 100%
+- Browser: Chrome 90+, Firefox 88+, Safari 14+
+- LMS: SCORM 2004 compatible
+- File size: < 50MB per package
+
+## 📖 Documentation
+
+See individual package folders for detailed documentation.
