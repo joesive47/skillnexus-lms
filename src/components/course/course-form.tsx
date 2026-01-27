@@ -188,9 +188,17 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
         if (!lesson.title?.trim()) {
           return `Lesson ${lessonNumber}: SCORM lesson title is required`
         }
-        // Only require SCORM file for new lessons or when replacing
-        if (!lesson.scormFile && !lesson.scormPackagePath && !lesson.id) {
-          return `Lesson ${lessonNumber}: SCORM package file is required for new SCORM lessons`
+        // Require either URL or file for new lessons
+        if (!lesson.scormFile && !lesson.scormPackagePath?.trim() && !lesson.id) {
+          return `Lesson ${lessonNumber}: SCORM package URL or file is required for new SCORM lessons`
+        }
+        // Validate URL format if provided
+        if (lesson.scormPackagePath?.trim()) {
+          try {
+            new URL(lesson.scormPackagePath)
+          } catch {
+            return `Lesson ${lessonNumber}: Please enter a valid SCORM package URL`
+          }
         }
       }
     }
@@ -503,33 +511,45 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label>SCORM Package (.zip) *</Label>
+                      <Label>SCORM Package URL * (Recommended for Vercel)</Label>
+                      <Input
+                        type="url"
+                        value={lesson.scormPackagePath || ''}
+                        onChange={(e) => updateLesson(index, 'scormPackagePath', e.target.value)}
+                        placeholder="https://your-storage.com/scorm-package.zip"
+                        className={!lesson.scormPackagePath?.trim() && !lesson.scormFile ? 'border-red-300' : ''}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        📦 Paste URL of SCORM package (.zip) hosted on Google Drive, Dropbox, AWS S3, etc.
+                      </p>
+                      {!lesson.scormPackagePath?.trim() && !lesson.scormFile && (
+                        <p className="text-red-500 text-xs mt-1">SCORM package URL is required</p>
+                      )}
+                    </div>
+                    <div className="col-span-2">
+                      <Label>Or Upload SCORM Package (.zip) - Local Only</Label>
                       <Input
                         type="file"
                         accept=".zip"
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) {
-                            // Validate file size (50MB)
                             if (file.size > 50 * 1024 * 1024) {
                               setError('SCORM package size must be less than 50MB')
                               return
                             }
                             updateLesson(index, 'scormFile', file)
+                            updateLesson(index, 'scormPackagePath', '')
                             setError(null)
                           }
                         }}
-                        className={!lesson.scormFile && !lesson.scormPackagePath ? 'border-red-300' : ''}
                       />
-                      {!lesson.scormFile && !lesson.scormPackagePath && (
-                        <p className="text-red-500 text-xs mt-1">SCORM package file is required</p>
-                      )}
                       <p className="text-xs text-gray-500 mt-1">
-                        Upload a SCORM 1.2 or SCORM 2004 compliant package (.zip file)
+                        ⚠️ File upload not supported on Vercel. Use URL instead.
                       </p>
-                      {lesson.scormPackagePath && (
+                      {lesson.scormFile && (
                         <p className="text-xs text-green-600 mt-1">
-                          ✓ SCORM package already uploaded
+                          ✓ File selected: {lesson.scormFile.name}
                         </p>
                       )}
                     </div>
