@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Upload, File, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, File, CheckCircle, AlertCircle, Link } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface ScormUploaderProps {
@@ -14,7 +14,9 @@ interface ScormUploaderProps {
 }
 
 export default function ScormUploader({ lessonId, onUploadComplete }: ScormUploaderProps) {
+  const [uploadType, setUploadType] = useState<'file' | 'url'>('url')
   const [file, setFile] = useState<File | null>(null)
+  const [packageUrl, setPackageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const { toast } = useToast()
@@ -36,40 +38,52 @@ export default function ScormUploader({ lessonId, onUploadComplete }: ScormUploa
   }
 
   const handleUpload = async () => {
-    if (!file) return
+    if (uploadType === 'file' && !file) return
+    if (uploadType === 'url' && !packageUrl) return
 
     setUploading(true)
     setUploadStatus('idle')
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('lessonId', lessonId)
-      formData.append('replace', 'true') // Allow replacing existing package
+      if (uploadType === 'url') {
+        // Save URL directly to database
+        const response = await fetch('/api/scorm/url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lessonId, packageUrl })
+        })
 
-      const response = await fetch('/api/scorm/upload', {
-        method: 'POST',
-        body: formData
-      })
+        const result = await response.json()
+        if (!response.ok) throw new Error(result.error || 'Failed to save URL')
+      } else {
+        // Upload file
+        const formData = new FormData()
+        formData.append('file', file!)
+        formData.append('lessonId', lessonId)
+        formData.append('replace', 'true')
 
-      const result = await response.json()
+        const response = await fetch('/api/scorm/upload', {
+          method: 'POST',
+          body: formData
+        })
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Upload failed')
+        const result = await response.json()
+        if (!response.ok) throw new Error(result.error || 'Upload failed')
       }
 
       setUploadStatus('success')
       toast({
-        title: 'Upload successful',
-        description: 'SCORM package has been uploaded successfully'
+        title: 'Success',
+        description: uploadType === 'url' ? 'SCORM URL saved successfully' : 'SCORM package uploaded successfully'
       })
       
-      setFile(null) // Clear file selection
+      setFile(null)
+      setPackageUrl('')
       onUploadComplete?.()
     } catch (error) {
       setUploadStatus('error')
       toast({
-        title: 'Upload failed',
+        title: 'Failed',
         description: error instanceof Error ? error.message : 'Unknown error occurred',
         variant: 'destructive'
       })
@@ -87,19 +101,70 @@ export default function ScormUploader({ lessonId, onUploadComplete }: ScormUploa
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="scorm-file">SCORM Package (ZIP file)</Label>
-          <Input
-            id="scorm-file"
-            type="file"
-            accept=".zip"
-            onChange={handleFileChange}
-            disabled={uploading}
-          />
-          <p className="text-sm text-gray-600">
-            Select a ZIP file containing your SCORM 1.2 or SCORM 2004 package
-          </p>
+        <div className="flex space-x-2 mb-4">
+          <Button
+            type="button"
+            variant={uploadType === 'url' ? 'default' : 'outline'}
+            onClick={() => setUploadType('url')}
+            className="flex-1"
+          >
+            <Link className="h-4 w-4 mr-2" />
+            URL (แนะนำ)
+          </Button>
+          <Button
+            type="button"
+            variant={uploadType === 'file' ? 'default' : 'outline'}
+            onClick={() => setUploadType('file')}
+            className="flex-1"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Upload File
+          </Button>
         </div>
+
+        {uploadType === 'url' ? (
+          <div className="space-y-2">
+            <Label htmlFor="package-url">SCORM Package URL (jsDelivr CDN)</Label>
+            <Input
+              id="package-url"
+              type="url"
+              placeholder="https://cdn.jsdelivr.net/gh/username/repo@main/scorm-packages/course.zip"
+              value={packageUrl}
+              onChange={(e) => setPackageUrl(e.target.value)}
+              disabled={uploading}
+            />
+            <div className="bg-green-50 p-3 rounded-lg space-y-2">
+              <p className="text-sm font-semibold text-green-900">📦 SCORM Packages พร้อมใช้:</p>
+              <div className="space-y-1 text-xs text-green-800">
+                <p className="font-mono break-all cursor-pointer hover:bg-green-100 p-1 rounded" 
+                   onClick={() => setPackageUrl('https://cdn.jsdelivr.net/gh/joesive47/skillnexus-lms@main/scorm-packages/ai-architect-blueprint.zip')}>
+                  • AI Architect: https://cdn.jsdelivr.net/gh/joesive47/skillnexus-lms@main/scorm-packages/ai-architect-blueprint.zip
+                </p>
+                <p className="font-mono break-all cursor-pointer hover:bg-green-100 p-1 rounded"
+                   onClick={() => setPackageUrl('https://cdn.jsdelivr.net/gh/joesive47/skillnexus-lms@main/scorm-packages/prompt-engineering.zip')}>
+                  • Prompt Engineering: https://cdn.jsdelivr.net/gh/joesive47/skillnexus-lms@main/scorm-packages/prompt-engineering.zip
+                </p>
+                <p className="text-xs text-green-700 mt-2">💡 คลิกที่ URL เพื่อใช้งาน</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="scorm-file">SCORM Package (ZIP file)</Label>
+            <Input
+              id="scorm-file"
+              type="file"
+              accept=".zip"
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+            <div className="bg-yellow-50 p-3 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                ⚠️ <strong>สำหรับ Vercel:</strong> ใช้ "URL" แทนการอัปโหลดไฟล์
+              </p>
+            </div>
+          </div>
+        )}
 
         {file && (
           <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
@@ -127,10 +192,10 @@ export default function ScormUploader({ lessonId, onUploadComplete }: ScormUploa
 
         <Button
           onClick={handleUpload}
-          disabled={!file || uploading}
+          disabled={(uploadType === 'file' && !file) || (uploadType === 'url' && !packageUrl) || uploading}
           className="w-full"
         >
-          {uploading ? 'Uploading...' : 'Upload SCORM Package'}
+          {uploading ? 'Processing...' : uploadType === 'url' ? 'Save URL' : 'Upload Package'}
         </Button>
 
         <div className="text-xs text-gray-500 space-y-1">
