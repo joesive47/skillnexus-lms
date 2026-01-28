@@ -44,7 +44,10 @@
     "docker:init": "node scripts/docker-setup.bat",
     "docker:env": "copy .env.docker .env",
     "docker:db": "npm run db:generate && npm run db:push && npm run db:seed",
-    "docker:full": "npm run docker:env && npm run docker:up && timeout /t 10 && npm run docker:db"
+    "docker:full": "npm run docker:env && npm run docker:up && timeout /t 10 && npm run docker:db",
+    "deploy:all": "npx prisma generate && npx prisma db push && npx tsx prisma/deploy-all.ts",
+    "deploy:verify": "npx tsx prisma/verify-courses.ts",
+    "deploy:quick": "npx tsx prisma/deploy-all.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",

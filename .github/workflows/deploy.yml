@@ -1,15 +1,48 @@
 name: Deploy to Vercel
+
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - main
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Trigger Vercel Deploy
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Generate Prisma Client
+        run: npx prisma generate
+
+      - name: 🚀 Deploy to Vercel
         run: |
-          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_${{ secrets.VERCEL_PROJECT_ID }}/trigger" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}"
+          npm install -g vercel
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 📊 Deploy Database
+        run: |
+          npx prisma db push
+          npm run deploy:quick
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: ✅ Verify Deployment
+        run: npm run deploy:verify
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

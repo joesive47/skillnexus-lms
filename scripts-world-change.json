@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "seed:world-change": "tsx prisma/seed-world-change-courses.ts",
+    "courses:verify": "tsx prisma/verify-courses.ts"
+  }
+}
