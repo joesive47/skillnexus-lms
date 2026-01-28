@@ -28,11 +28,28 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { courseId, title, type, youtubeUrl, content, order, scormPackageUrl } = body
+    console.log('Create lesson request:', body)
+    
+    const { courseId, title, type, youtubeUrl, content, order, scormPackageUrl, duration } = body
 
     // Validate required fields
-    if (!courseId || !title || !type) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (!courseId) {
+      return NextResponse.json({ error: 'Course ID is required' }, { status: 400 })
+    }
+    if (!title) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+    if (!type) {
+      return NextResponse.json({ error: 'Type is required' }, { status: 400 })
+    }
+
+    // Verify course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    })
+    
+    if (!course) {
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 })
     }
 
     // Create lesson
@@ -45,13 +62,16 @@ export async function POST(request: Request) {
         youtubeUrl: youtubeUrl || null,
         content: content || null,
         order: order || 0,
+        durationMin: duration || null,
       }
     })
+
+    console.log('Lesson created:', lesson.id)
 
     // If SCORM, create SCORM package
     if (type === 'SCORM' && scormPackageUrl) {
       try {
-        await prisma.scormPackage.create({
+        const scormPackage = await prisma.scormPackage.create({
           data: {
             lessonId: lesson.id,
             packagePath: scormPackageUrl,
@@ -59,13 +79,19 @@ export async function POST(request: Request) {
             title: title,
           }
         })
+        console.log('SCORM package created:', scormPackage.id)
       } catch (scormError) {
         console.error('SCORM package creation error:', scormError)
-        // Continue even if SCORM package fails
+        // Delete lesson if SCORM fails
+        await prisma.lesson.delete({ where: { id: lesson.id } })
+        return NextResponse.json({ 
+          error: 'Failed to create SCORM package',
+          details: scormError instanceof Error ? scormError.message : 'Unknown error'
+        }, { status: 500 })
       }
     }
 
-    return NextResponse.json({ lesson }, { status: 201 })
+    return NextResponse.json({ lesson, success: true }, { status: 201 })
   } catch (error) {
     console.error('Create lesson error:', error)
     return NextResponse.json({ 
