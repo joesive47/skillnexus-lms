@@ -126,11 +126,15 @@ export function ScormPlayer({ packagePath, lessonId, userId, onComplete }: Scorm
   }
 
   function openInNewWindow() {
-    const scormUrl = `${packagePath}/index.html`
+    const scormUrl = packagePath.startsWith('http') 
+      ? packagePath.replace('.zip', '/index.html')
+      : `${packagePath}/index.html`
     window.open(scormUrl, '_blank', 'width=1024,height=768,scrollbars=yes,resizable=yes')
   }
 
-  const scormUrl = `${packagePath}/index.html`
+  const scormUrl = packagePath.startsWith('http') 
+    ? packagePath.replace('.zip', '/index.html')
+    : `${packagePath}/index.html`
 
   return (
     <Card className="w-full">
