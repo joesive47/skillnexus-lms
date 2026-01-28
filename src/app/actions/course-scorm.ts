@@ -131,6 +131,18 @@ export async function createCourseWithScorm(formData: FormData) {
           // Store SCORM lessons for processing outside transaction
           if (lessonData.type === 'SCORM') {
             scormLessons.push({ lessonId: lesson.id, lessonData })
+            
+            // If URL is provided, create SCORM package record immediately
+            if (lessonData.scormPackagePath?.trim()) {
+              await tx.scormPackage.create({
+                data: {
+                  lessonId: lesson.id,
+                  packagePath: lessonData.scormPackagePath,
+                  version: '2004',
+                  title: lessonData.title,
+                }
+              })
+            }
           }
         }
         
@@ -345,6 +357,32 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
           // Store SCORM lessons for processing outside transaction
           if (lessonData.type === 'SCORM') {
             scormLessons.push({ lessonId, lessonData })
+            
+            // If URL is provided, create or update SCORM package record
+            if (lessonData.scormPackagePath?.trim()) {
+              const existingPackage = await tx.scormPackage.findUnique({
+                where: { lessonId }
+              })
+              
+              if (existingPackage) {
+                await tx.scormPackage.update({
+                  where: { lessonId },
+                  data: {
+                    packagePath: lessonData.scormPackagePath,
+                    title: lessonData.title,
+                  }
+                })
+              } else {
+                await tx.scormPackage.create({
+                  data: {
+                    lessonId,
+                    packagePath: lessonData.scormPackagePath,
+                    version: '2004',
+                    title: lessonData.title,
+                  }
+                })
+              }
+            }
           }
         }
         
