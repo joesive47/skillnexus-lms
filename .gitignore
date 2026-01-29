@@ -47,12 +47,19 @@ Thumbs.db
 /public/uploads
 /uploads
 
-# SCORM Packages
-/scorm-packages/*.zip
-/scorm-packages/prompt-engineering/
+# SCORM Packages (ย้ายออกจาก repo)
+/scorm-courses/
+/scorm-packages/
+public/scorm-packages/
+*.zip
+*.tar.gz
+*.rar
 
 # Deployment
 .vercel
+
+# SCORM Courses - อยู่นอก repo
+scorm-courses/
 
 # Build optimization
 *.tmp
