@@ -188,11 +188,11 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
         if (!lesson.title?.trim()) {
           return `Lesson ${lessonNumber}: SCORM lesson title is required`
         }
-        // Require either URL or file for new lessons
-        if (!lesson.scormFile && !lesson.scormPackagePath?.trim() && !lesson.id) {
+        // สำหรับบทเรียนใหม่ ต้องมี URL หรือ file
+        if (!lesson.id && !lesson.scormFile && !lesson.scormPackagePath?.trim()) {
           return `Lesson ${lessonNumber}: SCORM package URL or file is required for new SCORM lessons`
         }
-        // Validate URL format if provided
+        // สำหรับบทเรียนเก่า ถ้ามี URL ใหม่ ต้อง validate
         if (lesson.scormPackagePath?.trim()) {
           try {
             new URL(lesson.scormPackagePath)
@@ -488,45 +488,66 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
                 )}
 
                 {lesson.type === 'SCORM' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Title *</Label>
-                      <Input
-                        value={lesson.title || ''}
-                        onChange={(e) => updateLesson(index, 'title', e.target.value)}
-                        placeholder="Enter SCORM lesson title"
-                        className={!lesson.title?.trim() ? 'border-red-300' : ''}
-                      />
-                      {!lesson.title?.trim() && (
-                        <p className="text-red-500 text-xs mt-1">SCORM lesson title is required</p>
-                      )}
+                  <div className="space-y-4">
+                    {/* แสดงประวัติ SCORM ที่มีอยู่แล้ว */}
+                    {lesson.id && lesson.scormPackagePath && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-800 mb-1">✅ SCORM Package ที่มีอยู่แล้ว</p>
+                            <p className="text-xs text-green-700 break-all">
+                              📦 {lesson.scormPackagePath}
+                            </p>
+                            <p className="text-xs text-green-600 mt-2">
+                              💡 ถ้าต้องการเปลี่ยน SCORM ใหม่ ให้ใส่ URL ใหม่ด้านล่าง
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Title *</Label>
+                        <Input
+                          value={lesson.title || ''}
+                          onChange={(e) => updateLesson(index, 'title', e.target.value)}
+                          placeholder="Enter SCORM lesson title"
+                          className={!lesson.title?.trim() ? 'border-red-300' : ''}
+                        />
+                        {!lesson.title?.trim() && (
+                          <p className="text-red-500 text-xs mt-1">SCORM lesson title is required</p>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Duration (min)</Label>
+                        <Input
+                          type="number"
+                          value={lesson.durationMin || ''}
+                          onChange={(e) => updateLesson(index, 'durationMin', parseInt(e.target.value) || 0)}
+                          placeholder="30"
+                        />
+                      </div>
                     </div>
+
                     <div>
-                      <Label>Duration (min)</Label>
-                      <Input
-                        type="number"
-                        value={lesson.durationMin || ''}
-                        onChange={(e) => updateLesson(index, 'durationMin', parseInt(e.target.value) || 0)}
-                        placeholder="30"
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <Label>SCORM Package URL * (Recommended for Vercel)</Label>
+                      <Label>SCORM Package URL {!lesson.id && '*'}</Label>
                       <Input
                         type="url"
                         value={lesson.scormPackagePath || ''}
                         onChange={(e) => updateLesson(index, 'scormPackagePath', e.target.value)}
                         placeholder="https://your-storage.com/scorm-package.zip"
-                        className={!lesson.scormPackagePath?.trim() && !lesson.scormFile ? 'border-red-300' : ''}
+                        className={!lesson.id && !lesson.scormPackagePath?.trim() && !lesson.scormFile ? 'border-red-300' : ''}
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        📦 Paste URL of SCORM package (.zip) hosted on Google Drive, Dropbox, AWS S3, etc.
+                        📦 URL ของ SCORM package (.zip) จาก Google Drive, Dropbox, AWS S3, Cloudflare R2, etc.
                       </p>
-                      {!lesson.scormPackagePath?.trim() && !lesson.scormFile && (
+                      {!lesson.id && !lesson.scormPackagePath?.trim() && !lesson.scormFile && (
                         <p className="text-red-500 text-xs mt-1">SCORM package URL is required</p>
                       )}
                     </div>
-                    <div className="col-span-2">
+
+                    <div>
                       <Label>Or Upload SCORM Package (.zip) - Local Only</Label>
                       <Input
                         type="file"
@@ -539,7 +560,6 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
                               return
                             }
                             updateLesson(index, 'scormFile', file)
-                            updateLesson(index, 'scormPackagePath', '')
                             setError(null)
                           }
                         }}
