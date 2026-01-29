@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="CYBERSEC_GOV_2024" version="1.0" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3" xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3" xmlns:adlnav="http://www.adlnet.org/xsd/adlnav_v1p3" xmlns:imsss="http://www.imsglobal.org/xsd/imsss">
+  <metadata><schema>ADL SCORM</schema><schemaversion>2004 4th Edition</schemaversion></metadata>
+  <organizations default="CYBERSEC_GOV_ORG">
+    <organization identifier="CYBERSEC_GOV_ORG">
+      <title>Cybersecurity Awareness &amp; Data Governance</title>
+      <item identifier="MODULE1" identifierref="RES_MODULE1"><title>Module 1: Cybersecurity Fundamentals</title></item>
+      <item identifier="MODULE2" identifierref="RES_MODULE2"><title>Module 2: Data Protection &amp; Privacy</title></item>
+      <item identifier="MODULE3" identifierref="RES_MODULE3"><title>Module 3: Data Governance Framework</title></item>
+      <item identifier="MODULE4" identifierref="RES_MODULE4"><title>Module 4: Incident Response &amp; Business Continuity</title></item>
+      <item identifier="QUIZ" identifierref="RES_QUIZ"><title>แบบทดสอบ: ประเมินความรู้</title></item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="RES_MODULE1" type="webcontent" adlcp:scormType="sco" href="module1.html"><file href="module1.html"/><file href="shared/style.css"/><file href="shared/scorm.js"/></resource>
+    <resource identifier="RES_MODULE2" type="webcontent" adlcp:scormType="sco" href="module2.html"><file href="module2.html"/><file href="shared/style.css"/><file href="shared/scorm.js"/></resource>
+    <resource identifier="RES_MODULE3" type="webcontent" adlcp:scormType="sco" href="module3.html"><file href="module3.html"/><file href="shared/style.css"/><file href="shared/scorm.js"/></resource>
+    <resource identifier="RES_MODULE4" type="webcontent" adlcp:scormType="sco" href="module4.html"><file href="module4.html"/><file href="shared/style.css"/><file href="shared/scorm.js"/></resource>
+    <resource identifier="RES_QUIZ" type="webcontent" adlcp:scormType="sco" href="quiz.html"><file href="quiz.html"/><file href="shared/style.css"/><file href="shared/scorm.js"/><file href="shared/quiz.js"/></resource>
+  </resources>
+</manifest>
