@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Loader2, Play, Pause } from 'lucide-react'
+import { Loader2, Play, Pause, Maximize, Minimize } from 'lucide-react'
 
 interface ScormPlayerProps {
   lessonId: string
@@ -18,6 +18,8 @@ export default function ScormPlayer({ lessonId, onComplete }: ScormPlayerProps) 
   const [scormData, setScormData] = useState<any>(null)
   const [progress, setProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadScormPackage()
@@ -105,6 +107,35 @@ export default function ScormPlayer({ lessonId, onComplete }: ScormPlayerProps) 
     }
   }
 
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return
+
+    try {
+      if (!isFullscreen) {
+        if (containerRef.current.requestFullscreen) {
+          await containerRef.current.requestFullscreen()
+        }
+        setIsFullscreen(true)
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        }
+        setIsFullscreen(false)
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error)
+    }
+  }
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
   if (loading) {
     return (
       <Card className="w-full">
@@ -133,33 +164,49 @@ export default function ScormPlayer({ lessonId, onComplete }: ScormPlayerProps) 
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>{scormData?.package?.title || 'SCORM Content'}</span>
-          <div className="flex items-center space-x-2">
-            {isPlaying ? (
-              <Pause className="h-5 w-5 text-green-600" />
-            ) : (
-              <Play className="h-5 w-5 text-gray-400" />
-            )}
-            <span className="text-sm text-gray-600">
-              {progress}% Complete
-            </span>
+    <div ref={containerRef} className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
+      <Card className="w-full h-full">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>{scormData?.package?.title || 'SCORM Content'}</span>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleFullscreen}
+                className="flex items-center gap-2"
+              >
+                {isFullscreen ? (
+                  <><Minimize className="h-4 w-4" /> ออกจากเต็มจอ</>
+                ) : (
+                  <><Maximize className="h-4 w-4" /> เต็มจอ</>
+                )}
+              </Button>
+              <div className="flex items-center space-x-2">
+                {isPlaying ? (
+                  <Pause className="h-5 w-5 text-green-600" />
+                ) : (
+                  <Play className="h-5 w-5 text-gray-400" />
+                )}
+                <span className="text-sm text-gray-600">
+                  {progress}% Complete
+                </span>
+              </div>
+            </div>
+          </CardTitle>
+          <Progress value={progress} className="w-full" />
+        </CardHeader>
+        <CardContent>
+          <div className="relative w-full" style={{ height: isFullscreen ? 'calc(100vh - 150px)' : '600px' }}>
+            <iframe
+              ref={iframeRef}
+              className="w-full h-full border-0 rounded-lg"
+              title="SCORM Content"
+              sandbox="allow-scripts allow-same-origin allow-forms"
+            />
           </div>
-        </CardTitle>
-        <Progress value={progress} className="w-full" />
-      </CardHeader>
-      <CardContent>
-        <div className="relative w-full" style={{ height: '600px' }}>
-          <iframe
-            ref={iframeRef}
-            className="w-full h-full border-0 rounded-lg"
-            title="SCORM Content"
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
