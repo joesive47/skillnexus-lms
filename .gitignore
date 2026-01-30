@@ -67,6 +67,7 @@ scorm-courses/
 temp/
 cache/
 .cache/
+.env.build
 
 # Large files
 *.zip
@@ -74,3 +75,6 @@ cache/
 *.rar
 public/scorm-packages/
 node_modules/.cache/
+
+# Scripts output
+scripts/*.log

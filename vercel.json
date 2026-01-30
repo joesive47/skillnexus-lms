@@ -14,11 +14,13 @@
   },
   "build": {
     "env": {
-      "SKIP_ENV_VALIDATION": "1"
+      "SKIP_ENV_VALIDATION": "1",
+      "NODE_OPTIONS": "--max-old-space-size=2048",
+      "NEXT_TELEMETRY_DISABLED": "1"
     }
   },
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build:fast",
   "devCommand": "npm run dev",
   "framework": "nextjs",
   "regions": ["sin1"],
