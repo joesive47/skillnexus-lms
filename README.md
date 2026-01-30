@@ -457,3 +457,5 @@ src/
 - ✅ Schema provider ไม่ตรงกับ Database URL
 - ✅ Prisma Client ไม่ได้ regenerate
 - ✅ Environment Variables ไม่ถูกต้อง
+
+# Deploy trigger 12/06/2025 16:50:00
