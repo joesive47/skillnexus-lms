@@ -459,3 +459,5 @@ src/
 - ✅ Environment Variables ไม่ถูกต้อง
 
 # Deploy trigger 12/06/2025 16:50:00
+
+# Test auto-deploy 12/06/2025 16:52:00
