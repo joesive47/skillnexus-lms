@@ -148,10 +148,7 @@ async function deployAll() {
     
     const course = await prisma.course.create({
       data: {
-        ...courseInfo,
-        enrollmentCount: Math.floor(Math.random() * 5000) + 1000,
-        rating: 4.7 + Math.random() * 0.3,
-        reviewCount: Math.floor(Math.random() * 500) + 100
+        ...courseInfo
       }
     })
 
