@@ -17,7 +17,6 @@ model Course {
   price         Int                 @default(0)
   published     Boolean             @default(false)
   imageUrl      String?
-  createdBy     String?             // Who created the course
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   certificates  Certificate[]
