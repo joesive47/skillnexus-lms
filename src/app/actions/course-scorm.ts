@@ -30,7 +30,7 @@ export async function createCourseWithScorm(formData: FormData) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
     const priceStr = formData.get('price') as string
-    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr) * 100) : 0
+    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
@@ -72,7 +72,7 @@ export async function createCourseWithScorm(formData: FormData) {
     const validatedFields = courseSchema.parse({
       title: title.trim(),
       description: description.trim() || undefined,
-      price: price > 0 ? price / 100 : 0,
+      price: price,
       published,
     })
 
@@ -196,7 +196,7 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
     const priceStr = formData.get('price') as string
-    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr) * 100) : 0
+    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
@@ -238,7 +238,7 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
     const validatedFields = courseSchema.parse({
       title: title.trim(),
       description: description.trim() || undefined,
-      price: price > 0 ? price / 100 : 0,
+      price: price,
       published,
     })
 
