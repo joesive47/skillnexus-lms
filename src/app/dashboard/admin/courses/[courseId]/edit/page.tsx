@@ -81,32 +81,88 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                           <span className="text-sm text-gray-500">{lesson.duration} นาที</span>
                         )}
                       </div>
-                      {/* Show SCORM/Video URL */}
-                      {lesson.youtubeUrl && (
-                        <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-600">URL:</span>
-                            <a 
-                              href={lesson.youtubeUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline truncate max-w-md"
-                            >
-                              {lesson.youtubeUrl}
-                            </a>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2"
-                              onClick={() => {
-                                navigator.clipboard.writeText(lesson.youtubeUrl || '')
-                              }}
-                            >
-                              คัดลอก
-                            </Button>
+                      {/* Show All Lesson Details */}
+                      <div className="mt-2 space-y-2">
+                        {/* Description */}
+                        {lesson.description && (
+                          <div className="p-2 bg-gray-50 rounded text-xs">
+                            <span className="font-medium text-gray-600">คำอธิบาย:</span>
+                            <p className="text-gray-700 mt-1">{lesson.description}</p>
+                          </div>
+                        )}
+                        
+                        {/* Video URL */}
+                        {lesson.youtubeUrl && (
+                          <div className="p-2 bg-blue-50 rounded text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-600">Video URL:</span>
+                              <a 
+                                href={lesson.youtubeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline truncate max-w-md"
+                              >
+                                {lesson.youtubeUrl}
+                              </a>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(lesson.youtubeUrl || '')
+                                }}
+                              >
+                                คัดลอก
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* SCORM Package */}
+                        {lesson.scormPackage && (
+                          <div className="p-2 bg-purple-50 rounded text-xs">
+                            <div className="font-medium text-gray-600 mb-1">SCORM Package:</div>
+                            <div className="space-y-1 text-gray-700">
+                              <div>• ไฟล์: {lesson.scormPackage.fileName}</div>
+                              <div>• เวอร์ชัน: {lesson.scormPackage.version}</div>
+                              {lesson.scormPackage.launchUrl && (
+                                <div>• Launch URL: {lesson.scormPackage.launchUrl}</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Quiz */}
+                        {lesson.quiz && (
+                          <div className="p-2 bg-green-50 rounded text-xs">
+                            <div className="font-medium text-gray-600 mb-1">Quiz:</div>
+                            <div className="space-y-1 text-gray-700">
+                              <div>• ชื่อ: {lesson.quiz.title}</div>
+                              <div>• คะแนนผ่าน: {lesson.quiz.passingScore}%</div>
+                              <div>• เวลา: {lesson.quiz.timeLimit || 'ไม่จำกัด'} นาที</div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Content */}
+                        {lesson.content && (
+                          <div className="p-2 bg-yellow-50 rounded text-xs">
+                            <span className="font-medium text-gray-600">เนื้อหา:</span>
+                            <div className="text-gray-700 mt-1 max-h-20 overflow-y-auto">
+                              {lesson.content.substring(0, 200)}{lesson.content.length > 200 ? '...' : ''}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Metadata */}
+                        <div className="p-2 bg-gray-50 rounded text-xs text-gray-500">
+                          <div className="flex gap-4">
+                            <span>ID: {lesson.id}</span>
+                            <span>Order: {lesson.order}</span>
+                            <span>สร้าง: {new Date(lesson.createdAt).toLocaleDateString('th-TH')}</span>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { BookOpen } from 'lucide-react'
 
 interface CourseImageProps {
   src: string
@@ -16,11 +17,8 @@ export function CourseImage({ src, alt, fill, className }: CourseImageProps) {
 
   if (hasError || !src) {
     return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 ${className}`}>
-        <div className="text-center">
-          <div className="text-4xl mb-2">📚</div>
-          <p className="text-sm text-gray-600">No Cover Image</p>
-        </div>
+      <div className={`${className} ${fill ? 'w-full h-full' : ''} flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600`}>
+        <BookOpen className="w-12 h-12 text-white" />
       </div>
     )
   }
