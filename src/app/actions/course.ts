@@ -474,32 +474,15 @@ export async function getCourses() {
   try {
     const session = await auth()
     if (!session?.user?.id) {
-      return { success: false, error: 'Authentication required' }
+      return { success: false, error: 'Authentication required', courses: [] }
     }
 
     if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      return { success: false, error: 'Admin or Teacher access required' }
+      return { success: false, error: 'Admin or Teacher access required', courses: [] }
     }
 
     const courses = await prisma.course.findMany({
       include: {
-        lessons: {
-          include: {
-            scormPackage: true
-          },
-          orderBy: { order: 'asc' }
-        },
-        modules: {
-          include: {
-            lessons: {
-              include: {
-                scormPackage: true
-              },
-              orderBy: { order: 'asc' }
-            }
-          },
-          orderBy: { order: 'asc' }
-        },
         _count: {
           select: {
             enrollments: true,
@@ -515,7 +498,8 @@ export async function getCourses() {
     return { success: true, courses }
   } catch (error) {
     console.error('Error fetching courses:', error)
-    return { success: false, error: 'Failed to fetch courses' }
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch courses'
+    return { success: false, error: errorMessage, courses: [] }
   }
 }
 
