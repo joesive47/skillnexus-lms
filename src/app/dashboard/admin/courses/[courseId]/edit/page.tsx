@@ -75,12 +75,38 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                         {getLessonIcon(lesson)}
                         <h4 className="font-semibold">{lesson.title || 'Untitled Lesson'}</h4>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <Badge variant="outline">{getLessonType(lesson)}</Badge>
                         {lesson.duration && (
                           <span className="text-sm text-gray-500">{lesson.duration} นาที</span>
                         )}
                       </div>
+                      {/* Show SCORM/Video URL */}
+                      {(lesson.scormPackage || lesson.youtubeUrl) && (
+                        <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-600">URL:</span>
+                            <a 
+                              href={lesson.scormPackage?.packageUrl || lesson.youtubeUrl || '#'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline truncate max-w-md"
+                            >
+                              {lesson.scormPackage?.packageUrl || lesson.youtubeUrl}
+                            </a>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2"
+                              onClick={() => {
+                                navigator.clipboard.writeText(lesson.scormPackage?.packageUrl || lesson.youtubeUrl || '')
+                              }}
+                            >
+                              คัดลอก
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
