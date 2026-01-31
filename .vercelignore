@@ -1,48 +1,44 @@
 # Development files
-__tests__/
-*.test.ts
-*.test.js
-*.spec.ts
-*.spec.js
-jest.config.js
-
-# Documentation (keep only README)
+*.log
 *.md
 !README.md
+.env.local
+.env.development
+.env.sqlite
+.env.docker
+
+# Test files
+tests/
+*.test.js
+*.test.ts
+
+# Documentation
 docs/
-QUICK-*.md
-PHASE*.md
+SCORM-*.md
+COURSE-*.md
+*-GUIDE.md
+*-SUMMARY.md
+*-ROADMAP.md
 
-# Scripts (keep only essential)
+# Scripts
 scripts/
-!scripts/essential/
+*.bat
+*.ps1
+*.sh
 
-# Large files
-public/uploads/
-public/scorm-packages/
-*.zip
-*.tar.gz
+# Database
+prisma/dev.db
+prisma/prisma/
 
-# Development configs
-.env.example
-.env.postgresql.example
-docker-compose.yml
-Dockerfile*
-
-# Cache and build artifacts
+# Build artifacts
 .next/cache/
-.swc/
-.turbo/
-*.log
+node_modules/.cache/
+
+# SCORM packages (too large)
+public/scorm-packages/
+public/uploads/scorm/
+
+# Temporary files
 *.tmp
-temp/
-cache/
-*.tsbuildinfo
-
-# IDE
-.vscode/
-.idea/
-
-# Backup files
-*.backup
 *.bak
+*.backup

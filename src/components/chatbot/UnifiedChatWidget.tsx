@@ -98,8 +98,9 @@ export default function UnifiedChatWidget() {
     return (
       <Button
         onClick={toggleOpen}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg z-50 transition-all duration-200 hover:scale-110"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg z-[9999] transition-all duration-200 hover:scale-110"
         aria-label="เปิด AI Assistant"
+        title="เปิด AI Assistant"
       >
         <MessageCircle className="h-6 w-6" />
       </Button>
