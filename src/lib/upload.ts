@@ -34,8 +34,8 @@ export async function uploadToS3(file: File): Promise<string> {
     throw new Error('No file provided')
   }
   
-  if (file.size > 5 * 1024 * 1024) { // 5MB limit
-    throw new Error('File size is too large (max 5MB)')
+  if (file.size > 2 * 1024 * 1024) { // 2MB limit (reduced from 5MB)
+    throw new Error('File size is too large (max 2MB)')
   }
   
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']
@@ -43,11 +43,79 @@ export async function uploadToS3(file: File): Promise<string> {
     throw new Error('Invalid file type. Only JPEG, PNG, WebP, and SVG are allowed')
   }
   
-  // Convert to base64 for Vercel deployment (no filesystem access)
-  const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
-  const base64 = buffer.toString('base64')
-  const dataUrl = `data:${file.type};base64,${base64}`
+  // For SVG, return as-is (small file)
+  if (file.type === 'image/svg+xml') {
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64 = buffer.toString('base64')
+    return `data:${file.type};base64,${base64}`
+  }
   
-  return dataUrl
+  // For other images, compress before converting to base64
+  try {
+    const compressedFile = await compressImage(file)
+    const bytes = await compressedFile.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64 = buffer.toString('base64')
+    return `data:${compressedFile.type};base64,${base64}`
+  } catch (error) {
+    console.error('Compression error:', error)
+    // Fallback: use original file
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64 = buffer.toString('base64')
+    return `data:${file.type};base64,${base64}`
+  }
+}
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (e) => {
+      const img = new Image()
+      img.src = e.target?.result as string
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let width = img.width
+        let height = img.height
+        
+        // Resize if too large
+        const maxDimension = 800
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = (height / width) * maxDimension
+            width = maxDimension
+          } else {
+            width = (width / height) * maxDimension
+            height = maxDimension
+          }
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              })
+              resolve(compressedFile)
+            } else {
+              reject(new Error('Compression failed'))
+            }
+          },
+          'image/jpeg',
+          0.7 // 70% quality
+        )
+      }
+      img.onerror = reject
+    }
+    reader.onerror = reject
+  })
 }
