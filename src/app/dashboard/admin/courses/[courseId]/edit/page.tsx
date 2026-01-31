@@ -82,24 +82,24 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                         )}
                       </div>
                       {/* Show SCORM/Video URL */}
-                      {(lesson.scormPackage || lesson.youtubeUrl) && (
+                      {lesson.youtubeUrl && (
                         <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-gray-600">URL:</span>
                             <a 
-                              href={lesson.scormPackage?.packageUrl || lesson.youtubeUrl || '#'}
+                              href={lesson.youtubeUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-600 hover:underline truncate max-w-md"
                             >
-                              {lesson.scormPackage?.packageUrl || lesson.youtubeUrl}
+                              {lesson.youtubeUrl}
                             </a>
                             <Button
                               variant="ghost"
                               size="sm"
                               className="h-6 px-2"
                               onClick={() => {
-                                navigator.clipboard.writeText(lesson.scormPackage?.packageUrl || lesson.youtubeUrl || '')
+                                navigator.clipboard.writeText(lesson.youtubeUrl || '')
                               }}
                             >
                               คัดลอก
