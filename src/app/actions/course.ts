@@ -31,7 +31,7 @@ export async function createCourse(formData: FormData) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
     const priceStr = formData.get('price') as string
-    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr) * 100) : 0
+    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
@@ -68,7 +68,7 @@ export async function createCourse(formData: FormData) {
     const validatedFields = courseSchema.parse({
       title: title.trim(),
       description: description.trim() || undefined,
-      price: price > 0 ? price / 100 : 0,
+      price: price,
       published,
     })
 
@@ -90,7 +90,7 @@ export async function createCourse(formData: FormData) {
         data: {
           title: validatedFields.title,
           description: validatedFields.description,
-          price: price, // Use the integer price in cents
+          price: price, // Store price as-is (not in cents)
           published: validatedFields.published || false,
           imageUrl,
         },
@@ -179,7 +179,7 @@ export async function updateCourse(id: string, formData: FormData) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
     const priceStr = formData.get('price') as string
-    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr) * 100) : 0
+    const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
@@ -221,7 +221,7 @@ export async function updateCourse(id: string, formData: FormData) {
     const validatedFields = courseSchema.parse({
       title: title.trim(),
       description: description.trim() || undefined,
-      price: price > 0 ? price / 100 : 0,
+      price: price,
       published,
     })
 
@@ -247,7 +247,7 @@ export async function updateCourse(id: string, formData: FormData) {
     const updateData: any = {
       title: validatedFields.title,
       description: validatedFields.description,
-      price: price, // Use the integer price in cents
+      price: price, // Store price as-is (not in cents)
       published: validatedFields.published,
       imageUrl: imageUrl, // Always include imageUrl to preserve existing or set new
     }

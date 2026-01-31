@@ -285,7 +285,7 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
               step="0.01"
               min="0"
               placeholder="0.00"
-              defaultValue={course?.price ? (course.price / 100).toString() : ''}
+              defaultValue={course?.price?.toString() || ''}
             />
           </div>
 
