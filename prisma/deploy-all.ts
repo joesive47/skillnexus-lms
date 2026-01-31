@@ -172,14 +172,7 @@ async function deployAll() {
             order: i + 1,
             duration: Math.floor(moduleData.duration / 3),
             type: lessonTypes[i] as any,
-            moduleId: module.id,
-            videoUrl: lessonTypes[i] === 'VIDEO' ? `/videos/${course.slug}/module-${moduleData.order}-lesson-${i + 1}.mp4` : undefined,
-            scormData: {
-              version: 'SCORM_2004',
-              launchUrl: `/scorm/${course.slug}/module-${moduleData.order}/lesson-${i + 1}/index.html`,
-              masteryScore: 80,
-              completionThreshold: 100
-            }
+            moduleId: module.id
           }
         })
       }
