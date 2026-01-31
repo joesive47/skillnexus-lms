@@ -469,3 +469,5 @@ src/
 # Vercel-only deployment 12/06/2025 19:00:00
 
 # Optimized build configuration 12/06/2025 18:30:00
+
+# Deploy: Fix course cover & lesson details - 12/06/2025 20:00:00
