@@ -73,7 +73,7 @@ export default async function AdminCoursesPage() {
                   <span>{course._count.enrollments} students</span>
                 </div>
                 <div className="text-lg font-semibold text-green-600">
-                  {course.price === 0 ? "Free" : `$${course.price}`}
+                  {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString('th-TH')}`}
                 </div>
               </div>
               <div className="flex gap-2">
