@@ -21,7 +21,7 @@ export function PurchaseButton({ courseId, price, userCredits, isEnrolled }: Pur
     }
 
     if (userCredits < price) {
-      toast.error(`เครดิตไม่เพียงพอ (มี ${userCredits} ต้องการ ${price})`);
+      toast.error(`เครดิตไม่เพียงพอ (มี ฿${userCredits.toLocaleString('th-TH')} ต้องการ ฿${price.toLocaleString('th-TH')})`);
       return;
     }
 
@@ -59,14 +59,14 @@ export function PurchaseButton({ courseId, price, userCredits, isEnrolled }: Pur
   return (
     <div className="space-y-2">
       <div className="text-sm text-muted-foreground">
-        เครดิตของคุณ: {userCredits.toLocaleString()} | ราคา: {price.toLocaleString()}
+        เครดิตของคุณ: ฿{userCredits.toLocaleString('th-TH')} | ราคา: ฿{price.toLocaleString('th-TH')}
       </div>
       <Button 
         onClick={handlePurchase} 
         disabled={loading || userCredits < price}
         className="w-full"
       >
-        {loading ? 'กำลังซื้อ...' : `ซื้อด้วยเครดิต (${price.toLocaleString()})`}
+        {loading ? 'กำลังซื้อ...' : `ซื้อด้วยเครดิต (฿${price.toLocaleString('th-TH')})`}
       </Button>
     </div>
   );

@@ -277,14 +277,14 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Price ($)</Label>
+            <Label htmlFor="price">ราคา (บาท)</Label>
             <Input
               id="price"
               name="price"
               type="number"
-              step="0.01"
+              step="1"
               min="0"
-              placeholder="0.00"
+              placeholder="0"
               defaultValue={course?.price?.toString() || ''}
             />
           </div>

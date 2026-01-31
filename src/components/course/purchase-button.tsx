@@ -49,7 +49,7 @@ export function PurchaseButton({ courseId, price, userCredits = 0 }: PurchaseBut
       ) : (
         <ShoppingCart className="w-4 h-4 mr-2" />
       )}
-      {price === 0 ? 'ลงทะเบียนฟรี' : `ซื้อ ${price} เครดิต`}
+      {price === 0 ? 'ลงทะเบียนฟรี' : `ซื้อ ฿${price.toLocaleString('th-TH')}`}
     </Button>
   )
 }

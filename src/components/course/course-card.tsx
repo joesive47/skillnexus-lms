@@ -61,7 +61,7 @@ export function CourseCard({ course, isEnrolled, progress = 0, userRole, userCre
           {/* Price Badge */}
           <div className="absolute top-2 right-2">
             <Badge variant={course.price === 0 ? "secondary" : "default"}>
-              {course.price === 0 ? "ฟรี" : `$${course.price}`}
+              {course.price === 0 ? "ฟรี" : `฿${course.price.toLocaleString('th-TH')}`}
             </Badge>
           </div>
           

@@ -76,7 +76,7 @@ export default function CourseCard({ course, userCredits, isEnrolled }: CourseCa
         
         <div className="flex items-center gap-2">
           <Coins className="h-4 w-4 text-yellow-500" />
-          <span className="font-semibold">{course.price} เครดิต</span>
+          <span className="font-semibold">฿{course.price.toLocaleString('th-TH')}</span>
         </div>
       </CardContent>
 
