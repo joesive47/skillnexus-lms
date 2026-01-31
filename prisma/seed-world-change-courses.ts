@@ -322,11 +322,7 @@ async function seedWorldChangeCourses() {
     
     const course = await prisma.course.create({
       data: {
-        ...courseInfo,
-        instructorId: admin.id,
-        enrollmentCount: Math.floor(Math.random() * 5000) + 1000,
-        rating: 4.7 + Math.random() * 0.3,
-        reviewCount: Math.floor(Math.random() * 500) + 100
+        ...courseInfo
       }
     })
 
@@ -347,12 +343,7 @@ async function seedWorldChangeCourses() {
           data: {
             ...lessonData,
             moduleId: module.id,
-            videoUrl: lessonData.type === 'VIDEO' ? `/videos/${course.slug}/${lessonData.order}.mp4` : undefined,
-            scormData: {
-              version: 'SCORM_2004',
-              launchUrl: `/scorm/${course.slug}/lesson-${lessonData.order}/index.html`,
-              masteryScore: 80
-            }
+            courseId: course.id
           }
         })
       }
