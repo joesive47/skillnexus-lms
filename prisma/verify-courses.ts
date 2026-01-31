@@ -7,7 +7,6 @@ async function verifyCourses() {
 
   const courses = await prisma.course.findMany({
     where: {
-      scormVersion: 'SCORM_2004',
       slug: {
         in: [
           'sdgs-leadership-2030',
@@ -42,9 +41,7 @@ async function verifyCourses() {
     console.log(`   📚 Modules: ${course._count.modules}`)
     console.log(`   💰 Price: ฿${course.price}`)
     console.log(`   ⭐ Rating: ${course.rating}/5.0`)
-    console.log(`   👥 Enrollments: ${course.enrollmentCount}`)
-    console.log(`   🎓 SCORM: ${course.scormVersion}`)
-    console.log(`   📦 Package: ${course.scormPackageUrl}`)
+    console.log(`   👥 Enrollments: ${course._count.enrollments}`)
     console.log('')
   })
 
