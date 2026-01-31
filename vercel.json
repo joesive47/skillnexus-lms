@@ -1,32 +1,5 @@
 {
-  "version": 2,
-  "name": "uppowerskill-lms",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url"
-  },
-  "build": {
-    "env": {
-      "SKIP_ENV_VALIDATION": "1",
-      "NODE_OPTIONS": "--max-old-space-size=2048",
-      "NEXT_TELEMETRY_DISABLED": "1"
-    }
-  },
-  "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npm run build:fast",
-  "devCommand": "npm run dev",
+  "buildCommand": "prisma generate && next build",
   "framework": "nextjs",
-  "regions": ["sin1"],
-  "functions": {
-    "app/**/*.{js,ts,tsx}": {
-      "maxDuration": 30
-    }
-  }
+  "installCommand": "npm install"
 }
