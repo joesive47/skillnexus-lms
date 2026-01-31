@@ -26,22 +26,8 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
   const lessons = await prisma.lesson.findMany({
     where: { courseId },
     include: {
-      quiz: {
-        select: {
-          id: true,
-          title: true,
-          passingScore: true,
-          timeLimit: true
-        }
-      },
-      scormPackage: {
-        select: {
-          id: true,
-          fileName: true,
-          version: true,
-          launchUrl: true
-        }
-      }
+      quiz: true,
+      scormPackage: true
     },
     orderBy: { order: 'asc' }
   })
@@ -137,10 +123,10 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                           <div className="p-2 bg-purple-50 rounded text-xs">
                             <div className="font-medium text-gray-600 mb-1">SCORM Package:</div>
                             <div className="space-y-1 text-gray-700">
-                              <div>• ไฟล์: {lesson.scormPackage.fileName}</div>
                               <div>• เวอร์ชัน: {lesson.scormPackage.version}</div>
-                              {lesson.scormPackage.launchUrl && (
-                                <div>• Launch URL: {lesson.scormPackage.launchUrl}</div>
+                              <div>• Path: {lesson.scormPackage.packagePath}</div>
+                              {lesson.scormPackage.title && (
+                                <div>• ชื่อ: {lesson.scormPackage.title}</div>
                               )}
                             </div>
                           </div>
@@ -152,8 +138,8 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                             <div className="font-medium text-gray-600 mb-1">Quiz:</div>
                             <div className="space-y-1 text-gray-700">
                               <div>• ชื่อ: {lesson.quiz.title}</div>
-                              <div>• คะแนนผ่าน: {lesson.quiz.passingScore}%</div>
                               <div>• เวลา: {lesson.quiz.timeLimit || 'ไม่จำกัด'} นาที</div>
+                              <div>• สุ่มคำถาม: {lesson.quiz.randomize ? 'ใช่' : 'ไม่'}</div>
                             </div>
                           </div>
                         )}
