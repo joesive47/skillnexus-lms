@@ -15,6 +15,7 @@ interface CourseImageProps {
 export function CourseImage({ src, alt, fill, className }: CourseImageProps) {
   const [hasError, setHasError] = useState(false)
 
+  // Show fallback if no src or error
   if (hasError || !src) {
     return (
       <div className={`${className} ${fill ? 'w-full h-full' : ''} flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600`}>
@@ -23,19 +24,31 @@ export function CourseImage({ src, alt, fill, className }: CourseImageProps) {
     )
   }
 
-  // Handle local images by ensuring proper path
-  let imageSrc = src
-  if (!src.startsWith('http') && !src.startsWith('/') && !src.startsWith('blob:')) {
-    imageSrc = `/${src}`
+  // If it's a base64 data URL, use it directly
+  if (src.startsWith('data:')) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={`${className} ${fill ? 'w-full h-full object-cover' : ''}`}
+        onError={() => setHasError(true)}
+      />
+    )
   }
-  // Handle blob URLs for preview
-  if (src.startsWith('blob:')) {
-    imageSrc = src
-  }
-  // Handle API route for local images with cache busting
+
+  // For old file paths, show fallback (files don't exist on Vercel)
   if (src.startsWith('/uploads/')) {
-    const timestamp = Date.now()
-    imageSrc = `/api/images${src.replace('/uploads/', '/')}?t=${timestamp}`
+    return (
+      <div className={`${className} ${fill ? 'w-full h-full' : ''} flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600`}>
+        <BookOpen className="w-12 h-12 text-white" />
+      </div>
+    )
+  }
+
+  // Handle other URLs
+  let imageSrc = src
+  if (!src.startsWith('http') && !src.startsWith('/')) {
+    imageSrc = `/${src}`
   }
 
   return (
