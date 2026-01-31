@@ -7,13 +7,13 @@ async function verifyCourses() {
 
   const courses = await prisma.course.findMany({
     where: {
-      slug: {
+      title: {
         in: [
-          'sdgs-leadership-2030',
-          'circular-economy-zero-waste',
-          'social-entrepreneurship-impact',
-          'renewable-energy-cleantech',
-          'regenerative-agriculture-food'
+          'Sustainable Development Goals (SDGs) Leadership',
+          'Circular Economy & Zero Waste Innovation',
+          'Social Entrepreneurship & Impact Investing',
+          'Renewable Energy & Clean Technology',
+          'Regenerative Agriculture & Food Systems'
         ]
       }
     },
@@ -36,7 +36,6 @@ async function verifyCourses() {
 
   courses.forEach((course, index) => {
     console.log(`${index + 1}. ${course.title}`)
-    console.log(`   📊 Slug: ${course.slug}`)
     console.log(`   ⏱️  Duration: ${course.duration} minutes`)
     console.log(`   📚 Modules: ${course._count.modules}`)
     console.log(`   💰 Price: ฿${course.price}`)
