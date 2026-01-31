@@ -314,6 +314,30 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
           <div className="space-y-2">
             <Label htmlFor="image">Course Image (Optional)</Label>
             <p className="text-sm text-gray-600">Recommended: 400x240px (16:9), Max: 5MB, JPEG/PNG/WebP</p>
+            
+            {/* แสดงรูปปัจจุบัน (ถ้ามี) */}
+            {mode === 'edit' && course?.imageUrl && (
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm font-medium text-blue-800 mb-2">📸 รูปหน้าปกปัจจุบัน:</p>
+                <div className="relative w-[200px] h-[120px] border-2 border-blue-300 rounded-lg overflow-hidden bg-white">
+                  <Image
+                    src={course.imageUrl.startsWith('/uploads/') 
+                      ? `/api/images${course.imageUrl.replace('/uploads/', '/')}`
+                      : course.imageUrl.startsWith('/') 
+                        ? course.imageUrl 
+                        : `/${course.imageUrl}`}
+                    alt="Current course cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <p className="text-xs text-blue-600 mt-2">
+                  💡 อัปโหลดรูปใหม่ด้านล่างเพื่อเปลี่ยนรูปหน้าปก
+                </p>
+              </div>
+            )}
+            
             <Input
               id="image"
               name="image"
@@ -321,13 +345,18 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
               accept="image/jpeg,image/jpg,image/png,image/webp"
               onChange={handleImageChange}
             />
+            
+            {/* แสดง Preview รูปใหม่ที่เลือก */}
             {imagePreview && (
               <div className="mt-2">
-                <div className="relative w-[200px] h-[120px] border rounded-lg overflow-hidden">
-                  <img
+                <p className="text-sm font-medium text-green-700 mb-2">✅ Preview รูปใหม่:</p>
+                <div className="relative w-[200px] h-[120px] border-2 border-green-500 rounded-lg overflow-hidden">
+                  <Image
                     src={imagePreview}
-                    alt="Course preview"
-                    className="w-full h-full object-cover"
+                    alt="New course preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
               </div>
