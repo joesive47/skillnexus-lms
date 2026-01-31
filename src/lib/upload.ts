@@ -38,11 +38,16 @@ export async function uploadToS3(file: File): Promise<string> {
     throw new Error('File size is too large (max 5MB)')
   }
   
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']
   if (!allowedTypes.includes(file.type)) {
-    throw new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed')
+    throw new Error('Invalid file type. Only JPEG, PNG, WebP, and SVG are allowed')
   }
   
-  // Save locally and return local path for now
-  return await saveFileLocally(file, 'courses')
+  // Convert to base64 for Vercel deployment (no filesystem access)
+  const bytes = await file.arrayBuffer()
+  const buffer = Buffer.from(bytes)
+  const base64 = buffer.toString('base64')
+  const dataUrl = `data:${file.type};base64,${base64}`
+  
+  return dataUrl
 }
