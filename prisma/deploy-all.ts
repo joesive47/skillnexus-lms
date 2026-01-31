@@ -172,7 +172,8 @@ async function deployAll() {
             order: i + 1,
             duration: Math.floor(moduleData.duration / 3),
             type: lessonTypes[i] as any,
-            moduleId: module.id
+            moduleId: module.id,
+            courseId: course.id
           }
         })
       }
