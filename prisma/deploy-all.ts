@@ -158,8 +158,7 @@ async function deployAll() {
       const module = await prisma.module.create({
         data: {
           ...moduleData,
-          courseId: course.id,
-          description: `Module ${moduleData.order} content`
+          courseId: course.id
         }
       })
 
