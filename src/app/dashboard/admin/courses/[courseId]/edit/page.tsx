@@ -22,12 +22,26 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     notFound()
   }
 
-  // Get lessons for this course
+  // Get lessons for this course with all fields
   const lessons = await prisma.lesson.findMany({
     where: { courseId },
     include: {
-      quiz: true,
-      scormPackage: true
+      quiz: {
+        select: {
+          id: true,
+          title: true,
+          passingScore: true,
+          timeLimit: true
+        }
+      },
+      scormPackage: {
+        select: {
+          id: true,
+          fileName: true,
+          version: true,
+          launchUrl: true
+        }
+      }
     },
     orderBy: { order: 'asc' }
   })
