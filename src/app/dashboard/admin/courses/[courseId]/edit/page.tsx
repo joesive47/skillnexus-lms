@@ -83,14 +83,6 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                       </div>
                       {/* Show All Lesson Details */}
                       <div className="mt-2 space-y-2">
-                        {/* Description */}
-                        {lesson.description && (
-                          <div className="p-2 bg-gray-50 rounded text-xs">
-                            <span className="font-medium text-gray-600">คำอธิบาย:</span>
-                            <p className="text-gray-700 mt-1">{lesson.description}</p>
-                          </div>
-                        )}
-                        
                         {/* Video URL */}
                         {lesson.youtubeUrl && (
                           <div className="p-2 bg-blue-50 rounded text-xs">
