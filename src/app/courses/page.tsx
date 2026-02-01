@@ -3,8 +3,9 @@ import { auth } from '@/auth'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Coins, BookOpen } from 'lucide-react'
+import { Coins, BookOpen, Clock, Users } from 'lucide-react'
 import Link from 'next/link'
+import { CourseImage } from '@/components/ui/course-image'
 
 export const dynamic = 'force-dynamic'
 
