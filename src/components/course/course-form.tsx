@@ -13,6 +13,7 @@ import { createCourse, updateCourse } from '@/app/actions/course'
 import { createCourseWithScorm, updateCourseWithScorm } from '@/app/actions/course-scorm'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { CourseImage } from '@/components/ui/course-image'
 import { ChevronUp, ChevronDown, Trash2, Plus, Copy, GripVertical, Eye, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -315,6 +316,17 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
         formData.append(`scorm_${lesson.order}`, lesson.scormFile)
       }
     })
+
+    // Ensure image file is included in FormData (some browsers may not include it reliably)
+    try {
+      const imageInput = document.getElementById('image') as HTMLInputElement | null
+      const imageFile = imageInput?.files?.[0]
+      if (imageFile) {
+        formData.set('image', imageFile)
+      }
+    } catch (err) {
+      // ignore - server action will still read formData.get('image') if provided
+    }
     
     if (lessons.length > 0) {
       const lessonsData = lessons.map(lesson => {
@@ -357,7 +369,11 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>{mode === 'create' ? 'Create New Course' : 'Edit Course'}</CardTitle>
-      {imagePreview && <Image src={imagePreview} alt="Cover Image" width={500} height={300} />}
+      {imagePreview && (
+        <div className="mb-4">
+          <CourseImage src={imagePreview} alt="Cover Image Preview" className="w-full h-60 object-cover rounded-lg" fill={false} />
+        </div>
+      )}
       
       </CardHeader>
       <CardContent>
@@ -421,7 +437,7 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
               <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm font-medium text-blue-800 mb-2">📸 รูปหน้าปกปัจจุบัน:</p>
                 <div className="relative w-[200px] h-[120px] border-2 border-blue-300 rounded-lg overflow-hidden bg-white">
-                  <Image
+                  <CourseImage
                     src={course.imageUrl.startsWith('/uploads/') 
                       ? `/api/images${course.imageUrl.replace('/uploads/', '/')}`
                       : course.imageUrl.startsWith('/') 
@@ -430,7 +446,6 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
                     alt="Current course cover"
                     fill
                     className="object-cover"
-                    unoptimized
                   />
                 </div>
                 <p className="text-xs text-blue-600 mt-2">💡 อัปโหลดรูปใหม่ด้านล่างเพื่อเปลี่ยนรูปหน้าปก</p>
@@ -449,12 +464,11 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
               <div className="mt-2">
                 <p className="text-sm font-medium text-green-700 mb-2">✅ Preview รูปใหม่:</p>
                 <div className="relative w-[200px] h-[120px] border-2 border-green-500 rounded-lg overflow-hidden">
-                  <Image
+                  <CourseImage
                     src={imagePreview}
                     alt="New course preview"
                     fill
                     className="object-cover"
-                    unoptimized
                   />
                 </div>
               </div>
