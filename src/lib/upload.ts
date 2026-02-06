@@ -5,22 +5,9 @@ import { forceDeleteFile } from './file-manager'
 
 // Optional: use AWS S3 in production. Configure these env vars in Vercel:
 // AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET
-let s3Client: any = null
-let S3_BUCKET: string | undefined
-try {
-  if (process.env.AWS_REGION && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.S3_BUCKET) {
-    // Lazy-require to avoid adding dependency in environments that won't use it
-    // and to prevent import-time errors in the edge runtime.
-    // @ts-ignore
-    const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
-    s3Client = new S3Client({ region: process.env.AWS_REGION })
-    S3_BUCKET = process.env.S3_BUCKET
-    // expose for use below
-    ;(global as any).__S3_PUT_COMMAND = PutObjectCommand
-  }
-} catch (err) {
-  s3Client = null
-}
+// Do not create S3 client at module import time. Instead create it lazily
+// inside `uploadToS3` so that runtime environment variables configured
+// in the hosting platform (Vercel) are respected.
 
 export async function saveFileLocally(file: File, folder: string): Promise<string> {
   const bytes = await file.arrayBuffer()
@@ -62,10 +49,15 @@ export async function uploadToS3(file: File): Promise<string> {
     throw new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed')
   }
   
-  // If S3 is configured, upload to S3 and return the public URL
-  if (s3Client && S3_BUCKET) {
+  // If S3 is configured via environment variables, attempt to upload to S3.
+  if (process.env.AWS_REGION && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.S3_BUCKET) {
     try {
-      const PutObjectCommand = (global as any).__S3_PUT_COMMAND
+      // Lazy-require the AWS SDK so environments that don't need it won't fail.
+      // @ts-ignore
+      const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+      const s3Client = new S3Client({ region: process.env.AWS_REGION })
+      const S3_BUCKET = process.env.S3_BUCKET as string
+
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
       const timestamp = Date.now()
@@ -80,7 +72,6 @@ export async function uploadToS3(file: File): Promise<string> {
         ACL: 'public-read',
       }))
 
-      // Construct URL (standard S3 public URL). Adjust if using custom domain or CloudFront.
       const region = process.env.AWS_REGION
       const url = `https://${S3_BUCKET}.s3.${region}.amazonaws.com/${key}`
       return url
