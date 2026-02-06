@@ -45,17 +45,32 @@ export async function authenticate(
     const redirectMap: Record<string, string> = {
       'ADMIN': '/admin/dashboard',
       'TEACHER': '/teacher/dashboard', 
-      'STUDENT': '/student/dashboard'
+      'STUDENT': '/dashboard'
     }
 
-    const redirectTo = redirectMap[user?.role || 'STUDENT'] || '/student/dashboard'
+    const redirectTo = redirectMap[user?.role || 'STUDENT'] || '/dashboard'
     console.log('[AUTH ACTION] Redirect target:', redirectTo)
 
-    await signIn('credentials', {
-      email,
-      password,
-      redirectTo: redirectTo, // Use relative path only
-    })
+    try {
+      await signIn('credentials', {
+        email,
+        password,
+        redirectTo: redirectTo,
+      })
+    } catch (signInError) {
+      console.error('[AUTH ACTION] SignIn error:', signInError)
+      if (signInError instanceof AuthError) {
+        switch (signInError.type) {
+          case 'CredentialsSignin':
+            return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+          case 'CallbackRouteError':
+            return 'เกิดข้อผิดพลาดในการเข้าระบบ กรุณาตรวจสอบการตั้งค่า'
+          default:
+            return `เกิดข้อผิดพลาด: ${signInError.type}`
+        }
+      }
+      throw signInError
+    }
     
   } catch (error) {
     console.error('[AUTH ACTION] Authentication error:', error)

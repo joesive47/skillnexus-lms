@@ -4,45 +4,97 @@ import * as bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create admin users
-  const hashedPassword = await bcrypt.hash('Admin@123!', 12)
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@skillnexus.com' },
-    update: {},
-    create: {
+  console.log('🌱 Starting database seed...\n')
+
+  // ========================================
+  // 1. ADMIN USERS
+  // ========================================
+  console.log('👑 Creating ADMIN users...')
+  const adminPassword = await bcrypt.hash('admin@123!', 12)
+
+  const admins = [
+    {
       email: 'admin@skillnexus.com',
-      password: hashedPassword,
       name: 'นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)',
-      role: 'ADMIN',
+      role: 'ADMIN'
     },
-  })
-
-  await prisma.user.upsert({
-    where: { email: 'admin@bizsolve-ai.com' },
-    update: {},
-    create: {
+    {
       email: 'admin@bizsolve-ai.com',
-      password: hashedPassword,
       name: 'ผู้ดูแลระบบ BizSolve AI',
-      role: 'ADMIN',
+      role: 'ADMIN'
     },
-  })
+    {
+      email: 'admin@example.com',
+      name: 'System Administrator',
+      role: 'ADMIN'
+    }
+  ]
 
-  // Create teacher user
-  const teacherPassword = await bcrypt.hash('Teacher@123!', 12)
-  await prisma.user.upsert({
-    where: { email: 'teacher@skillnexus.com' },
-    update: {},
-    create: {
+  for (const admin of admins) {
+    await prisma.user.upsert({
+      where: { email: admin.email },
+      update: {},
+      create: {
+        email: admin.email,
+        password: adminPassword,
+        name: admin.name,
+        role: admin.role,
+        credits: 10000,
+      },
+    })
+  }
+  console.log(`✅ Created ${admins.length} admin users\n`)
+
+  // ========================================
+  // 2. TEACHER USERS
+  // ========================================
+  console.log('👨‍🏫 Creating TEACHER users...')
+  const teacherPassword = await bcrypt.hash('teacher@123!', 12)
+
+  const teachers = [
+    {
       email: 'teacher@skillnexus.com',
-      password: teacherPassword,
       name: 'นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)',
-      role: 'TEACHER',
+      role: 'TEACHER'
     },
-  })
+    {
+      email: 'teacher@example.com',
+      name: 'Prof. Sarah Johnson',
+      role: 'TEACHER'
+    },
+    {
+      email: 'instructor@skillnexus.com',
+      name: 'Dr. Michael Chen',
+      role: 'TEACHER'
+    },
+    {
+      email: 'tutor@skillnexus.com',
+      name: 'Emily Rodriguez',
+      role: 'TEACHER'
+    }
+  ]
 
-  // Create student users with credits
-  const studentPassword = await bcrypt.hash('Student@123!', 12)
+  for (const teacher of teachers) {
+    await prisma.user.upsert({
+      where: { email: teacher.email },
+      update: {},
+      create: {
+        email: teacher.email,
+        password: teacherPassword,
+        name: teacher.name,
+        role: teacher.role,
+        credits: 5000,
+      },
+    })
+  }
+  console.log(`✅ Created ${teachers.length} teacher users\n`)
+
+  // ========================================
+  // 3. STUDENT USERS
+  // ========================================
+  console.log('👨‍🎓 Creating STUDENT users...')
+  const studentPassword = await bcrypt.hash('student@123!', 12)
+
   const students = [
     {
       email: 'student@skillnexus.com',
@@ -50,13 +102,18 @@ async function main() {
       credits: 1000
     },
     {
-      email: 'john@example.com', 
+      email: 'student@example.com',
+      name: 'Alex Thompson',
+      credits: 800
+    },
+    {
+      email: 'john@example.com',
       name: 'John Doe',
       credits: 500
     },
     {
       email: 'alice@example.com',
-      name: 'Alice Johnson', 
+      name: 'Alice Johnson',
       credits: 750
     },
     {
@@ -109,6 +166,114 @@ async function main() {
       },
     })
   }
+  console.log(`✅ Created ${students.length} student users\n`)
+
+  // ========================================
+  // 4. ENTERPRISE USERS
+  // ========================================
+  console.log('🏢 Creating ENTERPRISE users...')
+  const enterprisePassword = await bcrypt.hash('enterprise@123!', 12)
+
+  const enterprises = [
+    {
+      email: 'enterprise@skillnexus.com',
+      name: 'Enterprise Admin',
+      role: 'ENTERPRISE'
+    },
+    {
+      email: 'corporate@example.com',
+      name: 'Corporate Training Manager',
+      role: 'ENTERPRISE'
+    },
+    {
+      email: 'business@skillnexus.com',
+      name: 'Business Account Manager',
+      role: 'ENTERPRISE'
+    }
+  ]
+
+  for (const enterprise of enterprises) {
+    await prisma.user.upsert({
+      where: { email: enterprise.email },
+      update: {},
+      create: {
+        email: enterprise.email,
+        password: enterprisePassword,
+        name: enterprise.name,
+        role: enterprise.role,
+        credits: 50000,
+      },
+    })
+  }
+  console.log(`✅ Created ${enterprises.length} enterprise users\n`)
+
+  // ========================================
+  // 5. MODERATOR USERS
+  // ========================================
+  console.log('🛡️ Creating MODERATOR users...')
+  const moderatorPassword = await bcrypt.hash('moderator@123!', 12)
+
+  const moderators = [
+    {
+      email: 'moderator@skillnexus.com',
+      name: 'Content Moderator',
+      role: 'MODERATOR'
+    },
+    {
+      email: 'mod@example.com',
+      name: 'Community Manager',
+      role: 'MODERATOR'
+    }
+  ]
+
+  for (const moderator of moderators) {
+    await prisma.user.upsert({
+      where: { email: moderator.email },
+      update: {},
+      create: {
+        email: moderator.email,
+        password: moderatorPassword,
+        name: moderator.name,
+        role: moderator.role,
+        credits: 3000,
+      },
+    })
+  }
+  console.log(`✅ Created ${moderators.length} moderator users\n`)
+
+  // ========================================
+  // 6. CONTENT CREATOR USERS
+  // ========================================
+  console.log('🎨 Creating CONTENT_CREATOR users...')
+  const creatorPassword = await bcrypt.hash('creator@123!', 12)
+
+  const creators = [
+    {
+      email: 'creator@skillnexus.com',
+      name: 'Content Creator',
+      role: 'CONTENT_CREATOR'
+    },
+    {
+      email: 'author@example.com',
+      name: 'Course Author',
+      role: 'CONTENT_CREATOR'
+    }
+  ]
+
+  for (const creator of creators) {
+    await prisma.user.upsert({
+      where: { email: creator.email },
+      update: {},
+      create: {
+        email: creator.email,
+        password: creatorPassword,
+        name: creator.name,
+        role: creator.role,
+        credits: 2000,
+      },
+    })
+  }
+  console.log(`✅ Created ${creators.length} content creator users\n`)
 
   // Create sample course
   const course = await prisma.course.create({
@@ -270,7 +435,7 @@ async function main() {
       category: 'Technology'
     },
     {
-      title: 'Data Scientist', 
+      title: 'Data Scientist',
       description: 'ประเมินทักษะการวิเคราะห์ข้อมูลและ Machine Learning',
       category: 'Technology'
     },
@@ -294,7 +459,7 @@ async function main() {
     }
 
     const careerSkills = skills[career.title as keyof typeof skills] || []
-    
+
     for (const skillName of careerSkills) {
       const skill = await prisma.careerSkill.upsert({
         where: { name: skillName },
@@ -309,7 +474,7 @@ async function main() {
             questionId: `JS001_${career.id}`,
             questionText: 'What is closure in JavaScript?',
             option1: 'Function with access to parent scope',
-            option2: 'Loop structure', 
+            option2: 'Loop structure',
             option3: 'Data type',
             option4: 'Operator',
             correctAnswer: '1',
@@ -353,7 +518,7 @@ async function main() {
       }
 
       const skillQuestions = questions[skillName as keyof typeof questions] || []
-      
+
       for (const questionData of skillQuestions) {
         await prisma.assessmentQuestion.create({
           data: {
@@ -373,23 +538,81 @@ async function main() {
   console.log('Database seeded successfully')
   console.log(`Created ${students.length} student users with credits`)
   console.log(`Created ${careers.length} sample career assessments`)
-  console.log('\n=== ข้อมูลการเข้าสู่ระบบ SkillNexus LMS ===')
-  console.log('\n## บัญชีผู้ดูแลระบบ (Admin)')
-  console.log('- อีเมล: admin@skillnexus.com | รหัสผ่าน: Admin@123!')
-  console.log('- ชื่อ: นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)')
-  console.log('- อีเมล: admin@bizsolve-ai.com | รหัสผ่าน: Admin@123!')
-  console.log('\n## บัญชีครู (Teacher)')
-  console.log('- อีเมล: teacher@skillnexus.com | รหัสผ่าน: Teacher@123!')
-  console.log('- ชื่อ: นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)')
-  console.log('\n## บัญชีนักเรียน (Student)')
-  console.log('- อีเมล: student@skillnexus.com | รหัสผ่าน: Student@123!')
-  console.log('- อีเมล: john@example.com | รหัสผ่าน: Student@123!')
-  console.log('- อีเมล: alice@example.com | รหัสผ่าน: Student@123!')
-  console.log('- อีเมล: joesive47@gmail.com | รหัสผ่าน: Student@123! | เครดิต: 1000')
-  console.log('(และอีก 6 บัญชีนักเรียนใช้รหัสผ่าน: Student@123!)')
-  console.log('\n## Skills Assessment')
-  console.log('- ไปที่: http://localhost:3000/skills-assessment')
-  console.log('- หรือ Import ข้อสอบเพิ่มเติม: http://localhost:3000/skills-assessment/import')
+  console.log('\n' + '='.repeat(60))
+  console.log('📋 SkillNexus LMS - LOGIN CREDENTIALS')
+  console.log('='.repeat(60) + '\n')
+
+  console.log('👑 ADMIN ACCOUNTS (Password: admin@123!)')
+  console.log('─'.repeat(60))
+  console.log('  • admin@skillnexus.com')
+  console.log('    Name: นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)')
+  console.log('  • admin@bizsolve-ai.com')
+  console.log('    Name: ผู้ดูแลระบบ BizSolve AI')
+  console.log('  • admin@example.com')
+  console.log('    Name: System Administrator')
+  console.log('')
+
+  console.log('👨‍🏫 TEACHER ACCOUNTS (Password: teacher@123!)')
+  console.log('─'.repeat(60))
+  console.log('  • teacher@skillnexus.com')
+  console.log('    Name: นายทวีศักดิ์ เจริญศิลป์ (Mr. Taweesak Jaroensin)')
+  console.log('  • teacher@example.com')
+  console.log('    Name: Prof. Sarah Johnson')
+  console.log('  • instructor@skillnexus.com')
+  console.log('    Name: Dr. Michael Chen')
+  console.log('  • tutor@skillnexus.com')
+  console.log('    Name: Emily Rodriguez')
+  console.log('')
+
+  console.log('👨‍🎓 STUDENT ACCOUNTS (Password: student@123!)')
+  console.log('─'.repeat(60))
+  console.log('  • student@skillnexus.com (Credits: 1000)')
+  console.log('  • student@example.com (Credits: 800)')
+  console.log('  • john@example.com (Credits: 500)')
+  console.log('  • alice@example.com (Credits: 750)')
+  console.log('  • joesive47@gmail.com (Credits: 1000)')
+  console.log('  • bob@example.com (Credits: 300)')
+  console.log('  • emma@example.com (Credits: 1200)')
+  console.log('  • david@example.com (Credits: 800)')
+  console.log('  • sarah@example.com (Credits: 600)')
+  console.log('  • mike@example.com (Credits: 900)')
+  console.log('  • lisa@example.com (Credits: 400)')
+  console.log('')
+
+  console.log('🏢 ENTERPRISE ACCOUNTS (Password: enterprise@123!)')
+  console.log('─'.repeat(60))
+  console.log('  • enterprise@skillnexus.com')
+  console.log('    Name: Enterprise Admin (Credits: 50000)')
+  console.log('  • corporate@example.com')
+  console.log('    Name: Corporate Training Manager (Credits: 50000)')
+  console.log('  • business@skillnexus.com')
+  console.log('    Name: Business Account Manager (Credits: 50000)')
+  console.log('')
+
+  console.log('🛡️ MODERATOR ACCOUNTS (Password: moderator@123!)')
+  console.log('─'.repeat(60))
+  console.log('  • moderator@skillnexus.com')
+  console.log('    Name: Content Moderator (Credits: 3000)')
+  console.log('  • mod@example.com')
+  console.log('    Name: Community Manager (Credits: 3000)')
+  console.log('')
+
+  console.log('🎨 CONTENT CREATOR ACCOUNTS (Password: creator@123!)')
+  console.log('─'.repeat(60))
+  console.log('  • creator@skillnexus.com')
+  console.log('    Name: Content Creator (Credits: 2000)')
+  console.log('  • author@example.com')
+  console.log('    Name: Course Author (Credits: 2000)')
+  console.log('')
+
+  console.log('='.repeat(60))
+  console.log('🔗 QUICK LINKS')
+  console.log('='.repeat(60))
+  console.log('  • Login: http://localhost:3001/login')
+  console.log('  • Skills Assessment: http://localhost:3001/skills-assessment')
+  console.log('  • Import Questions: http://localhost:3001/skills-assessment/import')
+  console.log('='.repeat(60) + '\n')
+
 }
 
 main()

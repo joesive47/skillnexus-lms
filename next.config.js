@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Docker optimization
-  output: 'standalone',
+  // Docker optimization - เฉพาะ production
+  ...(process.env.NODE_ENV === 'production' && { output: 'standalone' }),
+  
+  // Server Actions configuration - แก้ไข Body Size Limit
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb' // เพิ่มเป็น 50MB
+    }
+  },
   
   // Minimal config for stability
   serverExternalPackages: ['pdf-parse', '@napi-rs/canvas', 'canvas'],
@@ -28,8 +35,18 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   
-  // Docker-specific settings
-  outputFileTracingRoot: process.cwd(),
+  // Development settings
+  ...(process.env.NODE_ENV === 'development' && {
+    onDemandEntries: {
+      maxInactiveAge: 60 * 1000,
+      pagesBufferLength: 5,
+    }
+  }),
+  
+  // Docker-specific settings - เฉพาะ production
+  ...(process.env.NODE_ENV === 'production' && {
+    outputFileTracingRoot: process.cwd(),
+  })
 }
 
 module.exports = nextConfig

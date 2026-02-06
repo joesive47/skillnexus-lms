@@ -1,9 +1,17 @@
 # Multi-stage build for production optimization
-FROM node:18-alpine AS base
+FROM node:20-bullseye-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# Install build dependencies needed for native modules (sharp, node-gyp)
+RUN apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false && \
+    apt-get install -y --no-install-recommends \
+      python3 \
+      build-essential \
+      libvips-dev \
+      pkg-config \
+      ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
@@ -40,8 +48,13 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 
+# Copy Prisma client and schema for runtime access
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules ./node_modules
+
 # Set the correct permission for prerender cache
-RUN mkdir .next
+RUN mkdir -p .next
 RUN chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
@@ -54,5 +67,9 @@ EXPOSE 3000
 
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
+
+# Health check to verify the app is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => r.statusCode !== 200 ? process.exit(1) : process.exit(0)).on('error', () => process.exit(1))" || exit 1
 
 CMD ["node", "server.js"]

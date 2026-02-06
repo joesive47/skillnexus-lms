@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: skillnexus-postgres
     environment:
-      POSTGRES_DB: skillnexus
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: skillnexus_dev
+      POSTGRES_USER: skillnexus
+      POSTGRES_PASSWORD: skillnexus123
     ports:
       - "5432:5432"
     volumes:
@@ -47,11 +47,38 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # Core Settings
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/skillnexus
+      - NEXT_TELEMETRY_DISABLED=1
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      
+      # Database - Use Docker service hostname 'postgres'
+      - DATABASE_URL=postgresql://skillnexus:skillnexus123@postgres:5432/skillnexus_dev
+      
+      # Redis - Use Docker service hostname 'redis'
       - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      # NextAuth Configuration
       - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=your-secret-key-here
+      - NEXTAUTH_SECRET=skillnexus-super-secret-key-2024-docker-prod
+      - AUTH_URL=http://localhost:3000
+      - AUTH_SECRET=skillnexus-super-secret-key-2024-docker-prod
+      - AUTH_TRUST_HOST=true
+      
+      # Next.js Configuration
+      - NEXT_PUBLIC_URL=http://localhost:3000
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+      
+      # RAG System Configuration
+      - RAG_CHUNK_SIZE=600
+      - RAG_CHUNK_OVERLAP=50
+      - RAG_MAX_RESULTS=3
+      - RAG_BATCH_SIZE=10
+      - RAG_MAX_CONCURRENT=5
+      - RAG_CACHE_SIZE=5000
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,6 +89,12 @@ services:
     volumes:
       - ./uploads:/app/uploads
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:

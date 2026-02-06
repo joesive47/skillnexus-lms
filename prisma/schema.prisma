@@ -6,6 +6,8 @@ generator client {
 }
 
 datasource db {
+  // Running in Docker Compose uses PostgreSQL. Ensure provider matches DATABASE_URL.
+  // Change to "sqlite" only when using a file-based SQLite DB and set DATABASE_URL accordingly (e.g. "file:./prisma/dev.db").
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }

@@ -357,6 +357,8 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>{mode === 'create' ? 'Create New Course' : 'Edit Course'}</CardTitle>
+      {imagePreview && <Image src={imagePreview} alt="Cover Image" width={500} height={300} />}
+      
       </CardHeader>
       <CardContent>
         <form action={handleSubmit} className="space-y-6">

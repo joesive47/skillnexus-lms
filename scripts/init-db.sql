@@ -1,25 +1,25 @@
--- Initialize SkillNexus Database
+-- Initialize SkillNexus Development Database
 -- This script runs when PostgreSQL container starts for the first time
 
--- Create database if not exists
-SELECT 'CREATE DATABASE skillnexus'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'skillnexus')\gexec
+-- Create database if not exists (already created by POSTGRES_DB)
+-- CREATE DATABASE IF NOT EXISTS skillnexus_dev;
 
--- Connect to skillnexus database
-\c skillnexus;
-
--- Create extensions if needed
+-- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Grant permissions to postgres user
-GRANT ALL PRIVILEGES ON DATABASE skillnexus TO postgres;
-GRANT ALL ON SCHEMA public TO postgres;
+-- Set timezone
+SET timezone = 'Asia/Bangkok';
 
--- Set default privileges
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres;
+-- Create initial admin user (will be overridden by Prisma seed)
+-- This is just for initial setup
 
--- Log completion
-\echo 'SkillNexus database initialized successfully!'
+-- Log initialization
+DO $$
+BEGIN
+    RAISE NOTICE 'SkillNexus Development Database initialized successfully!';
+    RAISE NOTICE 'Database: skillnexus_dev';
+    RAISE NOTICE 'User: skillnexus';
+    RAISE NOTICE 'Timezone: Asia/Bangkok';
+    RAISE NOTICE 'Extensions: uuid-ossp, pgcrypto';
+END $$;

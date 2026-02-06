@@ -4,10 +4,17 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
-const UnifiedChatWidget = dynamic(() => import('@/components/chatbot/UnifiedChatWidget'), { 
-  ssr: false,
-  loading: () => null
-})
+const UnifiedChatWidget = dynamic(
+  () => import('@/components/chatbot/UnifiedChatWidget').catch((err) => {
+    console.error('Failed to load UnifiedChatWidget:', err)
+    // Return a fallback component
+    return { default: () => null }
+  }),
+  {
+    ssr: false,
+    loading: () => null
+  }
+)
 
 export default function GlobalWidgets() {
   return (

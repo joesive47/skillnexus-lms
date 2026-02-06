@@ -25,8 +25,6 @@ function SubmitButton() {
 
 export function LoginForm() {
   const [errorMessage, dispatch] = useActionState(authenticate, undefined)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const searchParams = useSearchParams()
   const redirectTo = searchParams?.get('callbackUrl') || searchParams?.get('redirect') || '/dashboard'
@@ -66,8 +64,6 @@ export function LoginForm() {
                 id="email"
                 name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="กรอกอีเมลของคุณ"
                 required
               />
@@ -79,8 +75,6 @@ export function LoginForm() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="กรอกรหัสผ่านของคุณ"
                   className="pr-10"
                   required

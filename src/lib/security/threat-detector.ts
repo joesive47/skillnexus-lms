@@ -39,9 +39,15 @@ export class ThreatDetector {
   private blockedIPs = new Set<string>();
   private readonly MAX_FAILED_ATTEMPTS = 5;
   private readonly BLOCK_DURATION = 3600; // 1 hour
+  private cleanupIntervalId: NodeJS.Timeout | null = null;
 
   private constructor() {
-    this.startCleanupTask();
+    // Delay cleanup task startup to allow database to be ready
+    if (process.env.NODE_ENV === 'production') {
+      setTimeout(() => this.startCleanupTask(), 5000);
+    } else {
+      this.startCleanupTask();
+    }
   }
 
   static getInstance(): ThreatDetector {
@@ -466,26 +472,56 @@ export class ThreatDetector {
    * Cleanup task to remove expired blocks
    */
   private startCleanupTask(): void {
-    setInterval(async () => {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+    }
+
+    this.cleanupIntervalId = setInterval(async () => {
       try {
+        // Check if DATABASE_URL is properly configured
+        if (!process.env.DATABASE_URL) {
+          console.warn('[ThreatDetector] DATABASE_URL not configured - skipping database cleanup');
+          return;
+        }
+
         // Remove expired IP blocks from database
-        await prisma.blockedIP.deleteMany({
-          where: {
-            expiresAt: {
-              lt: new Date()
+        try {
+          const deletedCount = await prisma.blockedIP.deleteMany({
+            where: {
+              expiresAt: {
+                lt: new Date()
+              }
             }
+          });
+          
+          if (deletedCount.count > 0) {
+            console.log(`[ThreatDetector] Cleaned up ${deletedCount.count} expired IP blocks`);
           }
-        });
+        } catch (dbError: any) {
+          // Log but don't crash if database is unavailable
+          if (dbError?.code === 'P1000' || dbError?.message?.includes('Can\'t reach database')) {
+            console.warn('[ThreatDetector] Database not yet available, will retry on next cycle');
+          } else {
+            console.warn('[ThreatDetector] Database cleanup warning:', dbError?.message || dbError);
+          }
+          // Continue with in-memory cleanup even if database fails
+        }
 
         // Clear old suspicious IPs (older than 1 hour)
         const oneHourAgo = Date.now() - 3600000;
+        let clearedCount = 0;
         for (const [ip, timestamp] of this.suspiciousIPs.entries()) {
           if (timestamp < oneHourAgo) {
             this.suspiciousIPs.delete(ip);
+            clearedCount++;
           }
         }
+        
+        if (clearedCount > 0) {
+          console.log(`[ThreatDetector] Cleared ${clearedCount} old suspicious IPs`);
+        }
       } catch (error) {
-        console.error('Cleanup task failed:', error);
+        console.warn('[ThreatDetector] Cleanup cycle warning:', error instanceof Error ? error.message : error);
       }
     }, 300000); // Run every 5 minutes
   }
