@@ -1,0 +1,16 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::uppowerskill-bucket/*"
+      ],
+      "Sid": "PublicReadForGetBucketObjects"
+    }
+  ]
+}
