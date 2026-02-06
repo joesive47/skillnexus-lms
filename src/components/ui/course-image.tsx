@@ -30,7 +30,7 @@ export function CourseImage({ src, alt, fill, className }: CourseImageProps) {
   
   // Handle different URL formats
   if (src.startsWith('/uploads/')) {
-    // Local upload paths - serve directly from public folder
+    // Local upload paths - use directly
     imageUrl = src
   } else if (src.startsWith('data:image/')) {
     // Base64 data URL - use as-is
@@ -61,7 +61,7 @@ export function CourseImage({ src, alt, fill, className }: CourseImageProps) {
         }}
         onError={(e) => {
           console.error('❌ Error loading image:', imageUrl)
-          console.error('Image src:', src)
+          console.error('Original src:', src)
           setImageError(true)
         }}
       />
