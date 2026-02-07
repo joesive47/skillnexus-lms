@@ -5,7 +5,7 @@ import JSZip from 'jszip'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Play, Pause, RotateCcw, ExternalLink, Maximize, Minimize } from 'lucide-react'
+import { Play, Pause, RotateCcw, Maximize, Minimize } from 'lucide-react'
 
 interface ScormPlayerProps {
   packagePath: string
@@ -277,11 +277,6 @@ export function ScormPlayer({
     }
   }
 
-  function openInNewWindow() {
-    if (!extractedUrl) return
-    window.open(extractedUrl, '_blank', 'width=1024,height=768,scrollbars=yes,resizable=yes')
-  }
-
   return (
     <Card className={`flex flex-col ${fullHeight ? 'h-full' : ''} ${className}`}>
       {!hideHeader && (
@@ -323,19 +318,6 @@ export function ScormPlayer({
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">รีเซ็ต</span>
-              </Button>
-              
-              {/* Open in New Window */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openInNewWindow}
-                disabled={!extractedUrl}
-                className="flex items-center gap-1.5"
-                title="เปิดในหน้าต่างใหม่"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span className="hidden md:inline">หน้าต่างใหม่</span>
               </Button>
             </div>
           </CardTitle>
