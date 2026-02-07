@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { CourseImage } from '@/components/ui/course-image'
 import { BookOpen, Video, FileQuestion, Package, Edit, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
@@ -48,6 +49,69 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Course Header with Cover Image */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Course Cover Image */}
+            <div className="lg:col-span-1">
+              <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                <CourseImage
+                  src={result.course.imageUrl}
+                  alt={result.course.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">สถานะ:</span>
+                  <Badge variant={result.course.published ? "default" : "secondary"}>
+                    {result.course.published ? "เผยแพร่แล้ว" : "แบบร่าง"}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">ราคา:</span>
+                  <span className="font-semibold">
+                    {result.course.price === 0 ? "ฟรี" : `฿${result.course.price.toLocaleString('th-TH')}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Course Info */}
+            <div className="lg:col-span-2">
+              <h1 className="text-2xl font-bold mb-2">{result.course.title}</h1>
+              <p className="text-gray-600 mb-4">
+                {result.course.description || "ไม่มีคำอธิบาย"}
+              </p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">จำนวนบทเรียน:</span>
+                  <span className="ml-2 font-semibold">{lessons.length} บท</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">สร้างเมื่อ:</span>
+                  <span className="ml-2 font-semibold">
+                    {new Date(result.course.createdAt).toLocaleDateString('th-TH')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">อัปเดตล่าสุด:</span>
+                  <span className="ml-2 font-semibold">
+                    {new Date(result.course.updatedAt).toLocaleDateString('th-TH')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Course ID:</span>
+                  <span className="ml-2 font-mono text-xs">{result.course.id}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Existing Lessons */}
       <Card>
         <CardHeader>
