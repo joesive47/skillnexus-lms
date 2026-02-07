@@ -36,11 +36,12 @@ export async function deleteFile(filePath: string): Promise<{ success: boolean; 
 
 export async function uploadToS3(file: File): Promise<string> {
   const isProdLike = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
+  const bucketName = process.env.S3_BUCKET || process.env.AWS_S3_BUCKET
   const hasS3Env = Boolean(
     process.env.AWS_REGION &&
     process.env.AWS_ACCESS_KEY_ID &&
     process.env.AWS_SECRET_ACCESS_KEY &&
-    process.env.S3_BUCKET
+    bucketName
   )
 
   // File validation
@@ -64,7 +65,7 @@ export async function uploadToS3(file: File): Promise<string> {
       // @ts-ignore
       const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
       const s3Client = new S3Client({ region: process.env.AWS_REGION })
-      const S3_BUCKET = process.env.S3_BUCKET as string
+      const S3_BUCKET = bucketName as string
 
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
@@ -90,7 +91,7 @@ export async function uploadToS3(file: File): Promise<string> {
   }
 
   if (isProdLike) {
-    throw new Error('S3 is not configured in this environment. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET.')
+    throw new Error('S3 is not configured in this environment. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET (or AWS_S3_BUCKET).')
   }
 
   // Fallback: save locally (useful for local/dev environments)
