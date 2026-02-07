@@ -9,6 +9,10 @@ import * as XLSX from 'xlsx'
 
 const importQuizSchema = z.object({
   title: z.string().min(1, 'Quiz title is required'),
+  questionsToShow: z.number().optional(),
+  timeLimit: z.number().optional(),
+  shuffleOptions: z.boolean().default(false),
+  randomize: z.boolean().default(false),
 })
 
 export async function importQuizFromExcel(formData: FormData) {
@@ -21,8 +25,21 @@ export async function importQuizFromExcel(formData: FormData) {
 
     const title = formData.get('title') as string
     const excelFile = formData.get('excelFile') as File
+    const questionsToShowStr = formData.get('questionsToShow') as string
+    const timeLimitStr = formData.get('timeLimit') as string
+    const shuffleOptions = formData.get('shuffleOptions') === 'true'
+    const randomize = formData.get('randomize') === 'true'
 
-    const validatedFields = importQuizSchema.parse({ title })
+    const questionsToShow = questionsToShowStr ? parseInt(questionsToShowStr) : undefined
+    const timeLimit = timeLimitStr ? parseInt(timeLimitStr) : 0
+
+    const validatedFields = importQuizSchema.parse({ 
+      title, 
+      questionsToShow,
+      timeLimit,
+      shuffleOptions,
+      randomize
+    })
 
     if (!excelFile || excelFile.size === 0) {
       return { success: false, error: 'Excel file is required' }
@@ -56,6 +73,7 @@ export async function importQuizFromExcel(formData: FormData) {
 
       return {
         text: row.QuestionText?.toString() || '',
+        order: index,
         options: [
           { text: row.OptionA?.toString() || '', isCorrect: correctOption === 'A' },
           { text: row.OptionB?.toString() || '', isCorrect: correctOption === 'B' },
@@ -65,11 +83,26 @@ export async function importQuizFromExcel(formData: FormData) {
       }
     })
 
+    const totalQuestions = questions.length
+
+    // Validate questionsToShow
+    if (questionsToShow && questionsToShow > totalQuestions) {
+      return { 
+        success: false, 
+        error: `Cannot show ${questionsToShow} questions from ${totalQuestions} total questions` 
+      }
+    }
+
     // Create quiz with questions atomically
     const quiz = await prisma.$transaction(async (tx) => {
       const newQuiz = await tx.quiz.create({
         data: {
           title: validatedFields.title,
+          timeLimit: validatedFields.timeLimit,
+          shuffleOptions: validatedFields.shuffleOptions,
+          randomize: validatedFields.randomize,
+          questionPoolSize: totalQuestions,
+          questionsToShow: questionsToShow || totalQuestions,
         },
       })
 
@@ -77,6 +110,7 @@ export async function importQuizFromExcel(formData: FormData) {
         const question = await tx.question.create({
           data: {
             text: questionData.text,
+            order: questionData.order,
             quizId: newQuiz.id,
           },
         })
@@ -95,7 +129,11 @@ export async function importQuizFromExcel(formData: FormData) {
 
     // Revalidate cache only after successful transaction
     revalidatePath('/dashboard/admin/quizzes')
-    return { success: true, quiz }
+    return { 
+      success: true, 
+      quiz,
+      message: `นำเข้าสำเร็จ ${totalQuestions} ข้อ${questionsToShow && questionsToShow < totalQuestions ? ` (จะสุ่ม ${questionsToShow} ข้อให้ผู้ทำ)` : ''}`
+    }
   } catch (error) {
     console.error('Error importing quiz:', error)
     if (error instanceof z.ZodError) {
@@ -255,5 +293,90 @@ export async function getQuizzes() {
   } catch (error) {
     console.error('Error fetching quizzes:', error)
     return { success: false, error: 'Failed to fetch quizzes' }
+  }
+}
+
+// Helper function: Shuffle array (Fisher-Yates algorithm)
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+// Get quiz questions with randomization support
+export async function getQuizForStudent(quizId: string) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const quiz = await prisma.quiz.findUnique({
+      where: { id: quizId },
+      include: {
+        questions: {
+          include: {
+            options: true
+          },
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
+    })
+
+    if (!quiz) {
+      return { success: false, error: 'Quiz not found' }
+    }
+
+    let questions = quiz.questions
+
+    // Randomize questions if enabled
+    if (quiz.randomize) {
+      questions = shuffleArray(questions)
+    }
+
+    // Select subset if questionsToShow is set
+    if (quiz.questionsToShow && quiz.questionsToShow < questions.length) {
+      questions = questions.slice(0, quiz.questionsToShow)
+    }
+
+    // Shuffle options if enabled
+    if (quiz.shuffleOptions) {
+      questions = questions.map(q => ({
+        ...q,
+        options: shuffleArray(q.options)
+      }))
+    }
+
+    // Remove correct answer indicators from options for student view
+    const sanitizedQuestions = questions.map(q => ({
+      ...q,
+      options: q.options.map(opt => ({
+        id: opt.id,
+        text: opt.text,
+        questionId: opt.questionId
+        // isCorrect is intentionally omitted
+      }))
+    }))
+
+    return { 
+      success: true, 
+      quiz: {
+        id: quiz.id,
+        title: quiz.title,
+        timeLimit: quiz.timeLimit,
+        randomize: quiz.randomize,
+        shuffleOptions: quiz.shuffleOptions,
+        questionsToShow: quiz.questionsToShow,
+        questionPoolSize: quiz.questionPoolSize
+      },
+      questions: sanitizedQuestions
+    }
+  } catch (error) {
+    console.error('Error fetching quiz for student:', error)
+    return { success: false, error: 'Failed to fetch quiz' }
   }
 }

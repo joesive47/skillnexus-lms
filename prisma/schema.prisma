@@ -116,16 +116,19 @@ model WatchHistory {
 }
 
 model Quiz {
-  id          String              @id @default(cuid())
-  title       String
-  courseId    String?
-  timeLimit   Int?                @default(0)
-  randomize   Boolean             @default(false)
-  createdAt   DateTime            @default(now())
-  lessons     Lesson[]
-  questions   Question[]
-  course      Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  submissions StudentSubmission[]
+  id               String              @id @default(cuid())
+  title            String
+  courseId         String?
+  timeLimit        Int?                @default(0)
+  randomize        Boolean             @default(false)
+  shuffleOptions   Boolean             @default(false)
+  questionPoolSize Int?                // จำนวนข้อทั้งหมดในคลัง (เช่น 30)
+  questionsToShow  Int?                // จำนวนข้อที่จะให้ทำ (เช่น 20)
+  createdAt        DateTime            @default(now())
+  lessons          Lesson[]
+  questions        Question[]
+  course           Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions      StudentSubmission[]
 
   @@map("quizzes")
 }
