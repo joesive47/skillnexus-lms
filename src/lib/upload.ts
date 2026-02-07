@@ -37,6 +37,11 @@ export async function deleteFile(filePath: string): Promise<{ success: boolean; 
 export async function uploadToS3(file: File): Promise<string> {
   const isProdLike = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
   const bucketName = process.env.S3_BUCKET || process.env.AWS_S3_BUCKET
+  const missingEnv: string[] = []
+  if (!process.env.AWS_REGION) missingEnv.push('AWS_REGION')
+  if (!process.env.AWS_ACCESS_KEY_ID) missingEnv.push('AWS_ACCESS_KEY_ID')
+  if (!process.env.AWS_SECRET_ACCESS_KEY) missingEnv.push('AWS_SECRET_ACCESS_KEY')
+  if (!bucketName) missingEnv.push('S3_BUCKET/AWS_S3_BUCKET')
   const hasS3Env = Boolean(
     process.env.AWS_REGION &&
     process.env.AWS_ACCESS_KEY_ID &&
@@ -91,7 +96,15 @@ export async function uploadToS3(file: File): Promise<string> {
   }
 
   if (isProdLike) {
-    throw new Error('S3 is not configured in this environment. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET (or AWS_S3_BUCKET).')
+    const missing = missingEnv.length > 0 ? ` Missing: ${missingEnv.join(', ')}` : ''
+    console.warn('S3 env check (prod-like):', {
+      hasRegion: Boolean(process.env.AWS_REGION),
+      hasAccessKeyId: Boolean(process.env.AWS_ACCESS_KEY_ID),
+      hasSecretAccessKey: Boolean(process.env.AWS_SECRET_ACCESS_KEY),
+      hasBucket: Boolean(bucketName),
+      missing: missingEnv,
+    })
+    throw new Error(`S3 is not configured in this environment. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET (or AWS_S3_BUCKET).${missing}`)
   }
 
   // Fallback: save locally (useful for local/dev environments)
