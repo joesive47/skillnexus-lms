@@ -151,11 +151,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
               launchUrl={lesson.launchUrl}
             />
           ) : lesson.lessonType === 'SCORM' && lesson.scormPackage ? (
-            <ScormPlayer
-              packagePath={lesson.scormPackage.packagePath}
-              lessonId={lesson.id}
-              userId={session.user.id}
-            />
+            <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center">
+              <div className="text-center p-6">
+                <p className="text-lg font-semibold text-blue-900 mb-2">📦 SCORM Content</p>
+                <p className="text-sm text-blue-700">This lesson uses fullscreen SCORM layout</p>
+              </div>
+            </div>
           ) : lesson.lessonType === 'QUIZ' && lesson.quiz ? (
             <div className="space-y-4">
               <div className="bg-blue-50 p-4 rounded-lg">
