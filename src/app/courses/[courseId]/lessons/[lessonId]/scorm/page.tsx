@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
-import { ScormPlayer } from '@/components/scorm/scorm-player'
+import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrapper'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -71,27 +71,13 @@ export default async function ScormLessonPage({ params }: ScormLessonPageProps) 
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Link 
-          href={`/courses/${courseId}`}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Course</span>
-        </Link>
-      </div>
-
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">{lesson.title}</h1>
-        <p className="text-gray-600 mt-2">{lesson.course.title}</p>
-      </div>
-
-      <ScormPlayer
-        packagePath={lesson.scormPackage.packagePath}
-        lessonId={lesson.id}
-        userId={session.user.id}
-      />
-    </div>
+    <ScormFullscreenWrapper
+      packagePath={lesson.scormPackage.packagePath}
+      lessonId={lesson.id}
+      userId={session.user.id}
+      courseId={courseId}
+      lessonTitle={lesson.title}
+      courseTitle={lesson.course.title}
+    />
   )
 }

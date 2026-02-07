@@ -11,9 +11,20 @@ interface ScormPlayerProps {
   lessonId: string
   userId: string
   onComplete?: () => void
+  className?: string
+  hideHeader?: boolean
+  fullHeight?: boolean
 }
 
-export function ScormPlayer({ packagePath, lessonId, userId, onComplete }: ScormPlayerProps) {
+export function ScormPlayer({ 
+  packagePath, 
+  lessonId, 
+  userId, 
+  onComplete,
+  className = '',
+  hideHeader = false,
+  fullHeight = false
+}: ScormPlayerProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
   const [completionStatus, setCompletionStatus] = useState('incomplete')
@@ -136,74 +147,81 @@ export function ScormPlayer({ packagePath, lessonId, userId, onComplete }: Scorm
     ? packagePath.replace('.zip', '/index.html')
     : `${packagePath}/index.html`
 
+  const iframeHeight = fullHeight ? 'h-screen' : 'h-[600px]'
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>SCORM Content</span>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={resetProgress}
-              disabled={isLoading}
-            >
-              <RotateCcw className="w-4 h-4 mr-1" />
-              Reset
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={openInNewWindow}
-            >
-              <ExternalLink className="w-4 h-4 mr-1" />
-              Open in New Window
-            </Button>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Progress Information */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progress:</span>
-            <span>{completionStatus === 'completed' ? 'Completed' : 'In Progress'}</span>
-          </div>
-          {score !== null && (
-            <div className="flex justify-between text-sm">
-              <span>Score:</span>
-              <span>{score}%</span>
+    <Card className={`w-full ${className}`}>
+      {!hideHeader && (
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>เนื้อหา SCORM</span>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetProgress}
+                disabled={isLoading}
+              >
+                <RotateCcw className="w-4 h-4 mr-1" />
+                รีเซ็ต
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openInNewWindow}
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                เปิดหน้าต่างใหม่
+              </Button>
             </div>
-          )}
-          <Progress value={progress} className="w-full" />
-        </div>
+          </CardTitle>
+        </CardHeader>
+      )}
+      <CardContent className="space-y-4">
+        {!hideHeader && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>ความคืบหน้า:</span>
+              <span>{completionStatus === 'completed' ? 'เสร็จสมบูรณ์' : 'กำลังเรียน'}</span>
+            </div>
+            {score !== null && (
+              <div className="flex justify-between text-sm">
+                <span>คะแนน:</span>
+                <span>{score}%</span>
+              </div>
+            )}
+            <Progress value={progress} className="w-full" />
+          </div>
+        )}
 
         {/* SCORM Content Frame */}
         <div className="relative">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Loading SCORM content...</p>
+                <p className="text-sm text-gray-600">กำลังโหลดเนื้อหา SCORM...</p>
               </div>
             </div>
           )}
           <iframe
             ref={iframeRef}
             src={scormUrl}
-            className="w-full h-[600px] border rounded-lg"
+            className={`w-full ${iframeHeight} border rounded-lg`}
             onLoad={handleIframeLoad}
             title="SCORM Content"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+            allowFullScreen
           />
         </div>
 
-        {/* Instructions */}
-        <div className="text-xs text-gray-500 space-y-1">
-          <p>• This SCORM content will automatically save your progress</p>
-          <p>• Complete all activities to mark this lesson as finished</p>
-          <p>• Use "Open in New Window" for better experience if needed</p>
-        </div>
+        {!hideHeader && (
+          <div className="text-xs text-gray-500 space-y-1">
+            <p>• เนื้อหา SCORM จะบันทึกความคืบหน้าอัตโนมัติ</p>
+            <p>• ทำกิจกรรมให้ครบทุกส่วนเพื่อทำเครื่องหมายว่าเรียนจบ</p>
+            <p>• หากต้องการประสบการณ์ที่ดีกว่า ใช้ "เปิดหน้าต่างใหม่"</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
