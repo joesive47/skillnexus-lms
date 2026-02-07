@@ -35,6 +35,14 @@ export async function deleteFile(filePath: string): Promise<{ success: boolean; 
 }
 
 export async function uploadToS3(file: File): Promise<string> {
+  const isProdLike = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
+  const hasS3Env = Boolean(
+    process.env.AWS_REGION &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY &&
+    process.env.S3_BUCKET
+  )
+
   // File validation
   if (!file || file.size === 0) {
     throw new Error('No file provided')
@@ -50,7 +58,7 @@ export async function uploadToS3(file: File): Promise<string> {
   }
   
   // If S3 is configured via environment variables, attempt to upload to S3.
-  if (process.env.AWS_REGION && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.S3_BUCKET) {
+  if (hasS3Env) {
     try {
       // Lazy-require the AWS SDK so environments that don't need it won't fail.
       // @ts-ignore
@@ -79,6 +87,10 @@ export async function uploadToS3(file: File): Promise<string> {
       console.error('S3 upload failed, falling back to local save:', err)
       // fall through to local save
     }
+  }
+
+  if (isProdLike) {
+    throw new Error('S3 is not configured in this environment. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET.')
   }
 
   // Fallback: save locally (useful for local/dev environments)
