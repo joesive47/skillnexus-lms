@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
 import { auth } from '@/auth'
+import { uploadToS3 } from '@/lib/upload'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,29 +25,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 })
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    const timestamp = Date.now()
-    const extension = file.name.split('.').pop()
-    const filename = `course-${timestamp}.${extension}`
-
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'courses')
-    await mkdir(uploadDir, { recursive: true })
-
-    const filepath = join(uploadDir, filename)
-    await writeFile(filepath, buffer)
-
-    const imageUrl = `/uploads/courses/${filename}`
+    // Upload using the smart upload system (Blob -> S3 -> Local)
+    const imageUrl = await uploadToS3(file)
 
     return NextResponse.json({ 
       success: true, 
       imageUrl,
-      filename 
+      filename: file.name 
     })
 
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Upload failed'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

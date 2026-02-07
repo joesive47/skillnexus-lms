@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
+    "@aws-sdk/client-s3": "^3.520.0",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -88,6 +89,7 @@
     "autoprefixer": "^10.4.22",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",
     "date-fns": "^4.1.0",
@@ -118,8 +120,7 @@
     "xlsx": "^0.20.3",
     "xml2js": "^0.6.2",
     "yauzl": "^3.2.0",
-    "zod": "^3.24.1",
-    "@aws-sdk/client-s3": "^3.520.0"
+    "zod": "^3.24.1"
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^0.1.53",

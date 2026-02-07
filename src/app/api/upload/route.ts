@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveFileLocally } from '@/lib/upload'
+import { uploadToS3 } from '@/lib/upload'
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const folder = formData.get('folder') as string || 'uploads'
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -25,11 +24,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 })
     }
 
-    const url = await saveFileLocally(file, folder)
+    // Upload using the smart upload system (Blob -> S3 -> Local)
+    const url = await uploadToS3(file)
     
     return NextResponse.json({ url })
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to upload file'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

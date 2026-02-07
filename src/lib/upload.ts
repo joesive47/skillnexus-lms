@@ -3,11 +3,10 @@ import { join } from 'path'
 import { existsSync } from 'fs'
 import { forceDeleteFile } from './file-manager'
 
-// Optional: use AWS S3 in production. Configure these env vars in Vercel:
-// AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET
-// Do not create S3 client at module import time. Instead create it lazily
-// inside `uploadToS3` so that runtime environment variables configured
-// in the hosting platform (Vercel) are respected.
+// File upload system with multiple storage options:
+// 1. Vercel Blob Storage (recommended for Vercel deployments) - Configure: BLOB_READ_WRITE_TOKEN
+// 2. AWS S3 (optional) - Configure: AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET
+// 3. Local filesystem (development and emergency fallback)
 
 export async function saveFileLocally(file: File, folder: string): Promise<string> {
   const bytes = await file.arrayBuffer()
@@ -36,19 +35,7 @@ export async function deleteFile(filePath: string): Promise<{ success: boolean; 
 
 export async function uploadToS3(file: File): Promise<string> {
   const isProdLike = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
-  const bucketName = process.env.S3_BUCKET || process.env.AWS_S3_BUCKET
-  const missingEnv: string[] = []
-  if (!process.env.AWS_REGION) missingEnv.push('AWS_REGION')
-  if (!process.env.AWS_ACCESS_KEY_ID) missingEnv.push('AWS_ACCESS_KEY_ID')
-  if (!process.env.AWS_SECRET_ACCESS_KEY) missingEnv.push('AWS_SECRET_ACCESS_KEY')
-  if (!bucketName) missingEnv.push('S3_BUCKET/AWS_S3_BUCKET')
-  const hasS3Env = Boolean(
-    process.env.AWS_REGION &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY &&
-    bucketName
-  )
-
+  
   // File validation
   if (!file || file.size === 0) {
     throw new Error('No file provided')
@@ -58,14 +45,53 @@ export async function uploadToS3(file: File): Promise<string> {
     throw new Error('File size is too large (max 5MB)')
   }
   
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
   if (!allowedTypes.includes(file.type)) {
-    throw new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed')
+    throw new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed')
   }
-  
-  // If S3 is configured via environment variables, attempt to upload to S3.
+
+  // Priority 1: Try Vercel Blob Storage (if configured)
+  const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN)
+  if (hasBlobToken) {
+    try {
+      console.log('📦 Uploading to Vercel Blob Storage...')
+      // Lazy load Vercel Blob to avoid build errors if not installed
+      const { put } = await import('@vercel/blob')
+      
+      const timestamp = Date.now()
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const filename = `${timestamp}-${sanitizedName}`
+      const pathname = `courses/${filename}`
+
+      const blob = await put(pathname, file, {
+        access: 'public',
+        addRandomSuffix: false,
+      })
+
+      console.log('✅ Blob upload successful:', blob.url)
+      return blob.url
+    } catch (err) {
+      console.error('❌ Blob upload failed:', err)
+      if (isProdLike) {
+        // In production, if Blob is configured but fails, we should know
+        throw new Error(`Blob upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      }
+      // Fall through to next option in dev mode
+    }
+  }
+
+  // Priority 2: Try AWS S3 (if configured)
+  const bucketName = process.env.S3_BUCKET || process.env.AWS_S3_BUCKET
+  const hasS3Env = Boolean(
+    process.env.AWS_REGION &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY &&
+    bucketName
+  )
+
   if (hasS3Env) {
     try {
+      console.log('📦 Uploading to AWS S3...')
       // Lazy-require the AWS SDK so environments that don't need it won't fail.
       // @ts-ignore
       const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
@@ -88,27 +114,33 @@ export async function uploadToS3(file: File): Promise<string> {
 
       const region = process.env.AWS_REGION
       const url = `https://${S3_BUCKET}.s3.${region}.amazonaws.com/${key}`
+      console.log('✅ S3 upload successful:', url)
       return url
     } catch (err) {
-      console.error('S3 upload failed, falling back to local save:', err)
-      // fall through to local save
+      console.error('❌ S3 upload failed:', err)
+      if (isProdLike) {
+        throw new Error(`S3 upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      }
+      // Fall through to local save in dev mode
     }
   }
 
-  if (isProdLike) {
-    const missing = missingEnv.length > 0 ? ` Missing: ${missingEnv.join(', ')}` : ''
-    console.warn('S3 env check (prod-like):', {
-      hasRegion: Boolean(process.env.AWS_REGION),
-      hasAccessKeyId: Boolean(process.env.AWS_ACCESS_KEY_ID),
-      hasSecretAccessKey: Boolean(process.env.AWS_SECRET_ACCESS_KEY),
-      hasBucket: Boolean(bucketName),
-      missing: missingEnv,
-    })
-    throw new Error(`S3 is not configured in this environment. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET (or AWS_S3_BUCKET).${missing}`)
+  // Priority 3: Local filesystem fallback
+  // Note: This won't work on Vercel (read-only filesystem) but is fine for local dev
+  if (!isProdLike) {
+    console.log('💾 Saving to local filesystem (dev mode)...')
+    const uploadPath = await saveFileLocally(file, 'courses')
+    return uploadPath
   }
 
-  // Fallback: save locally (useful for local/dev environments)
-  // Note: serverless platforms (Vercel) often have read-only fs; prefer S3 in production
-  const uploadPath = await saveFileLocally(file, 'courses')
-  return uploadPath
+  // If we reach here in production, no storage is configured
+  console.warn('⚠️ No file storage configured in production!')
+  console.warn('Please set up one of:')
+  console.warn('  • Vercel Blob: BLOB_READ_WRITE_TOKEN (recommended)')
+  console.warn('  • AWS S3: AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET')
+  
+  throw new Error(
+    'No file storage configured. See server logs for setup instructions.\n' +
+    'Quick fix: Set up Vercel Blob Storage in Vercel Dashboard → Storage → Create → Blob'
+  )
 }
