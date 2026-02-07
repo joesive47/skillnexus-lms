@@ -6,39 +6,77 @@
 .env.development
 .env.sqlite
 .env.docker
+.env.backup
+.env.postgresql
 
 # Test files
 tests/
 *.test.js
 *.test.ts
+test-*.js
+test-*.ts
 
-# Documentation
+# Documentation (large files)
 docs/
 SCORM-*.md
 COURSE-*.md
 *-GUIDE.md
 *-SUMMARY.md
 *-ROADMAP.md
+*-COMPLETE.md
+*-STATUS.md
+*-PLAN.md
+*-ANALYSIS.md
+*-FIX.md
+*-README.md
 
-# Scripts
+# Scripts (not needed in production)
 scripts/
 *.bat
 *.ps1
 *.sh
+setup-*.js
+build-*.js
+cleanup-*.js
+fix-*.js
+deploy-*.js
 
 # Database
 prisma/dev.db
 prisma/prisma/
+*.db
+*.db-journal
 
 # Build artifacts
 .next/cache/
 node_modules/.cache/
+.turbo/
+.swc/
+*.tsbuildinfo
 
-# SCORM packages (too large)
+# SCORM packages (very large)
 public/scorm-packages/
 public/uploads/scorm/
+scorm-templates/
+*.zip
 
 # Temporary files
 *.tmp
 *.bak
 *.backup
+*.old
+s3-policy.json
+bucket-policy.json
+
+# Git
+.git/
+.github/
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore

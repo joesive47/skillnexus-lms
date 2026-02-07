@@ -1,17 +1,19 @@
 {
-  "buildCommand": "prisma generate && next build",
+  "buildCommand": "npm run build:fast",
   "framework": "nextjs",
-  "installCommand": "npm install",
+  "installCommand": "npm install --prefer-offline --no-audit",
   "env": {
-    "NODE_OPTIONS": "--max-old-space-size=2048",
+    "NODE_OPTIONS": "--max-old-space-size=3072",
     "SKIP_ENV_VALIDATION": "true",
-    "NEXT_TELEMETRY_DISABLED": "1"
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "SKIP_TYPE_CHECK": "true"
   },
   "functions": {
     "src/app/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   },
   "regions": ["sin1"],
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": []
 }
