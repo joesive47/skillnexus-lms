@@ -76,8 +76,8 @@ export default async function ScormLessonPage({ params }: ScormLessonPageProps) 
       lessonId={lesson.id}
       userId={session.user.id}
       courseId={courseId}
-      lessonTitle={lesson.title}
-      courseTitle={lesson.course.title}
+      lessonTitle={lesson.title || 'Untitled Lesson'}
+      courseTitle={lesson.course.title || 'Untitled Course'}
     />
   )
 }
