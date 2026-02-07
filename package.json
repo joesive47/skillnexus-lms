@@ -98,6 +98,7 @@
     "framer-motion": "^11.18.2",
     "ioredis": "^5.8.2",
     "jspdf": "^3.0.4",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.469.0",
     "mammoth": "^1.11.0",
     "mime-types": "^3.0.2",

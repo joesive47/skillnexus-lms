@@ -54,10 +54,16 @@ export function ScormFullscreenWrapper({
     localStorage.setItem('scorm-sidebar-collapsed', String(isSidebarCollapsed))
   }, [isSidebarCollapsed])
 
-  // Fullscreen change listener (ESC key support)
+  // Fullscreen change listener (ESC key support + auto-hide sidebar)
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
+      const isNowFullscreen = !!document.fullscreenElement
+      setIsFullscreen(isNowFullscreen)
+      
+      // Auto-hide sidebar when entering fullscreen
+      if (isNowFullscreen) {
+        setIsSidebarCollapsed(true)
+      }
     }
 
     document.addEventListener('fullscreenchange', handleFullscreenChange)
@@ -101,35 +107,23 @@ export function ScormFullscreenWrapper({
       {/* Main Container - Fullscreen support */}
       <div ref={fullscreenRef} className="relative flex h-screen overflow-hidden bg-gray-50">
         
-        {/* Toggle Sidebar Button - Always visible */}
-        <button
-          onClick={toggleSidebar}
-          className={`fixed top-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg transition-all ${
-            isSidebarCollapsed ? 'left-4' : 'left-[304px] md:left-[324px]'
-          }`}
-          title={isSidebarCollapsed ? 'แสดงเมนู' : 'ซ่อนเมนู'}
-          aria-label={isSidebarCollapsed ? 'แสดงเมนู' : 'ซ่อนเมนู'}
-        >
-          {isSidebarCollapsed ? (
-            <Menu className="w-5 h-5" />
-          ) : (
-            <X className="w-5 h-5" />
-          )}
-        </button>
-
-        {/* Fullscreen Toggle Button */}
-        <button
-          onClick={toggleFullscreen}
-          className="fixed right-4 top-4 z-50 bg-gray-800 hover:bg-gray-900 text-white p-3 rounded-lg shadow-lg transition-all"
-          title={isFullscreen ? 'ออกจากเต็มจอ (ESC)' : 'เปิดเต็มจอ'}
-          aria-label={isFullscreen ? 'ออกจากเต็มจอ' : 'เปิดเต็มจอ'}
-        >
-          {isFullscreen ? (
-            <Minimize className="w-5 h-5" />
-          ) : (
-            <Maximize className="w-5 h-5" />
-          )}
-        </button>
+        {/* Toggle Sidebar Button - Hide in fullscreen */}
+        {!isFullscreen && (
+          <button
+            onClick={toggleSidebar}
+            className={`fixed top-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-lg shadow-lg transition-all duration-300 ${
+              isSidebarCollapsed ? 'left-4' : 'left-[304px] md:left-[324px]'
+            }`}
+            title={isSidebarCollapsed ? 'แสดงเมนู' : 'ซ่อนเมนู'}
+            aria-label={isSidebarCollapsed ? 'แสดงเมนู' : 'ซ่อนเมนู'}
+          >
+            {isSidebarCollapsed ? (
+              <Menu className="w-5 h-5" />
+            ) : (
+              <X className="w-5 h-5" />
+            )}
+          </button>
+        )}
 
         {/* Sidebar - Drawer on mobile, Fixed on desktop */}
         <aside
@@ -192,13 +186,15 @@ export function ScormFullscreenWrapper({
         {/* SCORM Content Area - Flexible, no scroll overlap */}
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Content Container - No padding in fullscreen */}
-          <div className={`flex-1 flex flex-col ${isFullscreen ? '' : 'p-4 md:p-6'}`}>
+          <div className={`flex-1 flex flex-col min-h-0 ${isFullscreen ? '' : 'p-4 md:p-6'}`}>
             <ScormPlayer
               packagePath={packagePath}
               lessonId={lessonId}
               userId={userId}
               hideHeader={isFullscreen}
               fullHeight={true}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={toggleFullscreen}
               className={isFullscreen ? 'h-full border-0 rounded-none' : 'h-full'}
             />
           </div>

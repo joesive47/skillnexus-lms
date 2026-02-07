@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { scormService } from '@/lib/scorm-service'
+import { scormService } from '@/lib/scorm-blob-service'
 import { auth } from '@/auth'
 
 export async function GET(request: NextRequest) {

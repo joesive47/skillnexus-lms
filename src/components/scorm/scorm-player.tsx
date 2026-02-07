@@ -5,7 +5,7 @@ import JSZip from 'jszip'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Play, Pause, RotateCcw, ExternalLink } from 'lucide-react'
+import { Play, Pause, RotateCcw, ExternalLink, Maximize, Minimize } from 'lucide-react'
 
 interface ScormPlayerProps {
   packagePath: string
@@ -15,6 +15,8 @@ interface ScormPlayerProps {
   className?: string
   hideHeader?: boolean
   fullHeight?: boolean
+  isFullscreen?: boolean
+  onToggleFullscreen?: () => void
 }
 
 export function ScormPlayer({ 
@@ -24,7 +26,9 @@ export function ScormPlayer({
   onComplete,
   className = '',
   hideHeader = false,
-  fullHeight = false
+  fullHeight = false,
+  isFullscreen = false,
+  onToggleFullscreen
 }: ScormPlayerProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
@@ -281,51 +285,85 @@ export function ScormPlayer({
   return (
     <Card className={`flex flex-col ${fullHeight ? 'h-full' : ''} ${className}`}>
       {!hideHeader && (
-        <CardHeader className="flex-shrink-0">
+        <CardHeader className="flex-shrink-0 pb-3">
           <CardTitle className="flex items-center justify-between">
-            <span>เนื้อหา SCORM</span>
-            <div className="flex items-center space-x-2">
+            <span className="text-lg">เนื้อหา SCORM</span>
+            <div className="flex items-center gap-2">
+              {/* Fullscreen Toggle */}
+              {onToggleFullscreen && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onToggleFullscreen}
+                  className="flex items-center gap-1.5"
+                  title={isFullscreen ? 'ออกจากเต็มจอ (กด ESC)' : 'เปิดเต็มจอ'}
+                >
+                  {isFullscreen ? (
+                    <>
+                      <Minimize className="w-4 h-4" />
+                      <span className="hidden sm:inline">ออกจากเต็มจอ</span>
+                    </>
+                  ) : (
+                    <>
+                      <Maximize className="w-4 h-4" />
+                      <span className="hidden sm:inline">เต็มจอ</span>
+                    </>
+                  )}
+                </Button>
+              )}
+              
+              {/* Reset Button */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={resetProgress}
                 disabled={isLoading || !extractedUrl}
+                className="flex items-center gap-1.5"
+                title="รีเซ็ตความคืบหน้า"
               >
-                <RotateCcw className="w-4 h-4 mr-1" />
-                รีเซ็ต
+                <RotateCcw className="w-4 h-4" />
+                <span className="hidden sm:inline">รีเซ็ต</span>
               </Button>
+              
+              {/* Open in New Window */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={openInNewWindow}
                 disabled={!extractedUrl}
+                className="flex items-center gap-1.5"
+                title="เปิดในหน้าต่างใหม่"
               >
-                <ExternalLink className="w-4 h-4 mr-1" />
-                เปิดหน้าต่างใหม่
+                <ExternalLink className="w-4 h-4" />
+                <span className="hidden md:inline">หน้าต่างใหม่</span>
               </Button>
             </div>
           </CardTitle>
         </CardHeader>
       )}
-      <CardContent className={`flex flex-col ${fullHeight ? 'flex-1 min-h-0' : ''} ${hideHeader ? 'p-0' : 'space-y-4'}`}>
+      <CardContent className={`flex flex-col ${fullHeight ? 'flex-1 min-h-0' : ''} ${hideHeader ? 'p-0' : 'pt-0 space-y-3'}`}>
         {!hideHeader && (
           <div className="space-y-2 flex-shrink-0">
-            <div className="flex justify-between text-sm">
-              <span>ความคืบหน้า:</span>
-              <span>{completionStatus === 'completed' ? 'เสร็จสมบูรณ์' : 'กำลังเรียน'}</span>
+            <div className="flex justify-between text-sm text-gray-700">
+              <span className="font-medium">ความคืบหน้า:</span>
+              <span className={completionStatus === 'completed' ? 'text-green-600 font-semibold' : 'text-blue-600'}>
+                {completionStatus === 'completed' ? '✓ เสร็จสมบูรณ์' : 'กำลังเรียน'}
+              </span>
             </div>
             {score !== null && (
-              <div className="flex justify-between text-sm">
-                <span>คะแนน:</span>
-                <span>{score}%</span>
+              <div className="flex justify-between text-sm text-gray-700">
+                <span className="font-medium">คะแนน:</span>
+                <span className="font-semibold text-blue-600">{score}%</span>
               </div>
             )}
-            <Progress value={progress} className="w-full" />
+            <Progress value={progress} className="w-full h-2" />
           </div>
         )}
 
-        {/* SCORM Content Frame - Flex-based, no fixed height */}
-        <div className={`relative ${fullHeight ? 'flex-1 min-h-0' : 'h-[600px]'}`}>
+        {/* SCORM Content Frame - Flex-based, no fixed height, no scroll overlap */}
+        <div className={`relative bg-gray-100 rounded-lg overflow-hidden ${
+          fullHeight ? 'flex-1 min-h-0' : 'h-[600px]'
+        }`}>
           {isLoading && !extractionError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
               <div className="text-center">
@@ -358,21 +396,33 @@ export function ScormPlayer({
             <iframe
               ref={iframeRef}
               src={extractedUrl}
-              className={`w-full h-full ${hideHeader ? 'rounded-none' : 'border rounded-lg'}`}
+              className={`w-full h-full bg-white ${
+                hideHeader ? 'rounded-none border-0' : 'border-0 rounded-lg'
+              }`}
               onLoad={handleIframeLoad}
               title="SCORM Content"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox"
               allowFullScreen
+              style={{ minHeight: fullHeight ? '100%' : '600px' }}
             />
           )}
         </div>
 
-        {!hideHeader && (
-          <div className="text-xs text-gray-500 space-y-1 flex-shrink-0">
-            <p>• เนื้อหา SCORM จะบันทึกความคืบหน้าอัตโนมัติ</p>
-            <p>• ทำกิจกรรมให้ครบทุกส่วนเพื่อทำเครื่องหมายว่าเรียนจบ</p>
+        {!hideHeader && !isFullscreen && (
+          <div className="text-xs text-gray-500 space-y-1 flex-shrink-0 pt-2">
+            <p className="flex items-start gap-1.5">
+              <span className="text-blue-600 mt-0.5">ℹ️</span>
+              <span>เนื้อหา SCORM จะบันทึกความคืบหน้าอัตโนมัติ</span>
+            </p>
+            <p className="flex items-start gap-1.5">
+              <span className="text-green-600 mt-0.5">✓</span>
+              <span>ทำกิจกรรมให้ครบทุกส่วนเพื่อทำเครื่องหมายว่าเรียนจบ</span>
+            </p>
             {packagePath.endsWith('.zip') && (
-              <p className="text-blue-600">✓ แตกไฟล์จาก Vercel Blob Storage แล้ว</p>
+              <p className="flex items-start gap-1.5">
+                <span className="text-purple-600 mt-0.5">📦</span>
+                <span>แตกไฟล์จาก Vercel Blob Storage แล้ว</span>
+              </p>
             )}
           </div>
         )}
