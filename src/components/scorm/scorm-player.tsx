@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import JSZip from 'jszip'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -29,7 +30,143 @@ export function ScormPlayer({
   const [progress, setProgress] = useState(0)
   const [completionStatus, setCompletionStatus] = useState('incomplete')
   const [score, setScore] = useState<number | null>(null)
+  const [extractedUrl, setExtractedUrl] = useState<string | null>(null)
+  const [extractionError, setExtractionError] = useState<string | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const blobUrlsRef = useRef<string[]>([])
+
+  // Extract ZIP if packagePath is a .zip file
+  useEffect(() => {
+    const isZipFile = packagePath.endsWith('.zip')
+    
+    if (!isZipFile) {
+      // Direct URL to SCORM content (traditional hosting)
+      setExtractedUrl(packagePath)
+      setIsLoading(false)
+      return
+    }
+
+    // Extract ZIP from Vercel Blob Storage
+    async function extractScormPackage() {
+      try {
+        setIsLoading(true)
+        setExtractionError(null)
+
+        // Download ZIP file
+        const response = await fetch(packagePath)
+        if (!response.ok) throw new Error('Failed to download SCORM package')
+        
+        const arrayBuffer = await response.arrayBuffer()
+        const zip = await JSZip.loadAsync(arrayBuffer)
+
+        // Find imsmanifest.xml to get launch file
+        const manifestFile = zip.file('imsmanifest.xml')
+        let launchFile = 'index.html' // default
+
+        if (manifestFile) {
+          const manifestContent = await manifestFile.async('string')
+          const parser = new DOMParser()
+          const xmlDoc = parser.parseFromString(manifestContent, 'text/xml')
+          const resourceElement = xmlDoc.querySelector('resource[href]')
+          if (resourceElement) {
+            launchFile = resourceElement.getAttribute('href') || 'index.html'
+          }
+        }
+
+        // Extract all files and create blob URLs
+        const fileMap = new Map<string, string>()
+        const promises: Promise<void>[] = []
+
+        zip.forEach((relativePath, file) => {
+          if (!file.dir) {
+            const promise = file.async('blob').then((blob) => {
+              // Determine MIME type
+              let mimeType = 'application/octet-stream'
+              if (relativePath.endsWith('.html')) mimeType = 'text/html'
+              else if (relativePath.endsWith('.js')) mimeType = 'text/javascript'
+              else if (relativePath.endsWith('.css')) mimeType = 'text/css'
+              else if (relativePath.endsWith('.json')) mimeType = 'application/json'
+              else if (relativePath.endsWith('.xml')) mimeType = 'application/xml'
+              else if (relativePath.endsWith('.png')) mimeType = 'image/png'
+              else if (relativePath.endsWith('.jpg') || relativePath.endsWith('.jpeg')) mimeType = 'image/jpeg'
+              else if (relativePath.endsWith('.gif')) mimeType = 'image/gif'
+              else if (relativePath.endsWith('.svg')) mimeType = 'image/svg+xml'
+
+              const blobWithType = new Blob([blob], { type: mimeType })
+              const url = URL.createObjectURL(blobWithType)
+              fileMap.set(relativePath, url)
+              blobUrlsRef.current.push(url)
+            })
+            promises.push(promise)
+          }
+        })
+
+        await Promise.all(promises)
+
+        // Get launch URL
+        const launchUrl = fileMap.get(launchFile)
+        if (!launchUrl) {
+          throw new Error(`Launch file not found: ${launchFile}`)
+        }
+
+        // Inject base tag to handle relative URLs
+        const htmlBlob = await fetch(launchUrl).then(r => r.blob())
+        const htmlText = await htmlBlob.text()
+        
+        // Create modified HTML with base tag and file map
+        const modifiedHtml = htmlText.replace(
+          /<head>/i,
+          `<head>
+          <script>
+            // Map relative URLs to blob URLs
+            const fileMap = ${JSON.stringify(Object.fromEntries(fileMap))};
+            
+            // Override fetch to use blob URLs
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+              if (typeof url === 'string' && fileMap[url]) {
+                return originalFetch(fileMap[url], options);
+              }
+              return originalFetch(url, options);
+            };
+
+            // Override XMLHttpRequest
+            const OriginalXHR = window.XMLHttpRequest;
+            window.XMLHttpRequest = function() {
+              const xhr = new OriginalXHR();
+              const originalOpen = xhr.open;
+              xhr.open = function(method, url, ...args) {
+                if (typeof url === 'string' && fileMap[url]) {
+                  url = fileMap[url];
+                }
+                return originalOpen.call(this, method, url, ...args);
+              };
+              return xhr;
+            };
+          </script>`
+        )
+
+        const modifiedBlob = new Blob([modifiedHtml], { type: 'text/html' })
+        const modifiedUrl = URL.createObjectURL(modifiedBlob)
+        blobUrlsRef.current.push(modifiedUrl)
+
+        setExtractedUrl(modifiedUrl)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error extracting SCORM package:', error)
+        setExtractionError(error instanceof Error ? error.message : 'Failed to extract SCORM package')
+        setIsLoading(false)
+      }
+    }
+
+    extractScormPackage()
+
+    // Cleanup blob URLs on unmount
+    return () => {
+      blobUrlsRef.current.forEach(url => URL.revokeObjectURL(url))
+      blobUrlsRef.current = []
+    }
+  }, [packagePath])
 
   useEffect(() => {
     // Load existing progress
@@ -137,15 +274,9 @@ export function ScormPlayer({
   }
 
   function openInNewWindow() {
-    const scormUrl = packagePath.startsWith('http') 
-      ? packagePath.replace('.zip', '/index.html')
-      : `${packagePath}/index.html`
-    window.open(scormUrl, '_blank', 'width=1024,height=768,scrollbars=yes,resizable=yes')
+    if (!extractedUrl) return
+    window.open(extractedUrl, '_blank', 'width=1024,height=768,scrollbars=yes,resizable=yes')
   }
-
-  const scormUrl = packagePath.startsWith('http') 
-    ? packagePath.replace('.zip', '/index.html')
-    : `${packagePath}/index.html`
 
   return (
     <Card className={`flex flex-col ${fullHeight ? 'h-full' : ''} ${className}`}>
@@ -158,7 +289,7 @@ export function ScormPlayer({
                 variant="outline"
                 size="sm"
                 onClick={resetProgress}
-                disabled={isLoading}
+                disabled={isLoading || !extractedUrl}
               >
                 <RotateCcw className="w-4 h-4 mr-1" />
                 รีเซ็ต
@@ -167,6 +298,7 @@ export function ScormPlayer({
                 variant="outline"
                 size="sm"
                 onClick={openInNewWindow}
+                disabled={!extractedUrl}
               >
                 <ExternalLink className="w-4 h-4 mr-1" />
                 เปิดหน้าต่างใหม่
@@ -194,30 +326,54 @@ export function ScormPlayer({
 
         {/* SCORM Content Frame - Flex-based, no fixed height */}
         <div className={`relative ${fullHeight ? 'flex-1 min-h-0' : 'h-[600px]'}`}>
-          {isLoading && (
+          {isLoading && !extractionError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">กำลังโหลดเนื้อหา SCORM...</p>
+                <p className="text-sm text-gray-600">
+                  {packagePath.endsWith('.zip') ? 'กำลังแตกไฟล์ SCORM...' : 'กำลังโหลดเนื้อหา SCORM...'}
+                </p>
               </div>
             </div>
           )}
-          <iframe
-            ref={iframeRef}
-            src={scormUrl}
-            className={`w-full h-full ${hideHeader ? 'rounded-none' : 'border rounded-lg'}`}
-            onLoad={handleIframeLoad}
-            title="SCORM Content"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            allowFullScreen
-          />
+
+          {extractionError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-red-50 rounded-lg z-10">
+              <div className="text-center p-6">
+                <div className="text-red-600 text-lg font-semibold mb-2">ไม่สามารถแตกไฟล์ SCORM ได้</div>
+                <p className="text-sm text-red-500">{extractionError}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => window.location.reload()}
+                >
+                  ลองใหม่
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {extractedUrl && !extractionError && (
+            <iframe
+              ref={iframeRef}
+              src={extractedUrl}
+              className={`w-full h-full ${hideHeader ? 'rounded-none' : 'border rounded-lg'}`}
+              onLoad={handleIframeLoad}
+              title="SCORM Content"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+              allowFullScreen
+            />
+          )}
         </div>
 
         {!hideHeader && (
           <div className="text-xs text-gray-500 space-y-1 flex-shrink-0">
             <p>• เนื้อหา SCORM จะบันทึกความคืบหน้าอัตโนมัติ</p>
             <p>• ทำกิจกรรมให้ครบทุกส่วนเพื่อทำเครื่องหมายว่าเรียนจบ</p>
-            <p>• หากต้องการประสบการณ์ที่ดีกว่า ใช้ "เปิดหน้าต่างใหม่"</p>
+            {packagePath.endsWith('.zip') && (
+              <p className="text-blue-600">✓ แตกไฟล์จาก Vercel Blob Storage แล้ว</p>
+            )}
           </div>
         )}
       </CardContent>
