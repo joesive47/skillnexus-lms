@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ScormPlayer } from '@/components/scorm/scorm-player'
-import { ChevronLeft, ChevronRight, Maximize, Minimize, ArrowLeft } from 'lucide-react'
+import { Menu, X, Maximize, Minimize, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 
 interface ScormFullscreenWrapperProps {
   packagePath: string
@@ -23,101 +22,188 @@ export function ScormFullscreenWrapper({
   lessonTitle,
   courseTitle
 }: ScormFullscreenWrapperProps) {
-  const [isMenuHidden, setIsMenuHidden] = useState(false)
+  // Initialize from localStorage (default: desktop=show, mobile=hide)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const fullscreenRef = useRef<HTMLDivElement>(null)
 
-  const toggleMenu = () => setIsMenuHidden(!isMenuHidden)
+  // Detect mobile & restore sidebar state from localStorage
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      
+      // On mount, restore from localStorage or use default
+      const stored = localStorage.getItem('scorm-sidebar-collapsed')
+      if (stored !== null) {
+        setIsSidebarCollapsed(stored === 'true')
+      } else {
+        // Default: mobile=collapsed, desktop=expanded
+        setIsSidebarCollapsed(mobile)
+      }
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Save sidebar state to localStorage
+  useEffect(() => {
+    localStorage.setItem('scorm-sidebar-collapsed', String(isSidebarCollapsed))
+  }, [isSidebarCollapsed])
+
+  // Fullscreen change listener (ESC key support)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed)
   
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
+  const toggleFullscreen = async () => {
+    if (!fullscreenRef.current) return
+
+    try {
+      if (!document.fullscreenElement) {
+        await fullscreenRef.current.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err)
+    }
+  }
+
+  // Close sidebar on backdrop click (mobile only)
+  const handleBackdropClick = () => {
+    if (isMobile && !isSidebarCollapsed) {
+      setIsSidebarCollapsed(true)
     }
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Sidebar Toggle Button - Always visible */}
-      <button
-        onClick={toggleMenu}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-r-lg shadow-lg transition-all"
-        title={isMenuHidden ? 'แสดงเมนู' : 'ซ่อนเมนู'}
-      >
-        {isMenuHidden ? (
-          <ChevronRight className="w-5 h-5" />
-        ) : (
-          <ChevronLeft className="w-5 h-5" />
-        )}
-      </button>
-
-      {/* Fullscreen Toggle Button */}
-      <button
-        onClick={toggleFullscreen}
-        className="fixed right-4 top-4 z-50 bg-gray-800 hover:bg-gray-900 text-white p-2 rounded-lg shadow-lg transition-all"
-        title={isFullscreen ? 'ออกจาก Fullscreen' : 'Fullscreen'}
-      >
-        {isFullscreen ? (
-          <Minimize className="w-5 h-5" />
-        ) : (
-          <Maximize className="w-5 h-5" />
-        )}
-      </button>
-
-      <div className="flex min-h-screen">
-        {/* Sidebar/Header - Can be hidden */}
+    <>
+      {/* Mobile Backdrop */}
+      {isMobile && !isSidebarCollapsed && (
         <div
-          className={`transition-all duration-300 ${
-            isMenuHidden ? 'w-0 opacity-0 overflow-hidden' : 'w-full md:w-80 opacity-100'
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={handleBackdropClick}
+          aria-label="Close sidebar"
+        />
+      )}
+
+      {/* Main Container - Fullscreen support */}
+      <div ref={fullscreenRef} className="relative flex h-screen overflow-hidden bg-gray-50">
+        
+        {/* Toggle Sidebar Button - Always visible */}
+        <button
+          onClick={toggleSidebar}
+          className={`fixed top-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg transition-all ${
+            isSidebarCollapsed ? 'left-4' : 'left-[304px] md:left-[324px]'
           }`}
+          title={isSidebarCollapsed ? 'แสดงเมนู' : 'ซ่อนเมนู'}
+          aria-label={isSidebarCollapsed ? 'แสดงเมนู' : 'ซ่อนเมนู'}
         >
-          <div className="container mx-auto px-4 py-8">
-            <div className="mb-6">
+          {isSidebarCollapsed ? (
+            <Menu className="w-5 h-5" />
+          ) : (
+            <X className="w-5 h-5" />
+          )}
+        </button>
+
+        {/* Fullscreen Toggle Button */}
+        <button
+          onClick={toggleFullscreen}
+          className="fixed right-4 top-4 z-50 bg-gray-800 hover:bg-gray-900 text-white p-3 rounded-lg shadow-lg transition-all"
+          title={isFullscreen ? 'ออกจากเต็มจอ (ESC)' : 'เปิดเต็มจอ'}
+          aria-label={isFullscreen ? 'ออกจากเต็มจอ' : 'เปิดเต็มจอ'}
+        >
+          {isFullscreen ? (
+            <Minimize className="w-5 h-5" />
+          ) : (
+            <Maximize className="w-5 h-5" />
+          )}
+        </button>
+
+        {/* Sidebar - Drawer on mobile, Fixed on desktop */}
+        <aside
+          className={`
+            fixed md:relative inset-y-0 left-0 z-40
+            w-80 max-w-[85vw] bg-white border-r border-gray-200
+            transform transition-transform duration-300 ease-in-out
+            overflow-y-auto
+            ${isSidebarCollapsed ? '-translate-x-full' : 'translate-x-0'}
+          `}
+        >
+          <div className="p-6 space-y-6">
+            {/* Back to Course */}
+            {!isFullscreen && (
               <Link 
                 href={`/courses/${courseId}`}
-                className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>กลับไปยังคอร์ส</span>
+                <span className="font-medium">กลับไปยังคอร์ส</span>
               </Link>
-            </div>
+            )}
 
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">{lessonTitle}</h1>
+            {/* Lesson Info */}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 leading-tight">
+                {lessonTitle}
+              </h1>
               <p className="text-gray-600 mt-2">{courseTitle}</p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">💡 เคลับลับ</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• คลิกปุ่มด้านซ้ายเพื่อซ่อน/แสดงเมนู</li>
-                <li>• คลิกปุ่มด้านขวาบนเพื่อเปิด Fullscreen</li>
-                <li>• ความคืบหน้าจะถูกบันทึกอัตโนมัติ</li>
+            {/* Tips Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                <span className="text-xl">💡</span>
+                <span>เคลับลับการใช้งาน</span>
+              </h3>
+              <ul className="text-sm text-blue-800 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span>กดปุ่ม <Menu className="inline w-4 h-4" /> เพื่อซ่อน/แสดงเมนู</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span>กดปุ่ม <Maximize className="inline w-4 h-4" /> เพื่อเปิดเต็มจอ</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span>กด <kbd className="px-1.5 py-0.5 bg-white rounded border border-blue-300 text-xs font-mono">ESC</kbd> เพื่อออกจากเต็มจอ</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span>ความคืบหน้าถูกบันทึกอัตโนมัติ</span>
+                </li>
               </ul>
             </div>
           </div>
-        </div>
+        </aside>
 
-        {/* SCORM Content - Full width when menu hidden */}
-        <div
-          className={`flex-1 transition-all duration-300 ${
-            isMenuHidden ? 'w-full' : 'w-full md:w-[calc(100%-320px)]'
-          }`}
-        >
-          <div className={isMenuHidden ? 'h-screen' : 'container mx-auto px-4 py-8'}>
+        {/* SCORM Content Area - Flexible, no scroll overlap */}
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Content Container - No padding in fullscreen */}
+          <div className={`flex-1 flex flex-col ${isFullscreen ? '' : 'p-4 md:p-6'}`}>
             <ScormPlayer
               packagePath={packagePath}
               lessonId={lessonId}
               userId={userId}
-              hideHeader={isMenuHidden}
-              fullHeight={isMenuHidden}
-              className={isMenuHidden ? 'h-screen border-0 rounded-none' : ''}
+              hideHeader={isFullscreen}
+              fullHeight={true}
+              className={isFullscreen ? 'h-full border-0 rounded-none' : 'h-full'}
             />
           </div>
-        </div>
+        </main>
       </div>
-    </div>
+    </>
   )
 }

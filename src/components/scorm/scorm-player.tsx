@@ -147,12 +147,10 @@ export function ScormPlayer({
     ? packagePath.replace('.zip', '/index.html')
     : `${packagePath}/index.html`
 
-  const iframeHeight = fullHeight ? 'h-screen' : 'h-[600px]'
-
   return (
-    <Card className={`w-full ${className}`}>
+    <Card className={`flex flex-col ${fullHeight ? 'h-full' : ''} ${className}`}>
       {!hideHeader && (
-        <CardHeader>
+        <CardHeader className="flex-shrink-0">
           <CardTitle className="flex items-center justify-between">
             <span>เนื้อหา SCORM</span>
             <div className="flex items-center space-x-2">
@@ -177,9 +175,9 @@ export function ScormPlayer({
           </CardTitle>
         </CardHeader>
       )}
-      <CardContent className="space-y-4">
+      <CardContent className={`flex flex-col ${fullHeight ? 'flex-1 min-h-0' : ''} ${hideHeader ? 'p-0' : 'space-y-4'}`}>
         {!hideHeader && (
-          <div className="space-y-2">
+          <div className="space-y-2 flex-shrink-0">
             <div className="flex justify-between text-sm">
               <span>ความคืบหน้า:</span>
               <span>{completionStatus === 'completed' ? 'เสร็จสมบูรณ์' : 'กำลังเรียน'}</span>
@@ -194,8 +192,8 @@ export function ScormPlayer({
           </div>
         )}
 
-        {/* SCORM Content Frame */}
-        <div className="relative">
+        {/* SCORM Content Frame - Flex-based, no fixed height */}
+        <div className={`relative ${fullHeight ? 'flex-1 min-h-0' : 'h-[600px]'}`}>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
               <div className="text-center">
@@ -207,7 +205,7 @@ export function ScormPlayer({
           <iframe
             ref={iframeRef}
             src={scormUrl}
-            className={`w-full ${iframeHeight} border rounded-lg`}
+            className={`w-full h-full ${hideHeader ? 'rounded-none' : 'border rounded-lg'}`}
             onLoad={handleIframeLoad}
             title="SCORM Content"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
@@ -216,7 +214,7 @@ export function ScormPlayer({
         </div>
 
         {!hideHeader && (
-          <div className="text-xs text-gray-500 space-y-1">
+          <div className="text-xs text-gray-500 space-y-1 flex-shrink-0">
             <p>• เนื้อหา SCORM จะบันทึกความคืบหน้าอัตโนมัติ</p>
             <p>• ทำกิจกรรมให้ครบทุกส่วนเพื่อทำเครื่องหมายว่าเรียนจบ</p>
             <p>• หากต้องการประสบการณ์ที่ดีกว่า ใช้ "เปิดหน้าต่างใหม่"</p>
@@ -225,4 +223,5 @@ export function ScormPlayer({
       </CardContent>
     </Card>
   )
+}
 }
