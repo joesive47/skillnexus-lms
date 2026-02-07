@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { NoteTaking } from '@/components/advanced/NoteTaking'
 import { StudyPlanner } from '@/components/advanced/StudyPlanner'
 import InteractivePlayer from '@/components/lesson/InteractivePlayer'
-import { ScormPlayer } from '@/components/scorm/scorm-player'
+import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrapper'
 import Link from 'next/link'
 
 interface LessonPageProps {
@@ -72,6 +72,20 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   const watchHistory = lesson.watchHistory[0]
   const youtubeId = extractYouTubeID(lesson.youtubeUrl || '')
+
+  // If SCORM lesson, use fullscreen layout
+  if (lesson.lessonType === 'SCORM' && lesson.scormPackage) {
+    return (
+      <ScormFullscreenWrapper
+        packagePath={lesson.scormPackage.packagePath}
+        lessonId={lesson.id}
+        userId={session.user.id}
+        courseId={courseId}
+        lessonTitle={lesson.title || 'Untitled Lesson'}
+        courseTitle={lesson.course.title || 'Untitled Course'}
+      />
+    )
+  }
 
   return (
     <div className="container mx-auto py-6">
