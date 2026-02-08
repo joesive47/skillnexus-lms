@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate || echo 'Prisma generation failed'",
     "dev": "next dev",
     "build": "npm run build:check && cross-env NODE_OPTIONS=--max-old-space-size=2048 NEXT_TELEMETRY_DISABLED=1 next build",
     "build:local": "npm run build:check && next build && node scripts/post-build.js",
