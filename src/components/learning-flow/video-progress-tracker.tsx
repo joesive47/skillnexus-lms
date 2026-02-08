@@ -6,6 +6,7 @@ import { updateVideoProgress } from '@/app/actions/learning-progress'
 interface VideoProgressTrackerProps {
   nodeId: string
   lessonId: string
+  courseId: string
   videoRef: React.RefObject<HTMLVideoElement>
   onProgressUpdate?: (progress: number) => void
   onComplete?: () => void
@@ -14,6 +15,7 @@ interface VideoProgressTrackerProps {
 export function VideoProgressTracker({
   nodeId,
   lessonId,
+  courseId,
   videoRef,
   onProgressUpdate,
   onComplete
@@ -81,25 +83,25 @@ export function VideoProgressTracker({
   }, [videoRef, isTracking])
 
   const updateProgressToServer = async (duration: number, forceComplete = false) => {
+    const video = videoRef.current
+    if (!video) return
+
     const segments = Array.from(segmentsRef.current.entries()).map(([start, end]) => ({
-      startTime: start,
-      endTime: end
+      start: start,
+      end: end
     }))
 
     try {
       const result = await updateVideoProgress({
-        nodeId,
         lessonId,
-        timeSpent: Math.floor(duration),
-        segments,
-        metadata: {
-          lastPosition: videoRef.current?.currentTime || 0,
-          totalDuration: duration
-        }
+        courseId,
+        watchTime: video.currentTime,
+        totalTime: video.duration || duration,
+        segments
       })
 
-      if (result.success && result.progress) {
-        const progressPercent = result.progress.progressPercent || 0
+      if (result.success && typeof result.progress === 'number') {
+        const progressPercent = result.progress
         onProgressUpdate?.(progressPercent)
 
         if (result.completed || forceComplete) {
