@@ -255,6 +255,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {/* Learning Progress - Only show if learning node exists */}
           {learningNode && (
             <ProgressIndicator
+              nodeId={learningNode.id}
               nodeType={learningNode.nodeType as 'VIDEO' | 'SCORM' | 'QUIZ'}
               currentProgress={nodeProgress?.progressPercent || 0}
               requiredProgress={learningNode.requiredProgress || (learningNode.nodeType === 'VIDEO' ? 80 : 100)}
