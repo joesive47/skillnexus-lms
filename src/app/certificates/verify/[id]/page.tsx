@@ -55,9 +55,9 @@ export default async function CertificateVerifyPage({ params }: CertificateVerif
     )
   }
 
-  const isExpired = certificate.expiresAt && new Date(certificate.expiresAt) < new Date()
+  const isExpired = certificate.expiryDate && new Date(certificate.expiryDate) < new Date()
   const isRevoked = certificate.status === 'REVOKED'
-  const isValid = certificate.status === 'ISSUED' && !isExpired && !isRevoked
+  const isValid = certificate.status === 'ACTIVE' && !isExpired && !isRevoked
 
   return (
     <div className="container mx-auto py-12">
@@ -104,31 +104,22 @@ export default async function CertificateVerifyPage({ params }: CertificateVerif
                   <Calendar className="h-4 w-4" />
                   Issue Date
                 </h3>
-                <p>{new Date(certificate.issuedAt).toLocaleDateString()}</p>
+                <p>{new Date(certificate.issueDate).toLocaleDateString()}</p>
               </div>
 
-              {certificate.expiresAt && (
+              {certificate.expiryDate && (
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
                     Expiry Date
                   </h3>
                   <p className={isExpired ? 'text-red-600 font-medium' : ''}>
-                    {new Date(certificate.expiresAt).toLocaleDateString()}
+                    {new Date(certificate.expiryDate).toLocaleDateString()}
                     {isExpired && ' (Expired)'}
                   </p>
                 </div>
               )}
             </div>
-
-            {certificate.metadata && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Final Exam Score</h3>
-                <p className="text-lg font-semibold text-green-600">
-                  {(certificate.metadata as any).finalExamScore || 'N/A'}%
-                </p>
-              </div>
-            )}
 
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center gap-1">
@@ -142,11 +133,11 @@ export default async function CertificateVerifyPage({ params }: CertificateVerif
           </div>
 
           {/* Revocation Reason */}
-          {isRevoked && certificate.metadata && (certificate.metadata as any).revocationReason && (
+          {isRevoked && certificate.revokedReason && (
             <div className="border-t pt-4">
               <h3 className="text-sm font-medium text-red-600 mb-1">Revocation Reason</h3>
               <p className="text-sm text-muted-foreground">
-                {(certificate.metadata as any).revocationReason}
+                {certificate.revokedReason}
               </p>
             </div>
           )}

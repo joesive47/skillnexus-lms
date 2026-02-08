@@ -14,7 +14,7 @@ interface CertificateCardProps {
   issuedDate: Date
   verificationId: string
   pdfUrl: string
-  status: 'ISSUED' | 'REVOKED' | 'EXPIRED'
+  status: 'ACTIVE' | 'REVOKED' | 'EXPIRED'
 }
 
 export function CertificateCard({
@@ -50,7 +50,7 @@ export function CertificateCard({
 
   const getStatusBadge = () => {
     switch (status) {
-      case 'ISSUED':
+      case 'ACTIVE':
         return <Badge className="bg-green-100 text-green-800">ออกแล้ว</Badge>
       case 'REVOKED':
         return <Badge variant="destructive">ถูกยกเลิก</Badge>
@@ -115,7 +115,7 @@ export function CertificateCard({
         <div className="flex gap-2">
           <Button 
             onClick={handleDownload} 
-            disabled={downloading || status !== 'ISSUED'}
+            disabled={downloading || status !== 'ACTIVE'}
             className="flex-1"
           >
             <Download className="w-4 h-4 mr-2" />
@@ -125,7 +125,7 @@ export function CertificateCard({
           <Button 
             variant="outline" 
             asChild
-            disabled={status !== 'ISSUED'}
+            disabled={status !== 'ACTIVE'}
           >
             <Link href={`/certificates/verify/${verificationId}`}>
               ตรวจสอบ
