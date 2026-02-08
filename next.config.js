@@ -1,5 +1,3 @@
-const { withSentryConfig } = require('@sentry/nextjs')
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Docker optimization - เฉพาะ production
@@ -30,6 +28,12 @@ const nextConfig = {
       }
     }
     
+    // Ignore canvas warnings
+    config.ignoreWarnings = [
+      { module: /node_modules\/canvas/ },
+      { module: /node_modules\/@napi-rs\/canvas/ }
+    ]
+    
     return config
   },
   
@@ -51,21 +55,30 @@ const nextConfig = {
   })
 }
 
-// Wrap with Sentry configuration
-module.exports = withSentryConfig(
-  nextConfig,
-  {
-    // Sentry Webpack Plugin Options
-    silent: true,
-    org: process.env.SENTRY_ORG,
-    project: process.env.SENTRY_PROJECT,
-  },
-  {
-    // Upload source maps to Sentry
-    widenClientFileUpload: true,
-    transpileClientSDK: true,
-    tunnelRoute: '/monitoring',
-    hideSourceMaps: true,
-    disableLogger: true,
+// Conditionally wrap with Sentry if enabled
+let finalConfig = nextConfig
+
+if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  try {
+    const { withSentryConfig } = require('@sentry/nextjs')
+    finalConfig = withSentryConfig(
+      nextConfig,
+      {
+        silent: true,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+      },
+      {
+        widenClientFileUpload: true,
+        transpileClientSDK: true,
+        tunnelRoute: '/monitoring',
+        hideSourceMaps: true,
+        disableLogger: true,
+      }
+    )
+  } catch (error) {
+    console.log('Sentry configuration skipped')
   }
-)
+}
+
+module.exports = finalConfig
