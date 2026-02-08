@@ -113,8 +113,9 @@ export async function importQuizFromExcel(formData: FormData) {
       questionsToShow: questionsToShow || totalQuestions
     })
 
-    // Create quiz with questions atomically
+    // Create quiz with questions atomically (with extended timeout for large imports)
     const quiz = await prisma.$transaction(async (tx) => {
+      // Create quiz first
       const newQuiz = await tx.quiz.create({
         data: {
           title: validatedFields.title,
@@ -126,25 +127,29 @@ export async function importQuizFromExcel(formData: FormData) {
         },
       })
 
+      // Batch create questions and collect their IDs
       for (const questionData of questions) {
         const question = await tx.question.create({
           data: {
             text: questionData.text,
             order: questionData.order,
             quizId: newQuiz.id,
+            options: {
+              createMany: {
+                data: questionData.options.map(option => ({
+                  text: option.text,
+                  isCorrect: option.isCorrect,
+                })),
+              }
+            }
           },
-        })
-
-        await tx.answerOption.createMany({
-          data: questionData.options.map(option => ({
-            text: option.text,
-            isCorrect: option.isCorrect,
-            questionId: question.id,
-          })),
         })
       }
 
       return newQuiz
+    }, {
+      maxWait: 10000, // 10 seconds max wait
+      timeout: 30000, // 30 seconds timeout for large imports
     })
 
     console.log('✅ Quiz created successfully:', quiz.id)
