@@ -11,10 +11,31 @@ const nextConfig = {
   },
   
   // Minimal config for stability
-  serverExternalPackages: ['pdf-parse', '@napi-rs/canvas', 'canvas'],
+  serverExternalPackages: [
+    'pdf-parse', 
+    '@napi-rs/canvas', 
+    'canvas',
+    'onnxruntime-node',
+    '@xenova/transformers',
+    'sharp'
+  ],
   
   // Handle optional dependencies
   webpack: (config, { isServer }) => {
+    // Ignore .node files (native bindings)
+    config.module.rules.push({
+      test: /\.node$/,
+      type: 'asset/resource',
+    })
+    
+    // Externalize onnxruntime for server
+    if (isServer) {
+      config.externals = config.externals || []
+      config.externals.push({
+        'onnxruntime-node': 'commonjs onnxruntime-node',
+      })
+    }
+    
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -24,14 +45,18 @@ const nextConfig = {
         crypto: false,
         'pdf-parse': false,
         '@napi-rs/canvas': false,
-        'canvas': false
+        'canvas': false,
+        'onnxruntime-node': false,
+        '@xenova/transformers': false,
       }
     }
     
-    // Ignore canvas warnings
+    // Ignore warnings
     config.ignoreWarnings = [
       { module: /node_modules\/canvas/ },
-      { module: /node_modules\/@napi-rs\/canvas/ }
+      { module: /node_modules\/@napi-rs\/canvas/ },
+      { module: /node_modules\/onnxruntime-node/ },
+      { module: /node_modules\/@xenova\/transformers/ },
     ]
     
     return config
