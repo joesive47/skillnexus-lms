@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +16,7 @@ interface LessonManagerProps {
 }
 
 export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
+  const router = useRouter()
   const [lessonType, setLessonType] = useState<'VIDEO' | 'QUIZ' | 'TEXT' | 'SCORM'>('VIDEO')
   const [isLoading, setIsLoading] = useState(false)
   const [videoId, setVideoId] = useState('')
@@ -59,11 +61,9 @@ export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
       const result = await createLesson(courseId, lessonData)
       
       if (result.success) {
-        // Reset form
-        setVideoId('')
-        setVideoPreview(null)
-        // You might want to redirect or show success message
-        console.log('Lesson created successfully:', result.lesson)
+        // Redirect to course edit page after successful creation
+        router.push(`/dashboard/admin/courses/${courseId}/edit`)
+        router.refresh()
       } else {
         setError(result.error || 'Failed to create lesson')
       }
