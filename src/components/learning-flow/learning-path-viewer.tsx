@@ -46,6 +46,7 @@ export function LearningPathViewer({ courseId, userId }: LearningPathViewerProps
         const nodesList: NodeData[] = []
         
         for (const [nodeId, unlockResult] of Object.entries(result.data.nodes as any)) {
+          const typedUnlockResult = unlockResult as any
           // Get node details
           const response = await fetch(`/api/learning-nodes/${nodeId}`)
           if (response.ok) {
@@ -57,11 +58,11 @@ export function LearningPathViewer({ courseId, userId }: LearningPathViewerProps
               title: nodeData.title,
               order: nodeData.order,
               isFinalExam: nodeData.isFinalExam,
-              unlocked: unlockResult.canAccess,
-              completed: unlockResult.progress === 100,
-              progress: unlockResult.progress || 0,
-              reason: unlockResult.reason,
-              missingRequirements: unlockResult.missingRequirements
+              unlocked: typedUnlockResult.canAccess,
+              completed: typedUnlockResult.progress === 100,
+              progress: typedUnlockResult.progress || 0,
+              reason: typedUnlockResult.reason,
+              missingRequirements: typedUnlockResult.missingRequirements
             })
           }
         }
