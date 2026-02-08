@@ -18,11 +18,20 @@ export function middleware(request: NextRequest) {
   // Only essential headers
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   
-  // Add CORS headers for server actions
-  response.headers.set('Access-Control-Allow-Origin', '*')
-  response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+  // Fix CORS - Use environment variable instead of wildcard
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || []
+  const origin = request.headers.get('origin')
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+    response.headers.set('Access-Control-Allow-Credentials', 'true')
+  }
+  
+  response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE')
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   
   return response
 }

@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import * as Sentry from '@sentry/nextjs'
 
 interface PerformanceMetric {
   id: string
@@ -44,9 +45,24 @@ class AdvancedPerformanceMonitor {
 
     this.addMetric('api_response', metric)
     
+    // Track slow API responses in Sentry
+    if (!success || duration > this.thresholds.responseTime) {
+      Sentry.captureMessage(`Slow API Response: ${endpoint}`, {
+        level: success ? 'warning' : 'error',
+        tags: {
+          endpoint,
+          response_time: Math.round(duration),
+        },
+        extra: {
+          duration,
+          success,
+          threshold: this.thresholds.responseTime,
+        },
+      });
+    }
+    
     // Store in database for long-term analysis
     // Note: performanceMetric model not yet implemented in schema
-    // TODO: Add performanceMetric model to Prisma schema for persistent storage
   }
 
   // Track database query performance

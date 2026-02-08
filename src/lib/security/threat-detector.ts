@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
+import * as Sentry from '@sentry/nextjs';
 
 export type ThreatLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type ThreatType = 
@@ -324,7 +325,23 @@ export class ThreatDetector {
       timestamp: event.timestamp,
     });
 
-    // TODO: Integrate with Slack/Email/SMS for real alerts
+    // Send critical alerts to Sentry
+    if (response.level === 'CRITICAL' || response.level === 'HIGH') {
+      Sentry.captureMessage(`Security Threat Detected: ${response.action}`, {
+        level: response.level === 'CRITICAL' ? 'fatal' : 'error',
+        tags: {
+          threat_type: event.type,
+          threat_level: response.level,
+          action: response.action,
+        },
+        extra: {
+          ip: event.ip,
+          endpoint: event.endpoint,
+          reason: response.reason,
+          user: event.userId,
+        },
+      });
+    }
   }
 
   /**

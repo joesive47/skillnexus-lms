@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Docker optimization - เฉพาะ production
@@ -49,4 +51,21 @@ const nextConfig = {
   })
 }
 
-module.exports = nextConfig
+// Wrap with Sentry configuration
+module.exports = withSentryConfig(
+  nextConfig,
+  {
+    // Sentry Webpack Plugin Options
+    silent: true,
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+  },
+  {
+    // Upload source maps to Sentry
+    widenClientFileUpload: true,
+    transpileClientSDK: true,
+    tunnelRoute: '/monitoring',
+    hideSourceMaps: true,
+    disableLogger: true,
+  }
+)

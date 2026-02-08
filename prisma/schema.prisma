@@ -92,6 +92,10 @@ model Lesson {
   videoSegments                VideoSegment[]
   scormRuntimeData             ScormRuntimeData[]
 
+  @@index([courseId])
+  @@index([moduleId])
+  @@index([type, courseId])
+  @@index([lessonType])
   @@map("lessons")
 }
 
@@ -104,6 +108,9 @@ model Enrollment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([createdAt])
   @@map("enrollments")
 }
 
@@ -119,6 +126,8 @@ model WatchHistory {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
+  @@index([userId, lessonId, updatedAt])
+  @@index([completed, updatedAt])
   @@map("watch_history")
 }
 
@@ -139,6 +148,7 @@ model Quiz {
   submissions      StudentSubmission[]
   attemptRecords   QuizAttemptRecord[]
 
+  @@index([courseId])
   @@map("quizzes")
 }
 
@@ -177,6 +187,8 @@ model StudentSubmission {
   quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, quizId, createdAt])
+  @@index([score])
   @@map("student_submissions")
 }
 
@@ -1683,6 +1695,8 @@ model QuizAttemptRecord {
   
   @@index([userId, quizId])
   @@index([quizId, passed])
+  @@index([userId, quizId, submittedAt])
+  @@index([score])
   @@map("quiz_attempt_records")
 }
 

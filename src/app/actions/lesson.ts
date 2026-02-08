@@ -330,9 +330,24 @@ export async function updateLesson(lessonId: string, lessonData: any) {
 
 export async function deleteLesson(lessonId: string) {
   try {
+    // Get the lesson first to find the courseId
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: { courseId: true }
+    })
+
+    if (!lesson) {
+      return { success: false, error: 'Lesson not found' }
+    }
+
+    // Delete the lesson
     await prisma.lesson.delete({
       where: { id: lessonId }
     })
+
+    // Revalidate the course edit page
+    revalidatePath(`/dashboard/admin/courses/${lesson.courseId}/edit`)
+    revalidatePath(`/dashboard/admin/courses/${lesson.courseId}`)
 
     return { success: true }
   } catch (error) {

@@ -1,4 +1,6 @@
 // Security Audit Logger
+import * as Sentry from '@sentry/nextjs';
+
 interface AuditLog {
   timestamp: Date
   userId?: string
@@ -33,7 +35,23 @@ export class AuditLogger {
     
     // In production, send to external logging service
     if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to Sentry, DataDog, or CloudWatch
+      // Send suspicious activity to Sentry
+      if (log.status === 'suspicious' || log.status === 'failure') {
+        Sentry.captureMessage(`Security Audit: ${log.action}`, {
+          level: log.status === 'suspicious' ? 'warning' : 'error',
+          tags: {
+            audit_action: log.action,
+            audit_status: log.status,
+            resource: log.resource,
+          },
+          extra: {
+            userId: log.userId,
+            ip: log.ip,
+            userAgent: log.userAgent,
+            details: log.details,
+          },
+        });
+      }
     }
   }
 
