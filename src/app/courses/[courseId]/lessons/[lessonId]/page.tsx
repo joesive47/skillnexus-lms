@@ -23,17 +23,36 @@ export default async function LessonPage({ params }: LessonPageProps) {
     redirect('/login')
   }
 
-  // Get lesson data directly from database
+  // Check user role for quiz data access
+  const isAdminOrTeacher = session.user.role === 'ADMIN' || session.user.role === 'TEACHER'
+
+  // Get lesson data - only include quiz answers for admin/teacher
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
     include: {
       course: true,
       module: true,
-      quiz: {
+      quiz: isAdminOrTeacher ? {
         include: {
           questions: {
             include: {
               options: true
+            }
+          }
+        }
+      } : {
+        // For students: only get quiz metadata, no questions/options
+        select: {
+          id: true,
+          title: true,
+          timeLimit: true,
+          randomize: true,
+          shuffleOptions: true,
+          questionsToShow: true,
+          questionPoolSize: true,
+          _count: {
+            select: {
+              questions: true
             }
           }
         }
@@ -162,15 +181,17 @@ export default async function LessonPage({ params }: LessonPageProps) {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h3 className="font-semibold mb-2">{lesson.quiz.title}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  This quiz has {lesson.quiz.questions.length} questions.
+                  This quiz has {'questions' in lesson.quiz 
+                    ? lesson.quiz.questions.length 
+                    : lesson.quiz._count?.questions ?? 0} questions.
                 </p>
                 <Button asChild>
                   <Link href={`/courses/${courseId}/lessons/${lessonId}/quiz`}>Start Quiz</Link>
                 </Button>
               </div>
               
-              {/* Preview questions for admin/teacher */}
-              {(session.user.role === 'ADMIN' || session.user.role === 'TEACHER') && (
+              {/* Preview questions for admin/teacher only */}
+              {isAdminOrTeacher && 'questions' in lesson.quiz && lesson.quiz.questions && (
                 <div className="border-t pt-4">
                   <h4 className="font-medium mb-3">Quiz Preview (Admin/Teacher only):</h4>
                   <div className="space-y-4">

@@ -49,9 +49,26 @@ export default async function QuizPage({ params }: QuizPageProps) {
     redirect(`/courses/${courseId}`)
   }
 
+  // 🔒 Security: Remove correct answers from quiz data before sending to client
+  // Students should NOT see isCorrect field - only admin/teacher can see answers
+  const sanitizedQuiz = {
+    id: lesson.quiz.id,
+    title: lesson.quiz.title,
+    questions: lesson.quiz.questions.map(q => ({
+      id: q.id,
+      text: q.text,
+      order: q.order,
+      options: q.options.map(opt => ({
+        id: opt.id,
+        text: opt.text,
+        // isCorrect is intentionally omitted - prevents cheating via DevTools
+      }))
+    }))
+  }
+
   return (
     <QuizComponent
-      quiz={lesson.quiz}
+      quiz={sanitizedQuiz}
       lessonId={lessonId}
       courseId={courseId}
       userId={session.user.id}

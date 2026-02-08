@@ -18,7 +18,7 @@ interface QuizComponentProps {
       options: {
         id: string
         text: string
-        isCorrect: boolean
+        // isCorrect removed - data sanitized on server before sending to client
       }[]
     }[]
   }
