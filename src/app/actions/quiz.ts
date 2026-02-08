@@ -139,7 +139,10 @@ export async function importQuizFromExcel(formData: FormData) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: 'Failed to import quiz' }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Failed to import quiz: Unknown error' }
   }
 }
 
