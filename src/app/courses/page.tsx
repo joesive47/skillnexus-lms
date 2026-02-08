@@ -132,15 +132,12 @@ export default async function CoursesPage() {
                       </div>
                     ) : (
                       <Button 
-                        disabled={!canPurchase}
-                        className={`w-full ${canPurchase ? 'bg-gradient-to-r from-yellow-500 to-blue-600 hover:from-yellow-600 hover:to-blue-700' : ''}`}
-                        asChild={canPurchase}
+                        className={`w-full ${canPurchase ? 'bg-gradient-to-r from-yellow-500 to-blue-600 hover:from-yellow-600 hover:to-blue-700' : 'bg-gray-400'}`}
+                        asChild
                       >
-                        {canPurchase ? (
-                          <Link href={`/courses/${course.id}/purchase`}>ซื้อคอร์ส</Link>
-                        ) : (
-                          <span>เครดิตไม่เพียงพอ</span>
-                        )}
+                        <Link href={`/courses/${course.id}`}>
+                          {canPurchase ? 'ดูรายละเอียด & ซื้อคอร์ส' : 'ดูรายละเอียด (เครดิตไม่เพียงพอ)'}
+                        </Link>
                       </Button>
                     )}
                   </CardFooter>
