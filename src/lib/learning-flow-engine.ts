@@ -341,7 +341,7 @@ export class LearningFlowRuleEngine {
 
     // Find first unlocked node that's not completed
     for (const [nodeId, result] of state.nodes) {
-      if (result.status === 'UNLOCKED' && result.progress < 100) {
+      if (result.status === 'UNLOCKED' && (result.progress ?? 0) < 100) {
         return nodeId
       }
     }
@@ -349,7 +349,7 @@ export class LearningFlowRuleEngine {
     // If all unlocked nodes are completed, check final exam
     if (state.canTakeFinalExam && state.finalExamNodeId) {
       const finalExamResult = state.nodes.get(state.finalExamNodeId)
-      if (finalExamResult && finalExamResult.progress < 100) {
+      if (finalExamResult && (finalExamResult.progress ?? 0) < 100) {
         return state.finalExamNodeId
       }
     }
