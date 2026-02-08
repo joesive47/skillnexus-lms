@@ -10,6 +10,8 @@ interface ProgressIndicatorProps {
   nodeType: 'VIDEO' | 'SCORM' | 'QUIZ'
   currentProgress: number
   requiredProgress?: number
+  score?: number | null
+  requiredScore?: number | null
   timeSpent?: number
   status?: string
 }
@@ -19,6 +21,8 @@ export function ProgressIndicator({
   nodeType,
   currentProgress,
   requiredProgress = 80,
+  score,
+  requiredScore,
   timeSpent = 0,
   status
 }: ProgressIndicatorProps) {
@@ -82,6 +86,17 @@ export function ProgressIndicator({
               </div>
             )}
 
+            {/* Score for QUIZ */}
+            {nodeType === 'QUIZ' && score !== null && score !== undefined && (
+              <div className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-muted-foreground text-xs">คะแนน</p>
+                  <p className="font-medium">{Math.round(score)}%</p>
+                </div>
+              </div>
+            )}
+
             {/* Status */}
             <div className="flex items-center gap-2">
               {isCompleted ? (
@@ -119,7 +134,7 @@ export function ProgressIndicator({
 
           {nodeType === 'QUIZ' && (
             <p className="text-xs text-muted-foreground bg-orange-50 p-2 rounded">
-              💡 ต้องได้คะแนนอย่างน้อย {requiredProgress}% เพื่อผ่าน
+              💡 ต้องได้คะแนนอย่างน้อย {requiredScore || requiredProgress}% เพื่อผ่าน
             </p>
           )}
         </div>
