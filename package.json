@@ -26,6 +26,7 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:learning-flow": "node scripts/migrate-to-learning-flow.js",
     "load-test": "tsx scripts/essential/load-test.ts",
     "security:scan": "tsx scripts/essential/security-scan.ts",
     "test:import": "node test-import-system.js",
