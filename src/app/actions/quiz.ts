@@ -17,11 +17,14 @@ const importQuizSchema = z.object({
 
 export async function importQuizFromExcel(formData: FormData) {
   try {
+    console.log('📥 Starting quiz import...')
+    
     // Validate user role
     const session = await auth()
     if (!session?.user || session.user.role !== UserRole.ADMIN) {
       return { success: false, error: 'Unauthorized: Admin access required' }
     }
+    console.log('✅ User authorized')
 
     const title = formData.get('title') as string
     const excelFile = formData.get('excelFile') as File
@@ -29,10 +32,13 @@ export async function importQuizFromExcel(formData: FormData) {
     const timeLimitStr = formData.get('timeLimit') as string
     const shuffleOptions = formData.get('shuffleOptions') === 'true'
     const randomize = formData.get('randomize') === 'true'
+    
+    console.log('📋 Form data:', { title, fileName: excelFile?.name, questionsToShowStr, timeLimitStr, shuffleOptions, randomize })
 
     const questionsToShow = questionsToShowStr ? parseInt(questionsToShowStr) : undefined
     const timeLimit = timeLimitStr ? parseInt(timeLimitStr) : 0
 
+    console.log('🔄 Validating fields...')
     const validatedFields = importQuizSchema.parse({ 
       title, 
       questionsToShow,
@@ -40,16 +46,20 @@ export async function importQuizFromExcel(formData: FormData) {
       shuffleOptions,
       randomize
     })
+    console.log('✅ Fields validated')
 
     if (!excelFile || excelFile.size === 0) {
       return { success: false, error: 'Excel file is required' }
     }
+    console.log('📄 Excel file received:', excelFile.name, excelFile.size, 'bytes')
 
     // Parse Excel file
+    console.log('📖 Reading Excel file...')
     const buffer = await excelFile.arrayBuffer()
     const workbook = XLSX.read(buffer)
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = XLSX.utils.sheet_to_json(worksheet) as any[]
+    console.log('✅ Excel parsed, rows:', data.length)
 
     if (!data || data.length === 0) {
       return { success: false, error: 'Excel file is empty or invalid format' }
@@ -93,6 +103,16 @@ export async function importQuizFromExcel(formData: FormData) {
       }
     }
 
+    console.log('💾 Creating quiz in database...')
+    console.log('Quiz data:', { 
+      title: validatedFields.title,
+      timeLimit: validatedFields.timeLimit,
+      shuffleOptions: validatedFields.shuffleOptions,
+      randomize: validatedFields.randomize,
+      questionPoolSize: totalQuestions,
+      questionsToShow: questionsToShow || totalQuestions
+    })
+
     // Create quiz with questions atomically
     const quiz = await prisma.$transaction(async (tx) => {
       const newQuiz = await tx.quiz.create({
@@ -126,6 +146,8 @@ export async function importQuizFromExcel(formData: FormData) {
 
       return newQuiz
     })
+
+    console.log('✅ Quiz created successfully:', quiz.id)
 
     // Revalidate cache only after successful transaction
     revalidatePath('/dashboard/admin/quizzes')
