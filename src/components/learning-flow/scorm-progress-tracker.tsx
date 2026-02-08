@@ -6,6 +6,7 @@ import { updateScormProgress } from '@/app/actions/learning-progress'
 interface ScormProgressTrackerProps {
   nodeId: string
   lessonId: string
+  courseId: string
   scormIframeRef: React.RefObject<HTMLIFrameElement>
   onProgressUpdate?: (progress: number) => void
   onComplete?: () => void
@@ -14,6 +15,7 @@ interface ScormProgressTrackerProps {
 export function ScormProgressTracker({
   nodeId,
   lessonId,
+  courseId,
   scormIframeRef,
   onProgressUpdate,
   onComplete
@@ -109,50 +111,15 @@ export function ScormProgressTracker({
 
   const syncProgressToServer = async (isCompleting = false) => {
     try {
-      const completionStatus = 
-        cmiDataRef.current['cmi.completion_status'] || 
-        cmiDataRef.current['cmi.core.lesson_status'] || 
-        'incomplete'
-      
-      const successStatus = 
-        cmiDataRef.current['cmi.success_status'] || 
-        cmiDataRef.current['cmi.core.lesson_status'] || 
-        'unknown'
-      
-      const scoreRaw = 
-        parseFloat(cmiDataRef.current['cmi.score.raw'] || 
-        cmiDataRef.current['cmi.core.score.raw'] || 
-        '0')
-      
-      const scoreMin = 
-        parseFloat(cmiDataRef.current['cmi.score.min'] || 
-        cmiDataRef.current['cmi.core.score.min'] || 
-        '0')
-      
-      const scoreMax = 
-        parseFloat(cmiDataRef.current['cmi.score.max'] || 
-        cmiDataRef.current['cmi.core.score.max'] || 
-        '100')
-      
-      const sessionTime = 
-        cmiDataRef.current['cmi.session_time'] || 
-        cmiDataRef.current['cmi.core.session_time'] || 
-        '0000:00:00'
-
       const result = await updateScormProgress({
-        nodeId,
         lessonId,
-        completionStatus,
-        successStatus,
-        scoreRaw,
-        scoreMin,
-        scoreMax,
-        sessionTime,
+        courseId,
         cmiData: cmiDataRef.current
       })
 
-      if (result.success && result.progress) {
-        const progressPercent = result.progress.progressPercent || 0
+      if (result.success) {
+        // Calculate progress based on completion status
+        const progressPercent = result.completed ? 100 : 50
         onProgressUpdate?.(progressPercent)
 
         if (result.completed || isCompleting) {
