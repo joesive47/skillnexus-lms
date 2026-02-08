@@ -11,6 +11,7 @@ import { StudyPlanner } from '@/components/advanced/StudyPlanner'
 import InteractivePlayer from '@/components/lesson/InteractivePlayer'
 import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrapper'
 import Link from 'next/link'
+import { ProgressIndicator } from '@/components/learning-flow'
 
 interface LessonPageProps {
   params: Promise<{ courseId: string; lessonId: string }>
@@ -91,6 +92,20 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   const watchHistory = lesson.watchHistory[0]
   const youtubeId = extractYouTubeID(lesson.youtubeUrl || '')
+
+  // Get Learning Node and Progress (for Learning Flow system)
+  const learningNode = await prisma.learningNode.findFirst({
+    where: {
+      courseId: courseId,
+      refId: lessonId
+    },
+    include: {
+      progress: {
+        where: { userId: session.user.id }
+      }
+    }
+  })
+  const nodeProgress = learningNode?.progress[0]
 
   // If SCORM lesson, use fullscreen layout
   if (lesson.lessonType === 'SCORM' && lesson.scormPackage) {
@@ -237,6 +252,19 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
         {/* Sidebar with Advanced Features */}
         <div className="space-y-6">
+          {/* Learning Progress - Only show if learning node exists */}
+          {learningNode && (
+            <ProgressIndicator
+              nodeType={learningNode.nodeType as 'VIDEO' | 'SCORM' | 'QUIZ'}
+              currentProgress={nodeProgress?.progressPercent || 0}
+              requiredProgress={learningNode.requiredProgress || (learningNode.nodeType === 'VIDEO' ? 80 : 100)}
+              score={nodeProgress?.score}
+              requiredScore={learningNode.requiredScore}
+              status={nodeProgress?.status as 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | undefined}
+              timeSpent={nodeProgress?.timeSpent}
+            />
+          )}
+          
           <NoteTaking 
             lessonId={lesson.id}
             userId={session.user.id}

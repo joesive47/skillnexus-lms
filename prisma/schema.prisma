@@ -39,6 +39,11 @@ model Course {
   courseCertificates    CourseCertificate[]
   courseBadges          CourseBadge[]
   careerPathCourses     CareerPathCourse[]
+  
+  // Learning Flow Management
+  learningNodes         LearningNode[]
+  certificateFiles      CertificateFile[]
+  progressSummaries     CourseProgressSummary[]
 
   @@map("courses")
 }
@@ -84,6 +89,8 @@ model Lesson {
   scormPackage                 ScormPackage?
   peerReviews                  PeerReview[]
   voiceAssignments             VoiceAssignment[]
+  videoSegments                VideoSegment[]
+  scormRuntimeData             ScormRuntimeData[]
 
   @@map("lessons")
 }
@@ -124,11 +131,13 @@ model Quiz {
   shuffleOptions   Boolean             @default(false)
   questionPoolSize Int?                // จำนวนข้อทั้งหมดในคลัง (เช่น 30)
   questionsToShow  Int?                // จำนวนข้อที่จะให้ทำ (เช่น 20)
+  passScore        Int                 @default(70) // Minimum score to pass (%)
   createdAt        DateTime            @default(now())
   lessons          Lesson[]
   questions        Question[]
   course           Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
   submissions      StudentSubmission[]
+  attemptRecords   QuizAttemptRecord[]
 
   @@map("quizzes")
 }
@@ -443,6 +452,14 @@ model User {
   courseBadges         CourseBadge[]
   careerCertificates   CareerCertificate[]
   careerBadges         CareerBadge[]
+  // Learning Flow Management relations
+  nodeProgress         NodeProgress[]
+  videoSegments        VideoSegment[]
+  scormRuntimeData     ScormRuntimeData[]
+  quizAttemptRecords   QuizAttemptRecord[]
+  unlockLogs           UnlockLog[]
+  certificateFiles     CertificateFile[]
+  progressSummaries    CourseProgressSummary[]
 
   @@map("users")
 }
@@ -1487,4 +1504,277 @@ model VisitorStats {
   updatedAt    DateTime @updatedAt
   
   @@map("visitor_stats")
+}
+
+// ============================================================================
+// LEARNING FLOW MANAGEMENT SYSTEM (Enterprise-grade, Graph-based)
+// ============================================================================
+
+// Unified Learning Node (replaces separate VIDEO/SCORM/QUIZ tracking)
+model LearningNode {
+  id                String             @id @default(cuid())
+  courseId          String
+  nodeType          String             // 'VIDEO', 'SCORM', 'QUIZ'
+  refId             String             // lessonId or quizId
+  title             String
+  order             Int                @default(0)
+  
+  // Completion Criteria
+  requiredScore     Int?               // For QUIZ nodes (e.g., 70)
+  requiredProgress  Float?             // For VIDEO/SCORM (e.g., 0.8 = 80%)
+  requiredDuration  Int?               // Minimum time in seconds
+  
+  // Flags
+  isFinalExam       Boolean            @default(false)
+  isOptional        Boolean            @default(false)
+  
+  // Metadata
+  metadata          Json?              // Flexible storage for type-specific config
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  // Relations
+  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  dependenciesFrom  NodeDependency[]   @relation("DependencyFrom")
+  dependenciesTo    NodeDependency[]   @relation("DependencyTo")
+  progress          NodeProgress[]
+  unlockLogs        UnlockLog[]
+  quizAttempts      QuizAttemptRecord[]
+  
+  @@index([courseId, nodeType])
+  @@index([courseId, order])
+  @@map("learning_nodes")
+}
+
+// Graph Edges (DAG - Directed Acyclic Graph)
+model NodeDependency {
+  id                String         @id @default(cuid())
+  fromNodeId        String         // Prerequisite node
+  toNodeId          String         // Dependent node (will be unlocked)
+  dependencyType    String         @default("AND") // 'AND', 'OR' (future)
+  
+  // Optional: Rule override
+  customRule        Json?          // Custom unlock logic if needed
+  createdAt         DateTime       @default(now())
+  
+  fromNode          LearningNode   @relation("DependencyFrom", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode            LearningNode   @relation("DependencyTo", fields: [toNodeId], references: [id], onDelete: Cascade)
+  
+  @@unique([fromNodeId, toNodeId])
+  @@index([toNodeId]) // Fast lookup for "what blocks this node?"
+  @@map("node_dependencies")
+}
+
+// Unified Progress Tracking
+model NodeProgress {
+  id                String         @id @default(cuid())
+  userId            String
+  nodeId            String
+  courseId          String         // Denormalized for performance
+  
+  // Progress State
+  status            String         @default("NOT_STARTED") // 'NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'FAILED'
+  progressPercent   Float          @default(0)
+  score             Float?
+  timeSpent         Int            @default(0) // Seconds
+  
+  // Completion data
+  startedAt         DateTime?
+  completedAt       DateTime?
+  lastActivityAt    DateTime       @default(now())
+  
+  // Anti-cheat + Sync
+  version           Int            @default(1) // Optimistic locking
+  deviceId          String?
+  ipAddress         String?
+  
+  // Type-specific data (JSON for flexibility)
+  metadata          Json?          // e.g., { "videoSegments": [...], "scormCmi": {...}, "quizAttempts": [...] }
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node              LearningNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, nodeId])
+  @@index([userId, courseId])
+  @@index([nodeId, status])
+  @@map("node_progress")
+}
+
+// Video Segments (Anti-Skip Tracking)
+model VideoSegment {
+  id                String         @id @default(cuid())
+  userId            String
+  lessonId          String
+  startTime         Float          // Seconds
+  endTime           Float          // Seconds
+  watchedAt         DateTime       @default(now())
+  
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson            Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, lessonId])
+  @@map("video_segments")
+}
+
+// SCORM Runtime Data (Normalized CMI fields)
+model ScormRuntimeData {
+  id                    String         @id @default(cuid())
+  userId                String
+  lessonId              String
+  
+  // CMI Core Data
+  completionStatus      String?        // 'completed', 'incomplete', 'not attempted'
+  successStatus         String?        // 'passed', 'failed', 'unknown'
+  scoreRaw              Float?
+  scoreMin              Float?
+  scoreMax              Float?
+  totalTime             String?        // ISO 8601 duration
+  
+  // Session Info
+  sessionTime           String?
+  suspendData           String?        @db.Text
+  location              String?
+  
+  // Full CMI dump (for debugging)
+  cmiData               Json?
+  
+  // Tracking
+  lastCommit            DateTime       @default(now())
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson                Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, lessonId])
+  @@index([lessonId, completionStatus])
+  @@map("scorm_runtime_data")
+}
+
+// Quiz Attempt (Enhanced with gating)
+model QuizAttemptRecord {
+  id                String         @id @default(cuid())
+  userId            String
+  quizId            String
+  nodeId            String?        // Link to LearningNode if applicable
+  
+  // Attempt data
+  attemptNumber     Int
+  score             Float
+  passed            Boolean
+  answers           Json           // Encrypted or hashed answers
+  
+  // Timing
+  startedAt         DateTime
+  submittedAt       DateTime       @default(now())
+  timeSpent         Int            // Seconds
+  
+  // Validation
+  ipAddress         String?
+  userAgent         String?
+  idempotencyKey    String?        @unique
+  
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz              Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  node              LearningNode?  @relation(fields: [nodeId], references: [id], onDelete: SetNull)
+  
+  @@index([userId, quizId])
+  @@index([quizId, passed])
+  @@map("quiz_attempt_records")
+}
+
+// Unlock Event Log (Audit Trail)
+model UnlockLog {
+  id                String         @id @default(cuid())
+  userId            String
+  nodeId            String
+  courseId          String
+  
+  // Event data
+  action            String         // 'UNLOCK', 'LOCK', 'RELOCK'
+  reason            String         // Human-readable reason
+  triggeredBy       String?        // NodeId that triggered this unlock
+  
+  // Rule evaluation snapshot
+  ruleSnapshot      Json?          // Which rules were evaluated
+  
+  createdAt         DateTime       @default(now())
+  
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node              LearningNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, courseId])
+  @@index([nodeId, action])
+  @@map("unlock_logs")
+}
+
+// Certificate File Storage
+model CertificateFile {
+  id                String         @id @default(cuid())
+  userId            String
+  courseId          String
+  
+  // Certificate data
+  certificateType   String         // 'COURSE_COMPLETION', 'FINAL_EXAM_PASSED'
+  verificationId    String         @unique // UUID for public verification
+  
+  // File info
+  pdfUrl            String         // Blob storage URL or local path
+  pdfHash           String         // SHA-256 hash for integrity
+  
+  // Metadata
+  issuerName        String
+  recipientName     String
+  issueDate         DateTime       @default(now())
+  expiryDate        DateTime?
+  
+  // Status
+  status            String         @default("ACTIVE") // 'ACTIVE', 'REVOKED'
+  revokedAt         DateTime?
+  revokedReason     String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, status])
+  @@index([verificationId])
+  @@map("certificate_files")
+}
+
+// Progress Summary (Denormalized for performance)
+model CourseProgressSummary {
+  id                String         @id @default(cuid())
+  userId            String
+  courseId          String
+  
+  // Aggregated stats
+  totalNodes        Int
+  completedNodes    Int
+  progressPercent   Float          @default(0)
+  
+  // Status flags
+  canTakeFinalExam  Boolean        @default(false)
+  finalExamPassed   Boolean        @default(false)
+  certificateIssued Boolean        @default(false)
+  
+  // Timestamps
+  lastActivity      DateTime       @default(now())
+  startedAt         DateTime       @default(now())
+  completedAt       DateTime?
+  
+  updatedAt         DateTime       @updatedAt
+  
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId, progressPercent])
+  @@map("course_progress_summary")
 }

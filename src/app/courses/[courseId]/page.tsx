@@ -11,6 +11,7 @@ import { getCourseProgress } from '@/app/actions/video'
 import { LessonProgressIndicator } from '@/components/lesson/LessonProgressIndicator'
 import { PurchaseButton } from '@/components/course/purchase-button'
 import { DiscussionList } from '@/components/social/DiscussionList'
+import { LearningPathViewer } from '@/components/learning-flow'
 
 interface CoursePageProps {
   params: Promise<{
@@ -194,6 +195,14 @@ export default async function CoursePage({ params }: CoursePageProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Learning Path Flow - Only show if enrolled */}
+          {isEnrolled && (
+            <LearningPathViewer 
+              courseId={courseId} 
+              userId={session.user.id} 
+            />
+          )}
 
           {/* Social Features - Only show if enrolled */}
           {isEnrolled && (
