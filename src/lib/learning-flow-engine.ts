@@ -83,7 +83,7 @@ export class LearningFlowRuleEngine {
       }
     })
 
-    const progressMap = new Map(progressRecords.map(p => [p.nodeId, p]))
+    const progressMap = new Map(progressRecords.map((p: any) => [p.nodeId, p]))
 
     // 3. Evaluate each node
     const unlockResults = new Map<string, UnlockResult>()

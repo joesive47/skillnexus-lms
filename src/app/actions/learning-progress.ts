@@ -556,7 +556,7 @@ async function updateProgressSummary(tx: any, userId: string, courseId: string) 
   })
 
   const completedCount = progressRecords.filter(
-    p => p.status === 'COMPLETED'
+    (p: any) => p.status === 'COMPLETED'
   ).length
 
   const progressPercent = nodes.length > 0
