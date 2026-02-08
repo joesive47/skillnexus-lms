@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getYouTubeThumbnail } from '@/lib/video'
 import { createLesson } from '@/app/actions/lesson'
+import { getQuizzes } from '@/app/actions/quiz'
 
 interface LessonManagerProps {
   courseId: string
@@ -22,6 +24,19 @@ export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
   const [videoId, setVideoId] = useState('')
   const [videoPreview, setVideoPreview] = useState<{ id: string; thumbnail: string } | null>(null)
   const [error, setError] = useState('')
+  const [quizzes, setQuizzes] = useState<any[]>([])
+  const [selectedQuizId, setSelectedQuizId] = useState<string>('')
+
+  // Fetch quizzes on component mount
+  useEffect(() => {
+    async function loadQuizzes() {
+      const result = await getQuizzes()
+      if (result.success && result.quizzes) {
+        setQuizzes(result.quizzes)
+      }
+    }
+    loadQuizzes()
+  }, [])
 
   const handleVideoIdChange = (id: string) => {
     setVideoId(id)
@@ -48,13 +63,18 @@ export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
     setError('')
     
     try {
+      const duration = formData.get('duration') ? parseFloat(formData.get('duration') as string) : null
+      
       const lessonData = {
         type: lessonType,
         title: formData.get('title') as string,
         youtubeUrl: lessonType === 'VIDEO' ? videoId.trim() : null,
-        content: formData.get('content') as string,
-        durationMin: formData.get('duration') ? parseFloat(formData.get('duration') as string) / 60 : null,
+        content: formData.get('content') as string || null,
+        launchUrl: formData.get('launchUrl') as string || null,
+        durationMin: duration,
+        duration: duration,
         requiredPct: parseInt(formData.get('completionPercentage') as string) || 80,
+        quizId: lessonType === 'QUIZ' ? selectedQuizId : null,
         order: 1, // This should be calculated based on existing lessons
       }
 
@@ -115,9 +135,10 @@ export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
                   type="text" 
                   value={videoId}
                   onChange={(e) => handleVideoIdChange(e.target.value)}
-                  placeholder="NI1W7glJ-to (11 characters)"
+                  placeholder="dQw4w9WgXcQ (11 characters)"
                   className={error ? 'border-red-500' : ''}
                   maxLength={11}
+                  required
                 />
                 {error && (
                   <p className="text-sm text-red-600">{error}</p>
@@ -139,28 +160,126 @@ export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration (seconds)</Label>
-                <Input id="duration" name="duration" type="number" />
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input 
+                  id="duration" 
+                  name="duration" 
+                  type="number" 
+                  min="0"
+                  step="0.1"
+                  placeholder="10"
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {lessonType === 'QUIZ' && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="quizSelect">Select Quiz</Label>
+                <Select value={selectedQuizId} onValueChange={setSelectedQuizId} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a quiz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {quizzes.map((quiz) => (
+                      <SelectItem key={quiz.id} value={quiz.id}>
+                        {quiz.title} ({quiz._count?.questions || 0} questions)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {quizzes.length === 0 && (
+                  <p className="text-sm text-amber-600">⚠️ No quizzes available. Create a quiz first.</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input 
+                  id="duration" 
+                  name="duration" 
+                  type="number" 
+                  min="0"
+                  step="0.1"
+                  placeholder="30"
+                  required
+                />
               </div>
             </>
           )}
 
           {lessonType === 'TEXT' && (
-            <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
-              <Textarea id="content" name="content" rows={6} />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
+                <Textarea 
+                  id="content" 
+                  name="content" 
+                  rows={8} 
+                  placeholder="Enter lesson content here..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="launchUrl">Document URL (Optional)</Label>
+                <Input 
+                  id="launchUrl" 
+                  name="launchUrl" 
+                  type="url" 
+                  placeholder="https://example.com/document.pdf"
+                />
+                <p className="text-sm text-muted-foreground">
+                  📄 Add a link to PDF, Google Docs, or any external document
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input 
+                  id="duration" 
+                  name="duration" 
+                  type="number" 
+                  min="0"
+                  step="0.1"
+                  placeholder="15"
+                  required
+                />
+              </div>
+            </>
           )}
 
           {lessonType === 'SCORM' && (
-            <div className="space-y-2">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  📦 SCORM lessons require uploading a SCORM package after creating the lesson.
-                  You can upload the package using the SCORM uploader component.
-                </p>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="launchUrl">SCORM Package URL</Label>
+                <Input 
+                  id="launchUrl" 
+                  name="launchUrl" 
+                  type="url" 
+                  placeholder="https://your-storage.com/scorm-package/index.html"
+                  required
+                />
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    📦 Enter the URL to your SCORM package's launch file (usually index.html or index_lms.html)
+                  </p>
+                  <p className="text-sm text-blue-700 mt-2">
+                    💡 You can upload SCORM packages to AWS S3, Google Drive, or Vercel Blob Storage
+                  </p>
+                </div>
               </div>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input 
+                  id="duration" 
+                  name="duration" 
+                  type="number" 
+                  min="0"
+                  step="0.1"
+                  placeholder="45"
+                  required
+                />
+              </div>
+            </>
           )}
 
           <div className="space-y-2">
@@ -184,11 +303,22 @@ export function LessonManager({ courseId, moduleId }: LessonManagerProps) {
             <Label htmlFor="isFinalExam">Mark as Final Exam</Label>
           </div>
 
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
           <Button 
             type="submit" 
-            disabled={isLoading || (lessonType === 'VIDEO' && (!videoPreview || !!error))}
+            disabled={
+              isLoading || 
+              (lessonType === 'VIDEO' && (!videoPreview || !!error)) ||
+              (lessonType === 'QUIZ' && !selectedQuizId)
+            }
+            className="w-full"
           >
-            {isLoading ? 'Creating...' : 'Create Lesson'}
+            {isLoading ? 'Creating Lesson...' : 'Create Lesson'}
           </Button>
         </form>
       </CardContent>

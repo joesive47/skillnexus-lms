@@ -275,8 +275,11 @@ export async function createLesson(courseId: string, lessonData: any) {
         order: lessonData.order,
         title: lessonData.title,
         youtubeUrl,
+        launchUrl: lessonData.launchUrl || null,
+        content: lessonData.content || null,
         requiredCompletionPercentage: lessonData.requiredPct || 80,
-        duration: lessonData.durationMin ? lessonData.durationMin * 60 : null,
+        duration: lessonData.durationMin || lessonData.duration || null,
+        durationMin: lessonData.durationMin || lessonData.duration || null,
         quizId: lessonData.quizId || null,
       }
     })
