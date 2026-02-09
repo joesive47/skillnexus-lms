@@ -326,12 +326,12 @@ export class ThreatDetector {
     });
 
     // Send critical alerts to Sentry
-    if (response.level === 'CRITICAL' || response.level === 'HIGH') {
+    if (severity === 'CRITICAL' || severity === 'HIGH') {
       Sentry.captureMessage(`Security Threat Detected: ${response.action}`, {
-        level: response.level === 'CRITICAL' ? 'fatal' : 'error',
+        level: severity === 'CRITICAL' ? 'fatal' : 'error',
         tags: {
           threat_type: event.type,
-          threat_level: response.level,
+          threat_level: severity,
           action: response.action,
         },
         extra: {
