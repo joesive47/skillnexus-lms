@@ -18,7 +18,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
   }
 
   // Get lessons for this course with all fields
-  const lessons = await prisma.lesson.findMany({
+  const lessonsData = await prisma.lesson.findMany({
     where: { courseId },
     include: {
       quiz: true,
@@ -26,6 +26,12 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     },
     orderBy: { order: 'asc' }
   })
+
+  // Ensure all lessons have non-null titles
+  const lessons = lessonsData.map(lesson => ({
+    ...lesson,
+    title: lesson.title || 'Untitled Lesson'
+  }))
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
