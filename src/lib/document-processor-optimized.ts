@@ -7,7 +7,7 @@ let pdfParse: any = null
 async function getPdfParse() {
   if (!pdfParse) {
     try {
-      const pdfModule = await import('pdf-parse') as any
+      const pdfModule = await import('pdf-parse')
       pdfParse = pdfModule.default || pdfModule
     } catch (error) {
       console.warn('pdf-parse not available:', error)
