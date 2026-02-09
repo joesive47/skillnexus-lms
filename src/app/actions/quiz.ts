@@ -81,8 +81,12 @@ export async function importQuizFromExcel(formData: FormData) {
         throw new Error(`Invalid correct option "${correctOption}" at row ${index + 2}. Must be A, B, C, or D`)
       }
 
+      // Remove question numbers like (1), (2), etc. from the beginning of question text
+      let questionText = row.QuestionText?.toString() || ''
+      questionText = questionText.replace(/^\s*\(\d+\)\s*/, '').trim()
+
       return {
-        text: row.QuestionText?.toString() || '',
+        text: questionText,
         order: index,
         options: [
           { text: row.OptionA?.toString() || '', isCorrect: correctOption === 'A' },
