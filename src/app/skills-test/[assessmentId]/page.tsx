@@ -517,7 +517,6 @@ export default function PublicSkillsTest() {
                     {wrongQuestions.map((item: any, index: number) => (
                       <div key={index} className="border-2 border-red-200 rounded-lg p-4 bg-red-50">
                         <div className="flex items-start gap-3 mb-3">
-                          <Badge variant="destructive">ข้อ {item.number}</Badge>
                           <Badge variant="outline">{item.skill}</Badge>
                         </div>
                         <p className="font-medium mb-3">{item.question}</p>
