@@ -202,6 +202,61 @@ export async function updateQuizMetadata(quizId: string, title: string) {
   }
 }
 
+export async function updateQuizSettings(
+  quizId: string, 
+  settings: { questionsToShow: number | null; randomize: boolean; shuffleOptions: boolean }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user || session.user.role !== UserRole.ADMIN) {
+      return { success: false, error: 'Unauthorized: Admin access required' }
+    }
+
+    // Get current quiz to validate questionsToShow
+    const quiz = await prisma.quiz.findUnique({
+      where: { id: quizId },
+      include: {
+        _count: {
+          select: { questions: true }
+        }
+      }
+    })
+
+    if (!quiz) {
+      return { success: false, error: 'Quiz not found' }
+    }
+
+    const totalQuestions = quiz._count.questions
+
+    // Validate questionsToShow
+    if (settings.questionsToShow && settings.questionsToShow > totalQuestions) {
+      return { 
+        success: false, 
+        error: `Cannot show ${settings.questionsToShow} questions from ${totalQuestions} total questions` 
+      }
+    }
+
+    const updatedQuiz = await prisma.quiz.update({
+      where: { id: quizId },
+      data: {
+        questionsToShow: settings.questionsToShow || totalQuestions,
+        questionPoolSize: totalQuestions,
+        randomize: settings.randomize,
+        shuffleOptions: settings.shuffleOptions
+      },
+    })
+
+    revalidatePath('/dashboard/admin/quizzes')
+    revalidatePath(`/dashboard/admin/quizzes/${quizId}`)
+    revalidatePath(`/dashboard/admin/quizzes/${quizId}/edit`)
+    
+    return { success: true, quiz: updatedQuiz }
+  } catch (error) {
+    console.error('Error updating quiz settings:', error)
+    return { success: false, error: 'Failed to update quiz settings' }
+  }
+}
+
 export async function submitQuizAttempt(quizId: string, lessonId: string, answers: Record<string, string>) {
   try {
     const session = await auth()

@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { QuizComponent } from '@/components/quiz/QuizComponent'
+import { getQuizForStudent } from '@/app/actions/quiz'
 
 interface QuizPageProps {
   params: Promise<{ courseId: string; lessonId: string }>
@@ -18,13 +19,13 @@ export default async function QuizPage({ params }: QuizPageProps) {
     where: { id: lessonId },
     include: {
       quiz: {
-        include: {
-          questions: {
-            include: {
-              options: true
-            },
-            orderBy: { order: 'asc' }
-          }
+        select: {
+          id: true,
+          title: true,
+          randomize: true,
+          shuffleOptions: true,
+          questionsToShow: true,
+          questionPoolSize: true
         }
       }
     }
@@ -49,19 +50,23 @@ export default async function QuizPage({ params }: QuizPageProps) {
     redirect(`/courses/${courseId}`)
   }
 
-  // 🔒 Security: Remove correct answers from quiz data before sending to client
-  // Students should NOT see isCorrect field - only admin/teacher can see answers
+  // Get randomized/filtered questions using server action
+  const quizDataResult = await getQuizForStudent(lesson.quiz.id)
+  
+  if (!quizDataResult.success || !quizDataResult.questions) {
+    redirect(`/courses/${courseId}/lessons/${lessonId}`)
+  }
+
   const sanitizedQuiz = {
     id: lesson.quiz.id,
     title: lesson.quiz.title,
-    questions: lesson.quiz.questions.map(q => ({
+    questions: quizDataResult.questions.map(q => ({
       id: q.id,
       text: q.text,
       order: q.order,
       options: q.options.map(opt => ({
         id: opt.id,
         text: opt.text,
-        // isCorrect is intentionally omitted - prevents cheating via DevTools
       }))
     }))
   }

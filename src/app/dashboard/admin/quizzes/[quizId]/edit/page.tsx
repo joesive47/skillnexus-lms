@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { updateQuizMetadata } from '@/app/actions/quiz'
+import { updateQuizMetadata, updateQuizSettings } from '@/app/actions/quiz'
 
 export default async function EditQuizPage({
   params,
@@ -38,6 +39,19 @@ export default async function EditQuizPage({
     await updateQuizMetadata(quizId, title)
   }
 
+  async function handleUpdateSettings(formData: FormData) {
+    'use server'
+    const questionsToShow = formData.get('questionsToShow')
+    const randomize = formData.get('randomize') === 'on'
+    const shuffleOptions = formData.get('shuffleOptions') === 'on'
+    
+    await updateQuizSettings(quizId, {
+      questionsToShow: questionsToShow ? parseInt(questionsToShow as string) : null,
+      randomize,
+      shuffleOptions
+    })
+  }
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex items-center gap-4 mb-6">
@@ -52,7 +66,7 @@ export default async function EditQuizPage({
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Quiz Settings</CardTitle>
+          <CardTitle>Quiz Basic Settings</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={handleUpdateTitle} className="space-y-4">
@@ -66,6 +80,62 @@ export default async function EditQuizPage({
               />
             </div>
             <Button type="submit">Update Title</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Quiz Display Settings</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Configure how questions are presented to students
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form action={handleUpdateSettings} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="questionsToShow">
+                  Number of Questions to Show (Optional)
+                </Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Total available: {quiz.questions.length} questions. Leave empty to show all.
+                </p>
+                <Input
+                  id="questionsToShow"
+                  name="questionsToShow"
+                  type="number"
+                  min="1"
+                  max={quiz.questions.length}
+                  defaultValue={quiz.questionsToShow || ''}
+                  placeholder={`Max: ${quiz.questions.length}`}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="randomize"
+                  name="randomize"
+                  defaultChecked={quiz.randomize}
+                />
+                <Label htmlFor="randomize" className="cursor-pointer">
+                  Randomize question order for each student
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="shuffleOptions"
+                  name="shuffleOptions"
+                  defaultChecked={quiz.shuffleOptions}
+                />
+                <Label htmlFor="shuffleOptions" className="cursor-pointer">
+                  Shuffle answer options for each question
+                </Label>
+              </div>
+            </div>
+            
+            <Button type="submit">Update Display Settings</Button>
           </form>
         </CardContent>
       </Card>
