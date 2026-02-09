@@ -99,7 +99,7 @@ export default function SmartSkipSystem({ sectionTitle, onSkipApproved, onSkipDe
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-xl max-w-2xl w-full p-6 text-white">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Question {currentQuestion + 1} of {questions.length}</h2>
+          <h2 className="text-xl font-bold">Smart Skip Assessment</h2>
           <div className="text-sm text-gray-400">Score: {score}/{currentQuestion}</div>
         </div>
 

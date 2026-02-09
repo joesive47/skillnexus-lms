@@ -79,7 +79,7 @@ export default function TestPage() {
         <CardHeader>
           <CardTitle>🧪 Assessment Test - Debug Mode</CardTitle>
           <p className="text-sm text-gray-600">
-            ข้อ {currentIndex + 1} จาก {mockQuestions.length}
+            แบบทดสอบ ({mockQuestions.length} ข้อ)
           </p>
         </CardHeader>
         <CardContent>

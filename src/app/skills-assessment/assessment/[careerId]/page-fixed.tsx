@@ -203,8 +203,7 @@ export default function AssessmentPageFixed() {
 
           {/* Progress */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>ข้อ {currentIndex + 1} จาก {questions.length}</span>
+            <div className="flex justify-end text-sm">
               <span>ตอบแล้ว {answeredCount}/{questions.length} ข้อ</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -215,7 +214,7 @@ export default function AssessmentPageFixed() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-lg">
-              ข้อ {currentIndex + 1}: {currentQuestion.questionText}
+              {currentQuestion.questionText}
             </CardTitle>
             <div className="flex gap-2">
               <Badge variant="outline">{currentQuestion.skillName}</Badge>

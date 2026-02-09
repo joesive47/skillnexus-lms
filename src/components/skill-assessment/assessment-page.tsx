@@ -124,7 +124,7 @@ export function AssessmentPage({
               <div>
                 <h1 className="text-xl font-bold">{career.title}</h1>
                 <p className="text-sm text-gray-600">
-                  ข้อ {currentQuestion + 1} จาก {questions.length}
+                  แบบประเมินทักษะ
                 </p>
               </div>
             </div>
