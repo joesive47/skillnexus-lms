@@ -184,6 +184,11 @@ export default async function LessonPage({ params }: LessonPageProps) {
               lessonId={lesson.id}
               launchUrl={lesson.launchUrl}
             />
+          ) : lesson.lessonType === 'SCORM' && lesson.launchUrl ? (
+            <InteractivePlayer
+              lessonId={lesson.id}
+              launchUrl={lesson.launchUrl}
+            />
           ) : lesson.lessonType === 'SCORM' && lesson.scormPackage ? (
             <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center">
               <div className="text-center p-6">
@@ -240,7 +245,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 <p className="text-sm text-muted-foreground">
                   {lesson.lessonType === 'VIDEO' ? 'No video URL provided' : 
                    lesson.lessonType === 'INTERACTIVE' ? 'No interactive content found' :
-                   lesson.lessonType === 'SCORM' ? 'No SCORM package found' :
+                   lesson.lessonType === 'SCORM' ? 'No SCORM package or URL found' :
                    'No quiz content found'}
                 </p>
               </div>
