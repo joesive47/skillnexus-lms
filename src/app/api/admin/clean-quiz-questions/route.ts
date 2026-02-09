@@ -36,16 +36,31 @@ export async function GET(request: NextRequest) {
     const cleanedQuestions: any[] = []
 
     for (const question of questions) {
-      // Check if question starts with (number)
-      const match = question.text.match(/^\s*\(\d+\)\s*/)
+      const originalText = question.text
+      let cleanedText = question.text
+      let wasModified = false
+
+      // Remove (ข้อ XX) anywhere in the text
+      const pattern1 = /\(\s*ข้อ\s*\d+\s*\)/g
+      if (pattern1.test(cleanedText)) {
+        cleanedText = cleanedText.replace(pattern1, '').trim()
+        wasModified = true
+      }
+
+      // Remove (XX) at the beginning
+      const pattern2 = /^\s*\(\d+\)\s*/
+      if (pattern2.test(cleanedText)) {
+        cleanedText = cleanedText.replace(pattern2, '').trim()
+        wasModified = true
+      }
+
+      // Clean up multiple spaces
+      cleanedText = cleanedText.replace(/\s+/g, ' ').trim()
       
-      if (match) {
-        const originalText = question.text
-        const cleanedText = question.text.replace(/^\s*\(\d+\)\s*/, '').trim()
-        
+      if (wasModified && cleanedText !== originalText) {
         console.log(`🧹 Cleaning question ${question.id}:`)
-        console.log(`   Original: ${originalText.substring(0, 50)}...`)
-        console.log(`   Cleaned:  ${cleanedText.substring(0, 50)}...`)
+        console.log(`   Original: ${originalText.substring(0, 60)}...`)
+        console.log(`   Cleaned:  ${cleanedText.substring(0, 60)}...`)
         
         await prisma.question.update({
           where: { id: question.id },
