@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { NoteTaking } from '@/components/advanced/NoteTaking'
 import { StudyPlanner } from '@/components/advanced/StudyPlanner'
 import InteractivePlayer from '@/components/lesson/InteractivePlayer'
+import { ScormPlayerWithControls } from '@/components/lesson/ScormPlayerWithControls'
 import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrapper'
 import Link from 'next/link'
 import { ProgressIndicator } from '@/components/learning-flow'
@@ -185,9 +186,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
               launchUrl={lesson.launchUrl}
             />
           ) : lesson.lessonType === 'SCORM' && lesson.launchUrl ? (
-            <InteractivePlayer
+            <ScormPlayerWithControls
               lessonId={lesson.id}
               launchUrl={lesson.launchUrl}
+              title={lesson.title || 'SCORM Content'}
             />
           ) : lesson.lessonType === 'SCORM' && lesson.scormPackage ? (
             <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center">
