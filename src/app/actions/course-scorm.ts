@@ -213,7 +213,8 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
         
         // Validate lessons
         for (const lesson of lessons) {
-          if (lesson.type === 'VIDEO') {
+          const lessonType = lesson.type || lesson.lessonType
+          if (lessonType === 'VIDEO') {
             if (!lesson.title?.trim()) {
               return { success: false, error: 'Video lesson title is required' }
             }
@@ -221,10 +222,10 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
               return { success: false, error: 'YouTube URL is required for video lessons' }
             }
           }
-          if (lesson.type === 'QUIZ' && !lesson.quizId) {
+          if (lessonType === 'QUIZ' && !lesson.quizId) {
             return { success: false, error: 'Quiz selection is required for quiz lessons' }
           }
-          if (lesson.type === 'SCORM') {
+          if (lessonType === 'SCORM') {
             if (!lesson.title?.trim()) {
               return { success: false, error: 'SCORM lesson title is required' }
             }

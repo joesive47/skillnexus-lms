@@ -43,7 +43,8 @@ export async function updateLessonProgress(
     if (!lesson) throw new Error('Lesson not found')
 
     // Calculate completion (assume 80% for video completion)
-    const isCompleted = lesson.type === 'VIDEO' ? watchTime >= 30 : watchTime > 0
+    const lessonType = lesson.lessonType || lesson.type
+    const isCompleted = lessonType === 'VIDEO' ? watchTime >= 30 : watchTime > 0
 
     // Update progress
     const progress = await prisma.watchHistory.upsert({
