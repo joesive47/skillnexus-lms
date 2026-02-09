@@ -22,18 +22,15 @@ const nextConfig = {
   
   // Handle optional dependencies
   webpack: (config, { isServer }) => {
-    // Ignore .node files (native bindings)
-    config.module.rules.push({
-      test: /\.node$/,
-      type: 'asset/resource',
-    })
-    
-    // Externalize onnxruntime for server
+    // Externalize native modules for server only
     if (isServer) {
       config.externals = config.externals || []
-      config.externals.push({
-        'onnxruntime-node': 'commonjs onnxruntime-node',
-      })
+      config.externals.push(
+        'onnxruntime-node',
+        'canvas',
+        '@napi-rs/canvas',
+        'pdf-parse'
+      )
     }
     
     if (!isServer) {
