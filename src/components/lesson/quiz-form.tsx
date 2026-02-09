@@ -148,7 +148,7 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
           {quiz.questions.map((question, index) => (
             <div key={question.id} className="space-y-3">
               <h3 className="font-medium">
-                {index + 1}. {question.text}
+                {question.text}
               </h3>
               <RadioGroup
                 value={answers[question.id] || ''}

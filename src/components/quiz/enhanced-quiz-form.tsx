@@ -154,7 +154,7 @@ export function EnhancedQuizForm({ quiz, lessonId }: EnhancedQuizFormProps) {
         <Card key={question.id}>
           <CardHeader>
             <CardTitle className="text-lg">
-              {index + 1}. {question.text}
+              {question.text}
             </CardTitle>
           </CardHeader>
           <CardContent>

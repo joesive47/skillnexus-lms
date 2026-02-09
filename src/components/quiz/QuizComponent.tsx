@@ -120,8 +120,7 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
         <CardHeader>
           <CardTitle>{quiz.title}</CardTitle>
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Question {currentQuestion + 1} of {quiz.questions.length}</span>
+            <div className="flex justify-end text-sm text-muted-foreground">
               <span>{Math.round(progress)}% Complete</span>
             </div>
             <Progress value={progress} />
