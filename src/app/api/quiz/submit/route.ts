@@ -27,20 +27,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 })
     }
 
-    // Calculate score
+    // Calculate score with detailed analysis
     let correctAnswers = 0
     const totalQuestions = quiz.questions.length
+    const questionResults: Array<{
+      questionId: string
+      questionText: string
+      userAnswer: string | null
+      correctAnswer: string
+      isCorrect: boolean
+      userAnswerText: string | null
+      correctAnswerText: string
+    }> = []
 
     for (const question of quiz.questions) {
       const userAnswer = answers[question.id]
       const correctOption = question.options.find(opt => opt.isCorrect)
+      const userOption = question.options.find(opt => opt.id === userAnswer)
+      const isCorrect = userAnswer === correctOption?.id
       
-      if (userAnswer === correctOption?.id) {
+      if (isCorrect) {
         correctAnswers++
       }
+
+      questionResults.push({
+        questionId: question.id,
+        questionText: question.text,
+        userAnswer: userAnswer || null,
+        correctAnswer: correctOption?.id || '',
+        isCorrect,
+        userAnswerText: userOption?.text || null,
+        correctAnswerText: correctOption?.text || ''
+      })
     }
 
     const score = Math.round((correctAnswers / totalQuestions) * 100)
+    const percentage = score
 
     // Save quiz submission
     await prisma.studentSubmission.create({
@@ -74,7 +96,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ score, correctAnswers, totalQuestions })
+    return NextResponse.json({
+      score,
+      correctAnswers,
+      totalQuestions,
+      percentage,
+      passed: score >= 70,
+      questionResults
+    })
   } catch (error) {
     console.error('Quiz submission error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

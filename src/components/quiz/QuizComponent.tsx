@@ -33,6 +33,19 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [score, setScore] = useState(0)
+  const [quizResults, setQuizResults] = useState<{
+    correctAnswers: number
+    totalQuestions: number
+    percentage: number
+    passed: boolean
+    questionResults: Array<{
+      questionId: string
+      questionText: string
+      userAnswerText: string | null
+      correctAnswerText: string
+      isCorrect: boolean
+    }>
+  } | null>(null)
   const router = useRouter()
 
   const handleAnswerChange = (questionId: string, optionId: string) => {
@@ -68,6 +81,7 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
       if (response.ok) {
         const result = await response.json()
         setScore(result.score)
+        setQuizResults(result)
         setShowResults(true)
       }
     } catch (error) {
@@ -80,21 +94,92 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
   const currentQ = quiz.questions[currentQuestion]
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100
 
-  if (showResults) {
+  if (showResults && quizResults) {
     return (
       <div className="container mx-auto py-6">
         <Card>
           <CardHeader>
             <CardTitle>Quiz Results</CardTitle>
           </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <div className="text-4xl font-bold text-green-600">
-              {score}%
+          <CardContent className="space-y-6">
+            {/* Large Percentage Display */}
+            <div className="text-center space-y-2">
+              <div className={`text-6xl font-bold ${
+                quizResults.percentage >= 80 ? 'text-green-600' :
+                quizResults.percentage >= 70 ? 'text-blue-600' :
+                quizResults.percentage >= 60 ? 'text-yellow-600' :
+                'text-red-600'
+              }`}>
+                {quizResults.percentage}%
+              </div>
+              <div className="text-xl text-gray-600">
+                {quizResults.correctAnswers} / {quizResults.totalQuestions} correct
+              </div>
+              <div className={`text-lg font-medium ${
+                quizResults.passed ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {quizResults.passed ? '✓ Passed' : '✗ Not Passed (70% required)'}
+              </div>
             </div>
-            <p className="text-lg">
-              You scored {score}% on this quiz!
-            </p>
-            <div className="flex gap-2 justify-center">
+
+            {/* Score Breakdown */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {quizResults.correctAnswers}
+                </div>
+                <div className="text-sm text-green-700">Correct</div>
+              </div>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-red-600">
+                  {quizResults.totalQuestions - quizResults.correctAnswers}
+                </div>
+                <div className="text-sm text-red-700">Incorrect</div>
+              </div>
+            </div>
+
+            {/* Detailed Question Review */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Detailed Review:</h3>
+              <div className="max-h-96 overflow-y-auto space-y-2 border rounded-lg p-4">
+                {quizResults.questionResults.map((result, index) => (
+                  <div
+                    key={result.questionId}
+                    className={`p-3 rounded-lg ${
+                      result.isCorrect
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className={`font-bold ${
+                        result.isCorrect ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {result.isCorrect ? '✓' : '✗'}
+                      </span>
+                      <div className="flex-1">
+                        <div className="font-medium text-sm mb-1">
+                          Q{index + 1}: {result.questionText}
+                        </div>
+                        {!result.isCorrect && (
+                          <div className="text-xs space-y-1">
+                            <div className="text-red-700">
+                              Your answer: {result.userAnswerText || 'No answer'}
+                            </div>
+                            <div className="text-green-700">
+                              Correct answer: {result.correctAnswerText}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 justify-center pt-4 border-t">
               <Button onClick={() => router.push(`/courses/${courseId}/lessons/${lessonId}`)}>
                 Back to Lesson
               </Button>
