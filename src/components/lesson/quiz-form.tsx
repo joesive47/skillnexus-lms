@@ -33,9 +33,18 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<{
     score: number
-    passed: boolean
+    correctAnswers: number
     totalQuestions: number
+    percentage: number
+    passed: boolean
+    questionResults?: any[]
     certificate?: any
+    analysis?: {
+      scoreDisplay: string
+      percentageDisplay: string
+      status: string
+      minimumRequired: string
+    }
   } | null>(null)
 
   const handleAnswerChange = (questionId: string, optionId: string) => {
@@ -61,9 +70,13 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
       if (response.success) {
         setResult({
           score: response.score!,
+          correctAnswers: response.correctAnswers!,
+          totalQuestions: response.totalQuestions!,
+          percentage: response.percentage!,
           passed: response.passed!,
-          totalQuestions: quiz.questions.length,
-          certificate: response.certificate
+          questionResults: response.questionResults,
+          certificate: response.certificate,
+          analysis: response.analysis
         })
       } else {
         alert(response.error || 'Failed to submit quiz')
@@ -96,17 +109,85 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <p className="text-lg font-medium">
-                Score: {result.score}/{result.totalQuestions} ({Math.round((result.score / result.totalQuestions) * 100)}%)
-              </p>
-              <p className="text-muted-foreground">
+            {/* Score Summary */}
+            <div className="p-4 bg-white rounded-lg border-2 border-gray-200">
+              <div className="text-center mb-4">
+                <div className={`text-4xl font-bold mb-2 ${
+                  result.passed ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {result.percentage}%
+                </div>
+                <div className="text-lg text-gray-700">
+                  {result.correctAnswers} / {result.totalQuestions} ข้อ
+                </div>
+                <Badge className={`mt-2 ${result.passed ? 'bg-green-500' : 'bg-red-500'}`}>
+                  {result.passed ? 'ผ่าน' : 'ไม่ผ่าน'} (ต้องการ 80% ขึ้นไป)
+                </Badge>
+              </div>
+
+              {/* Score Analysis */}
+              <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">ตอบถูก</div>
+                  <div className="text-2xl font-bold text-green-600">{result.correctAnswers}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600">ตอบผิด</div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {result.totalQuestions - result.correctAnswers}
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-center text-muted-foreground mt-4">
                 {result.passed 
-                  ? `Congratulations! You've successfully completed this ${isFinalExam ? 'final exam' : 'quiz'}.`
-                  : `You need at least 80% to pass. Please review the material and try again.`
+                  ? `🎉 ยินดีด้วย! คุณทำ${isFinalExam ? 'ข้อสอบปลายภาค' : 'แบบทดสอบ'}ผ่าน`
+                  : `💪 คุณต้องได้อย่างน้อย 80% เพื่อผ่าน กรุณาทบทวนเนื้อหาแล้วลองใหม่อีกครั้ง`
                 }
               </p>
             </div>
+
+            {/* Detailed Results */}
+            {result.questionResults && result.questionResults.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <span>📝</span> รายละเอียดการตอบคำถาม
+                </h4>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {result.questionResults.map((q: any, idx: number) => (
+                    <div 
+                      key={idx}
+                      className={`p-3 rounded-lg border ${
+                        q.isCorrect 
+                          ? 'bg-green-50 border-green-200' 
+                          : 'bg-red-50 border-red-200'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="flex-shrink-0">
+                          {q.isCorrect ? '✅' : '❌'}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm mb-1">
+                            ข้อ {q.questionNumber}: {q.questionText}
+                          </div>
+                          <div className="text-xs space-y-1">
+                            <div className={q.isCorrect ? 'text-green-700' : 'text-red-700'}>
+                              คำตอบของคุณ: {q.userAnswer}
+                            </div>
+                            {!q.isCorrect && (
+                              <div className="text-green-700">
+                                คำตอบที่ถูก: {q.correctAnswer}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             {result.certificate && (
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

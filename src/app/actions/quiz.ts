@@ -292,20 +292,41 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
     // Calculate score for different question types
     let correctAnswers = 0
     const totalQuestions = quiz.questions.length
+    const questionResults: any[] = []
 
-    quiz.questions.forEach(question => {
+    quiz.questions.forEach((question, index) => {
       const userAnswer = answers[question.id]
       
       // For multiple choice questions (default)
       const selectedOption = question.options.find(opt => opt.id === userAnswer)
-      if (selectedOption?.isCorrect) {
+      const correctOption = question.options.find(opt => opt.isCorrect)
+      const isCorrect = selectedOption?.isCorrect || false
+      
+      if (isCorrect) {
         correctAnswers++
       }
+
+      // Store detailed results
+      questionResults.push({
+        questionNumber: index + 1,
+        questionText: question.text,
+        userAnswer: selectedOption?.text || 'ไม่ได้ตอบ',
+        correctAnswer: correctOption?.text || '',
+        isCorrect
+      })
     })
 
     const score = correctAnswers
-    const percentage = (correctAnswers / totalQuestions) * 100
+    const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0
     const passed = percentage >= 80
+
+    console.log('📊 Quiz Results:', {
+      correctAnswers,
+      totalQuestions,
+      percentage: `${percentage}%`,
+      passed,
+      details: `${correctAnswers}/${totalQuestions} = ${percentage}%`
+    })
 
     // Save submission
     await prisma.studentSubmission.create({
@@ -314,7 +335,16 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
         quizId,
         score,
         passed,
-        answers: JSON.stringify(answers)
+        answers: JSON.stringify({
+          userAnswers: answers,
+          questionResults,
+          summary: {
+            correctAnswers,
+            totalQuestions,
+            percentage,
+            passed
+          }
+        })
       }
     })
 
@@ -355,11 +385,19 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
     
     return { 
       success: true, 
-      score, 
-      passed, 
+      score,
+      correctAnswers,
       totalQuestions,
-      percentage: Math.round(percentage),
-      certificate 
+      percentage,
+      passed,
+      questionResults,
+      certificate,
+      analysis: {
+        scoreDisplay: `${correctAnswers}/${totalQuestions}`,
+        percentageDisplay: `${percentage}%`,
+        status: passed ? 'PASSED' : 'FAILED',
+        minimumRequired: '80%'
+      }
     }
   } catch (error) {
     console.error('Error submitting quiz:', error)
