@@ -464,6 +464,9 @@ model User {
   courseBadges         CourseBadge[]
   careerCertificates   CareerCertificate[]
   careerBadges         CareerBadge[]
+  // Skill Certification System
+  userSkillBadges      UserSkillBadge[]
+  userCertifications   UserCertification[]
   // Learning Flow Management relations
   nodeProgress         NodeProgress[]
   videoSegments        VideoSegment[]
@@ -1791,4 +1794,157 @@ model CourseProgressSummary {
   @@index([userId])
   @@index([courseId, progressPercent])
   @@map("course_progress_summary")
+}
+
+// ============================================
+// CERTIFICATION SYSTEM MODELS
+// ============================================
+
+// Skill Badge Definition
+model SkillBadge {
+  id              String   @id @default(cuid())
+  badgeName       String
+  skillCategory   String
+  level           String
+  description     String?
+  imageUrl        String?
+  
+  criteriaType    String
+  criteriaValue   String
+  
+  issuerName      String   @default("SkillNexus Academy")
+  issuerUrl       String?
+  issuerEmail     String?
+  
+  expiryMonths    Int?
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  userBadges          UserSkillBadge[]
+  certificationBadges CertificationBadge[]
+  
+  @@map("skill_badges")
+}
+
+// User Skill Badges (Issued)
+model UserSkillBadge {
+  id              String   @id @default(cuid())
+  userId          String
+  badgeId         String
+  
+  issuedDate      DateTime @default(now())
+  expiryDate      DateTime?
+  
+  evidenceType    String?
+  evidenceId      String?
+  evidenceUrl     String?
+  evidenceData    String?
+  
+  verificationCode String  @unique @default(cuid())
+  
+  status          String   @default("ACTIVE")
+  revokedAt       DateTime?
+  revokedReason   String?
+  
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge  SkillBadge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, badgeId, evidenceId])
+  @@index([userId])
+  @@index([status])
+  @@map("user_skill_badges")
+}
+
+// Skill Certification Definition
+model SkillCertification {
+  id                  String   @id @default(cuid())
+  certificationName   String   @unique
+  description         String
+  category            String
+  
+  minimumBadgeLevel   String?
+  
+  issuerName          String   @default("SkillNexus Academy")
+  issuerUrl           String?
+  issuerLogo          String?
+  
+  validityMonths      Int?
+  
+  imageUrl            String?
+  certificateTemplate String?
+  
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  requiredBadges      CertificationBadge[]
+  userCertifications  UserCertification[]
+  
+  @@map("skill_certifications")
+}
+
+// Certification Required Badges (Mapping)
+model CertificationBadge {
+  id              String   @id @default(cuid())
+  certificationId String
+  badgeId         String
+  isRequired      Boolean  @default(true)
+  order           Int      @default(0)
+  
+  certification SkillCertification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  badge         SkillBadge         @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([certificationId, badgeId])
+  @@map("certification_badges")
+}
+
+// User Certifications (Issued)
+model UserCertification {
+  id                  String   @id @default(cuid())
+  userId              String
+  certificationId     String
+  
+  issueDate           DateTime @default(now())
+  expiryDate          DateTime?
+  
+  certificationNumber String   @unique @default(cuid())
+  verificationCode    String   @unique @default(cuid())
+  verificationUrl     String?
+  digitalSignature    String?
+  
+  status              String   @default("ACTIVE")
+  
+  earnedBadgesSnapshot String
+  
+  pdfUrl              String?
+  pdfGeneratedAt      DateTime?
+  
+  revokedAt           DateTime?
+  revokedReason       String?
+  
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certification SkillCertification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@map("user_certifications")
+}
+
+// Certification Events (Event Log)
+model CertificationEvent {
+  id          String   @id @default(cuid())
+  eventType   String
+  userId      String
+  entityType  String
+  entityId    String
+  metadata    String?
+  processed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+  
+  @@index([processed])
+  @@index([eventType])
+  @@map("certification_events")
 }
