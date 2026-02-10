@@ -162,6 +162,20 @@ export default function AssessmentPage() {
       finalAnswers[questions[currentIndex].id] = currentAnswer
     }
 
+    // Transform answers to match API format (option IDs)
+    const transformedAnswers: Record<string, string[]> = {}
+    Object.entries(finalAnswers).forEach(([questionId, answerIndex]) => {
+      const question = questions.find(q => q.id === questionId)
+      if (question) {
+        // Convert index to option text for saveAssessmentResult
+        const optionText = question[`option${(answerIndex as number) + 1}` as keyof Question] as string
+        transformedAnswers[questionId] = [optionText]
+      }
+    })
+
+    // Store answers in sessionStorage for results page
+    sessionStorage.setItem('assessmentAnswers', JSON.stringify(transformedAnswers))
+
     let correctAnswers = 0
     let totalScore = 0
     let earnedScore = 0

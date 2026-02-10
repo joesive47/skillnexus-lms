@@ -18,6 +18,9 @@ import {
   Share2
 } from 'lucide-react'
 import Link from 'next/link'
+import { CertificateModal } from '@/components/certification/certificate-modal'
+import { saveAssessmentResult } from '@/app/actions/assessment'
+import { useSession } from 'next-auth/react'
 
 interface SkillAnalysis {
   skillName: string
@@ -26,9 +29,16 @@ interface SkillAnalysis {
   recommendation: string
 }
 
+interface Certificate {
+  id: string
+  name: string
+  issuedAt: Date
+}
+
 export default function AssessmentResultsPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { data: session } = useSession()
   
   const careerId = searchParams.get('careerId')
   const score = parseInt(searchParams.get('score') || '0')
@@ -41,6 +51,46 @@ export default function AssessmentResultsPage() {
   const [careerTitle, setCareerTitle] = useState('')
   const [skillAnalysis, setSkillAnalysis] = useState<SkillAnalysis[]>([])
   const [wrongQuestions, setWrongQuestions] = useState<any[]>([])
+  const [certificate, setCertificate] = useState<Certificate | null>(null)
+  const [showCertificateModal, setShowCertificateModal] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    // Save assessment result to database
+    const saveResult = async () => {
+      if (!session?.user?.id || !careerId || isSaving) return
+      
+      setIsSaving(true)
+      try {
+        // Get answers from sessionStorage
+        const answersStr = sessionStorage.getItem('assessmentAnswers')
+        if (!answersStr) return
+        
+        const answers = JSON.parse(answersStr)
+        
+        const result = await saveAssessmentResult({
+          userId: session.user.id,
+          careerId,
+          answers,
+          timeSpent: 0 // You can track this if needed
+        })
+        
+        if (result.success && result.certificate) {
+          setCertificate(result.certificate)
+          // Show modal after a short delay
+          setTimeout(() => {
+            setShowCertificateModal(true)
+          }, 1500)
+        }
+      } catch (error) {
+        console.error('Error saving assessment result:', error)
+      } finally {
+        setIsSaving(false)
+      }
+    }
+    
+    saveResult()
+  }, [session?.user?.id, careerId, isSaving])
 
   useEffect(() => {
     // Parse skill scores from URL
@@ -309,13 +359,24 @@ export default function AssessmentResultsPage() {
               <p className="text-muted-foreground mb-4">
                 คุณผ่านการประเมินแล้ว! สามารถรับใบรับรองทักษะได้
               </p>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                รับใบรับรองทักษะ
-              </Button>
+              <Link href="/certifications">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  ดูวุฒิบัตรของฉัน
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Certificate Modal */}
+      {certificate && (
+        <CertificateModal
+          isOpen={showCertificateModal}
+          onClose={() => setShowCertificateModal(false)}
+          certificate={certificate}
+        />
+      )}
     </div>
   )
 }

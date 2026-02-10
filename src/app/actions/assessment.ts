@@ -307,7 +307,34 @@ export async function saveAssessmentResult(data: {
       }
     })
 
-    return { success: true, resultId: result.id, analysis }
+    // 🎓 Check and issue certifications if passed (>= 70%)
+    let certificate = null
+    if (percentage >= 70) {
+      try {
+        const { onAssessmentCompleted } = await import('@/lib/certification/integration-hooks')
+        await onAssessmentCompleted(session.user.id, data.careerId, percentage)
+        
+        // Check if user received any certificates
+        const userCertificates = await prisma.userCertification.findMany({
+          where: { userId: session.user.id },
+          include: { certification: true },
+          orderBy: { issuedAt: 'desc' },
+          take: 1
+        })
+        
+        if (userCertificates.length > 0) {
+          certificate = {
+            id: userCertificates[0].id,
+            name: userCertificates[0].certification.name,
+            issuedAt: userCertificates[0].issuedAt
+          }
+        }
+      } catch (error) {
+        console.error('Error issuing certification:', error)
+      }
+    }
+
+    return { success: true, resultId: result.id, analysis, certificate }
   } catch (error) {
     console.error('Save result error:', error)
     return { success: false, error: 'Failed to save result' }
