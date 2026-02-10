@@ -18,7 +18,7 @@ export default async function CertificationsPage() {
     include: {
       certification: {
         include: {
-          badges: {
+          requiredBadges: {
             include: {
               badge: true
             }
@@ -104,11 +104,11 @@ export default async function CertificationsPage() {
                     </span>
                   </div>
 
-                  {userCert.certification.badges.length > 0 && (
+                  {userCert.certification.requiredBadges.length > 0 && (
                     <div className="pt-2 border-t">
                       <p className="text-xs text-gray-500 mb-2">Required Badges:</p>
                       <div className="flex flex-wrap gap-1">
-                        {userCert.certification.badges.map((cb) => (
+                        {userCert.certification.requiredBadges.map((cb) => (
                           <span
                             key={cb.id}
                             className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"
