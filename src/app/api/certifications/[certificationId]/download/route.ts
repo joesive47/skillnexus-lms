@@ -117,7 +117,7 @@ export async function GET(
     })
 
     // Certificate Name
-    const certName = userCert.certification.name
+    const certName = userCert.certification.certificationName
     const certNameLines = wrapText(certName, 60)
     certNameLines.forEach((line, index) => {
       page.drawText(line, {
@@ -144,7 +144,7 @@ export async function GET(
     }
 
     // Date issued
-    const dateStr = new Date(userCert.issuedAt).toLocaleDateString('en-US', {
+    const dateStr = new Date(userCert.issueDate).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

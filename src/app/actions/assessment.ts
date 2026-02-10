@@ -318,15 +318,15 @@ export async function saveAssessmentResult(data: {
         const userCertificates = await prisma.userCertification.findMany({
           where: { userId: session.user.id },
           include: { certification: true },
-          orderBy: { issuedAt: 'desc' },
+          orderBy: { issueDate: 'desc' },
           take: 1
         })
         
         if (userCertificates.length > 0) {
           certificate = {
             id: userCertificates[0].id,
-            name: userCertificates[0].certification.name,
-            issuedAt: userCertificates[0].issuedAt
+            name: userCertificates[0].certification.certificationName,
+            issuedAt: userCertificates[0].issueDate
           }
         }
       } catch (error) {

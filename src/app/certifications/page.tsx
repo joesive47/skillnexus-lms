@@ -26,7 +26,7 @@ export default async function CertificationsPage() {
         }
       }
     },
-    orderBy: { issuedAt: 'desc' }
+    orderBy: { issueDate: 'desc' }
   })
 
   // Get all user badges
@@ -35,7 +35,7 @@ export default async function CertificationsPage() {
     include: {
       badge: true
     },
-    orderBy: { earnedAt: 'desc' }
+    orderBy: { issuedDate: 'desc' }
   })
 
   return (
@@ -82,7 +82,7 @@ export default async function CertificationsPage() {
                       <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-lg mb-1">{userCert.certification.name}</CardTitle>
+                      <CardTitle className="text-lg mb-1">{userCert.certification.certificationName}</CardTitle>
                       {userCert.certification.description && (
                         <p className="text-sm text-gray-600 line-clamp-2">
                           {userCert.certification.description}
@@ -96,7 +96,7 @@ export default async function CertificationsPage() {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      Issued: {new Date(userCert.issuedAt).toLocaleDateString('th-TH', {
+                      Issued: {new Date(userCert.issueDate).toLocaleDateString('th-TH', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'
@@ -113,7 +113,7 @@ export default async function CertificationsPage() {
                             key={cb.id}
                             className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"
                           >
-                            {cb.badge.name}
+                            {cb.badge.badgeName}
                           </span>
                         ))}
                       </div>
@@ -167,7 +167,7 @@ export default async function CertificationsPage() {
                     {userBadge.badge.imageUrl ? (
                       <img
                         src={userBadge.badge.imageUrl}
-                        alt={userBadge.badge.name}
+                        alt={userBadge.badge.badgeName}
                         className="w-20 h-20 mx-auto rounded-full"
                       />
                     ) : (
@@ -176,12 +176,12 @@ export default async function CertificationsPage() {
                       </div>
                     )}
                   </div>
-                  <h3 className="font-semibold text-sm mb-1">{userBadge.badge.name}</h3>
+                  <h3 className="font-semibold text-sm mb-1">{userBadge.badge.badgeName}</h3>
                   <p className="text-xs text-gray-500 line-clamp-2 mb-2">
                     {userBadge.badge.description}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(userBadge.earnedAt).toLocaleDateString('th-TH', {
+                    {new Date(userBadge.issuedDate).toLocaleDateString('th-TH', {
                       year: 'numeric',
                       month: 'short'
                     })}
