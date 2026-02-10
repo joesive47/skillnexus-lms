@@ -206,6 +206,7 @@ export async function attemptFinalCertification(userId: string, courseId: string
         return {
           id: certificate.id,
           uniqueId: certificate.verificationToken,
+          certificateNumber: certificate.certificateNumber,
           courseTitle: course.title,
           issuedAt: certificate.issuedAt
         }

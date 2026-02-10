@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { submitQuizAttempt } from '@/app/actions/quiz'
 import { CheckCircle, XCircle, Trophy } from 'lucide-react'
+import { DownloadCertificateButton } from '@/components/DownloadCertificateButton'
 
 interface QuizFormProps {
   quiz: {
@@ -193,14 +194,19 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy className="w-5 h-5 text-yellow-600" />
-                  <h3 className="font-medium text-yellow-800">Certificate Earned!</h3>
+                  <h3 className="font-medium text-yellow-800">🎉 ได้รับใบประกาศนียบัตร!</h3>
                 </div>
                 <p className="text-yellow-700 text-sm">
-                  Congratulations! You've earned a certificate for completing {result.certificate.courseTitle}.
+                  ยินดีด้วย! คุณได้รับใบประกาศนียบัตรจากการทำข้อสอบผ่านเกณฑ์สำหรับคอร์ส {result.certificate.courseTitle}
                 </p>
                 <p className="text-yellow-600 text-xs mt-1">
                   Certificate ID: {result.certificate.uniqueId}
                 </p>
+                {result.certificate.certificateNumber && (
+                  <div className="mt-4">
+                    <DownloadCertificateButton certificateNumber={result.certificate.certificateNumber} />
+                  </div>
+                )}
               </div>
             )}
           </div>
