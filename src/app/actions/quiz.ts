@@ -290,11 +290,15 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
     }
 
     // Calculate score for different question types
+    // Only count questions that were actually answered (shown to user)
     let correctAnswers = 0
-    const totalQuestions = quiz.questions.length
     const questionResults: any[] = []
 
-    quiz.questions.forEach((question, index) => {
+    // Filter only questions that user answered (actually shown in quiz)
+    const answeredQuestionIds = Object.keys(answers)
+    const answeredQuestions = quiz.questions.filter(q => answeredQuestionIds.includes(q.id))
+
+    answeredQuestions.forEach((question, index) => {
       const userAnswer = answers[question.id]
       
       // For multiple choice questions (default)
@@ -316,6 +320,8 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
       })
     })
 
+    // Calculate from actual answered questions, not total in question bank
+    const totalQuestions = answeredQuestions.length
     const score = correctAnswers
     const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0
     const passed = percentage >= 80

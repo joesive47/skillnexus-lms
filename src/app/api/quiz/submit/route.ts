@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate score with detailed analysis
+    // Only count questions that were actually answered (shown to user)
     let correctAnswers = 0
-    const totalQuestions = quiz.questions.length
     const questionResults: Array<{
       questionId: string
       questionText: string
@@ -40,7 +40,11 @@ export async function POST(request: NextRequest) {
       correctAnswerText: string
     }> = []
 
-    for (const question of quiz.questions) {
+    // Filter only questions that user answered (actually shown in quiz)
+    const answeredQuestionIds = Object.keys(answers)
+    const answeredQuestions = quiz.questions.filter(q => answeredQuestionIds.includes(q.id))
+
+    for (const question of answeredQuestions) {
       const userAnswer = answers[question.id]
       const correctOption = question.options.find(opt => opt.isCorrect)
       const userOption = question.options.find(opt => opt.id === userAnswer)
@@ -61,6 +65,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Calculate from actual answered questions, not total in question bank
+    const totalQuestions = answeredQuestions.length
     const score = Math.round((correctAnswers / totalQuestions) * 100)
     const percentage = score
 
