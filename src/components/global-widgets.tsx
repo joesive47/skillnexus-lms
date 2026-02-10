@@ -16,9 +16,24 @@ const UnifiedChatWidget = dynamic(
   }
 )
 
+const NotificationCenter = dynamic(
+  () => import('@/components/notifications/notification-center').then(mod => ({ default: mod.NotificationCenter })),
+  {
+    ssr: false,
+    loading: () => null
+  }
+)
+
 export default function GlobalWidgets() {
   return (
     <>
+      {/* Notification Center - Fixed Position Top Right */}
+      <div className="fixed top-4 right-4 z-[9999]">
+        <Suspense fallback={null}>
+          <NotificationCenter />
+        </Suspense>
+      </div>
+
       {/* Skill Assessment Button - Fixed Position */}
       <Link
         href="/skills-assessment"

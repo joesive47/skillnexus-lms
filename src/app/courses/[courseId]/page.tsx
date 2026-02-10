@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CourseImage } from '@/components/ui/course-image'
 import { CourseProgressCard } from '@/components/course/CourseProgressCard'
+import { CourseProgressBar } from '@/components/course/CourseProgressBar'
 import { getCourseProgress } from '@/app/actions/video'
 import { LessonProgressIndicator } from '@/components/lesson/LessonProgressIndicator'
 import { PurchaseButton } from '@/components/course/purchase-button'
@@ -198,10 +199,15 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
           {/* Learning Path Flow - Only show if enrolled */}
           {isEnrolled && (
-            <LearningPathViewer 
-              courseId={courseId} 
-              userId={session.user.id} 
-            />
+            <>
+              {/* New Course Progress Bar with Certificate */}
+              <CourseProgressBar courseId={courseId} showDetails={true} />
+              
+              <LearningPathViewer 
+                courseId={courseId} 
+                userId={session.user.id} 
+              />
+            </>
           )}
 
           {/* Social Features - Only show if enrolled */}

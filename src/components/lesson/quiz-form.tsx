@@ -7,8 +7,11 @@ import { Badge } from '@/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { submitQuizAttempt } from '@/app/actions/quiz'
+import { markLessonComplete } from '@/lib/course-progress'
 import { CheckCircle, XCircle, Trophy } from 'lucide-react'
 import { DownloadCertificateButton } from '@/components/DownloadCertificateButton'
+import { toast } from 'sonner'
+import { addNotification } from '@/components/notifications/notification-center'
 
 interface QuizFormProps {
   quiz: {
@@ -25,11 +28,12 @@ interface QuizFormProps {
     }[]
   }
   lessonId: string
+  courseId: string
   userId: string
   isFinalExam: boolean
 }
 
-export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps) {
+export function QuizForm({ quiz, lessonId, courseId, userId, isFinalExam }: QuizFormProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<{
@@ -59,7 +63,10 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
     event.preventDefault()
     
     if (Object.keys(answers).length !== quiz.questions.length) {
-      alert('Please answer all questions before submitting.')
+      toast({
+        tit.error('กรุณาตอบคำถามให้ครบ', {
+        description: 'โปรดตอบคำถามทุกข้อก่อนส่งคำตอบ',
+      })
       return
     }
 
@@ -68,7 +75,63 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
     try {
       const response = await submitQuizAttempt(quiz.id, lessonId, answers)
       
-      if (response.success) {
+      if (response.success && response.passed) {
+        // Mark lesson as complete when quiz is passed
+        const progressResult = await markLessonComplete(courseId, lessonId)
+        
+        // Merge certificate info
+        const finalResult = {
+          score: response.score!,
+          correctAnswers: response.correctAnswers!,
+          totalQuestions: response.totalQuestions!,
+          percentage: response.percentage!,
+          passed: response.passed!,
+          questionResults: response.questionResults,
+          certificate: progressResult.certificate || response.certificate,
+          analysis: response.analysis
+        }
+        
+        setResult(finalResult)
+
+        // Show success notification
+        toast.success('ยินดีด้วย!', {
+          description: isFinalExam 
+            ? 'คุณสอบไฟนอลผ่านแล้ว!' 
+            : 'คุณทำแบบทดสอบผ่านเกณฑ์!',
+        })
+
+        // Add to notification center
+        addNotification({
+          type: 'progress',
+          title: isFinalExam ? 'ผ่านสอบไฟนอล!' : 'ผ่านแบบทดสอบ!',
+          message: `คุณทำแบบทดสอบได้ ${response.percentage}%`,
+        })
+
+        // Show certificate notification if issued
+        if (progressResult.courseComplete && progressResult.certificate) {
+          setTimeout(() => {
+            toast.success('ได้รับใบรับรอง!', {
+              description: 'คุณจบคอร์สและได้รับใบรับรองแล้ว',
+              action: {
+                label: 'ดูใบรับรอง',
+                onClick: () => {
+                  window.location.href = `/certificates/${progressResult.certificate.id}`
+                }
+              },
+              duration: 10000,
+            })
+
+            // Add certificate notification
+            addNotification({
+              type: 'certificate',
+              title: 'ยินดีด้วย! คุณได้รับใบรับรอง',
+              message: 'คุณจบคอร์สและได้รับใบรับรองแล้ว',
+              link: `/certificates/${progressResult.certificate.id}`,
+              linkText: 'ดูใบรับรอง'
+            })
+          }, 1000)
+        }
+      } else if (response.success) {
         setResult({
           score: response.score!,
           correctAnswers: response.correctAnswers!,
@@ -76,15 +139,22 @@ export function QuizForm({ quiz, lessonId, userId, isFinalExam }: QuizFormProps)
           percentage: response.percentage!,
           passed: response.passed!,
           questionResults: response.questionResults,
-          certificate: response.certificate,
           analysis: response.analysis
         })
+
+        toast.error('ไม่ผ่านเกณฑ์', {
+          description: 'กรุณาทบทวนเนื้อหาแล้วลองใหม่อีกครั้ง',
+        })
       } else {
-        alert(response.error || 'Failed to submit quiz')
+        toast.error('เกิดข้อผิดพลาด', {
+          description: response.error || 'ไม่สามารถส่งคำตอบได้',
+        })
       }
     } catch (error) {
       console.error('Quiz submission error:', error)
-      alert('Failed to submit quiz. Please try again.')
+      toast.error('เกิดข้อผิดพลาด', {
+        description: 'ไม่สามารถส่งคำตอบได้ กรุณาลองใหม่อีกครั้ง',
+      })
     } finally {
       setIsSubmitting(false)
     }
