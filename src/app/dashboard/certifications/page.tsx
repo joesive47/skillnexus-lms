@@ -258,9 +258,11 @@ function CertificateViewDialog({ certificate }: { certificate: CourseCertificate
           </div>
           
           <div className="flex justify-end gap-2">
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Download PDF
+            <Button variant="outline" asChild>
+              <Link href={`/api/certificates/download/${certificate.verificationCode}`} target="_blank">
+                <Download className="w-4 h-4 mr-2" />
+                Download PDF
+              </Link>
             </Button>
           </div>
         </div>

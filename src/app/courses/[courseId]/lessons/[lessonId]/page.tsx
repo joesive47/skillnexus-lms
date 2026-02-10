@@ -13,6 +13,7 @@ import { ScormPlayerWithControls } from '@/components/lesson/ScormPlayerWithCont
 import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrapper'
 import Link from 'next/link'
 import { ProgressIndicator } from '@/components/learning-flow'
+import { LayoutDashboard } from 'lucide-react'
 
 interface LessonPageProps {
   params: Promise<{ courseId: string; lessonId: string }>
@@ -124,9 +125,15 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-4">
+      <div className="mb-4 flex gap-2">
         <Button variant="outline" asChild>
           <Link href={`/courses/${courseId}`}>← Back to Course</Link>
+        </Button>
+        <Button variant="default" asChild>
+          <Link href="/dashboard">
+            <LayoutDashboard className="w-4 h-4 mr-2" />
+            Dashboard
+          </Link>
         </Button>
       </div>
       
