@@ -14,6 +14,7 @@
     "build:production": "cross-env NODE_ENV=production npm run build",
     "start": "next start",
     "lint": "next lint",
+    "health": "node scripts/health-check.js",
     "clean:all": "node cleanup-project.js",
     "clean:cache": "rimraf .next node_modules/.cache .turbo .swc",
     "clean:logs": "rimraf *.log debug.log error.log",

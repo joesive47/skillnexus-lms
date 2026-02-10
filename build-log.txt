@@ -1,0 +1,10 @@
+
+> uppowerskill-lms@1.0.2 build
+> next build
+
+   Γû▓ Next.js 15.5.7
+   - Environments: .env.local, .env.production, .env
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+   Creating an optimized production build ...
