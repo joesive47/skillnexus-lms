@@ -157,6 +157,7 @@ export default async function ClassroomPage({ params, searchParams }: ClassroomP
               <QuizForm
                 quiz={quizData}
                 lessonId={selectedLesson.id}
+                courseId={courseId}
                 userId={session.user.id}
                 isFinalExam={selectedLesson.isFinalExam}
               />
