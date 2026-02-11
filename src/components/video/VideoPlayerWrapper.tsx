@@ -27,10 +27,16 @@ export function VideoPlayerWrapper({
 }: VideoPlayerWrapperProps) {
   const [lastSavedTime, setLastSavedTime] = useState(0)
   const [certificateIssued, setCertificateIssued] = useState(false)
+  const [currentVideoTime, setCurrentVideoTime] = useState(0)
+  const [videoDuration, setVideoDuration] = useState(0)
 
   // Auto-save progress every 30 seconds
   const handleProgress = async (watchedTime: number, totalTime: number) => {
     try {
+      // Update current time state
+      setCurrentVideoTime(watchedTime)
+      setVideoDuration(totalTime)
+      
       // Only save if 30 seconds have passed since last save
       if (Math.abs(watchedTime - lastSavedTime) >= 30) {
         await updateLessonProgress(courseId, lessonId, {
@@ -46,11 +52,11 @@ export function VideoPlayerWrapper({
   }
 
   // Mark as complete when video ends
-  const handleComplete = async (watchedTime: number, totalTime: number) => {
+  const handleComplete = async () => {
     try {
       const result = await updateLessonProgress(courseId, lessonId, {
-        watchTime: totalTime,
-        totalTime: totalTime,
+        watchTime: videoDuration,
+        totalTime: videoDuration,
         completed: true
       })
 
