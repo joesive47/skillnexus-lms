@@ -37,10 +37,10 @@ title: true,
   const isExpired = certificate?.expiryDate && new Date(certificate.expiryDate) < new Date()
 
   return (
-    <div className=\"container mx-auto py-12 max-w-2xl\">
-      <div className=\"text-center mb-8\">
-        <h1 className=\"text-3xl font-bold mb-2\">🔍 ตรวจสอบใบรับรอง</h1>
-        <p className=\"text-gray-600\">
+    <div className="container mx-auto py-12 max-w-2xl">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2">🔍 ตรวจสอบใบรับรอง</h1>
+        <p className="text-gray-600">
           Certificate Verification
         </p>
       </div>
@@ -48,11 +48,11 @@ title: true,
       {certificate ? (
         <Card className={isValid && !isExpired ? 'border-green-500' : 'border-red-500'}>
           <CardHeader className={isValid && !isExpired ? 'bg-green-50' : 'bg-red-50'}>
-            <div className=\"flex items-center gap-3\">
+            <div className="flex items-center gap-3">
               {isValid && !isExpired ? (
-                <CheckCircle className=\"w-8 h-8 text-green-600\" />
+                <CheckCircle className="w-8 h-8 text-green-600" />
               ) : (
-                <XCircle className=\"w-8 h-8 text-red-600\" />
+                <XCircle className="w-8 h-8 text-red-600" />
               )}
               <div>
                 <CardTitle className={isValid && !isExpired ? 'text-green-900' : 'text-red-900'}>
@@ -68,39 +68,39 @@ title: true,
               </div>
             </div>
           </CardHeader>
-          <CardContent className=\"pt-6 space-y-4\">
+          <CardContent className="pt-6 space-y-4">
             {/* Verification Code */}
-            <div className=\"bg-gray-50 rounded-lg p-4\">
-              <p className=\"text-sm text-gray-600 mb-1\">Verification Code</p>
-              <p className=\"text-lg font-mono font-bold text-gray-900\">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-sm text-gray-600 mb-1">Verification Code</p>
+              <p className="text-lg font-mono font-bold text-gray-900">
                 {certificate.verificationCode}
               </p>
             </div>
 
             {/* Certificate Details */}
-            <div className=\"space-y-3\">
-              <div className=\"flex items-start gap-3 p-3 bg-gray-50 rounded-lg\">
-                <Award className=\"w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5\" />
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <Award className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className=\"text-sm text-gray-600\">Course</p>
-                  <p className=\"font-medium text-gray-900\">{certificate.course.title}</p>
+                  <p className="text-sm text-gray-600">Course</p>
+                  <p className="font-medium text-gray-900">{certificate.course.title}</p>
                 </div>
               </div>
 
-              <div className=\"flex items-start gap-3 p-3 bg-gray-50 rounded-lg\">
-                <User className=\"w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5\" />
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <User className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className=\"text-sm text-gray-600\">Recipient</p>
-                  <p className=\"font-medium text-gray-900\">{certificate.user.name}</p>
-                  <p className=\"text-sm text-gray-500\">{certificate.user.email}</p>
+                  <p className="text-sm text-gray-600">Recipient</p>
+                  <p className="font-medium text-gray-900">{certificate.user.name}</p>
+                  <p className="text-sm text-gray-500">{certificate.user.email}</p>
                 </div>
               </div>
 
-              <div className=\"flex items-start gap-3 p-3 bg-gray-50 rounded-lg\">
-                <Calendar className=\"w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5\" />
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <Calendar className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className=\"text-sm text-gray-600\">Issue Date</p>
-                  <p className=\"font-medium text-gray-900\">
+                  <p className="text-sm text-gray-600">Issue Date</p>
+                  <p className="font-medium text-gray-900">
                     {new Date(certificate.issueDate).toLocaleDateString('th-TH', {
                       year: 'numeric',
                       month: 'long',
@@ -111,11 +111,11 @@ title: true,
               </div>
 
               {certificate.expiryDate && (
-                <div className=\"flex items-start gap-3 p-3 bg-gray-50 rounded-lg\">
-                  <Calendar className=\"w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5\" />
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Calendar className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className=\"text-sm text-gray-600\">Expiry Date</p>
-                    <p className=\"font-medium text-gray-900\">
+                    <p className="text-sm text-gray-600">Expiry Date</p>
+                    <p className="font-medium text-gray-900">
                       {new Date(certificate.expiryDate).toLocaleDateString('th-TH', {
                         year: 'numeric',
                         month: 'long',
@@ -123,7 +123,7 @@ title: true,
                       })}
                     </p>
                     {isExpired && (
-                      <Badge variant=\"destructive\" className=\"mt-1\">
+                      <Badge variant="destructive" className="mt-1">
                         Expired
                       </Badge>
                     )}
@@ -131,19 +131,19 @@ title: true,
                 </div>
               )}
 
-              <div className=\"flex items-start gap-3 p-3 bg-gray-50 rounded-lg\">
-                <Award className=\"w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5\" />
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <Award className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className=\"text-sm text-gray-600\">Issued By</p>
-                  <p className=\"font-medium text-gray-900\">{certificate.definition.issuerName}</p>
-                  <p className=\"text-sm text-gray-500\">{certificate.definition.issuerTitle}</p>
+                  <p className="text-sm text-gray-600">Issued By</p>
+                  <p className="font-medium text-gray-900">{certificate.definition.issuerName}</p>
+                  <p className="text-sm text-gray-500">{certificate.definition.issuerTitle}</p>
                 </div>
               </div>
 
-              <div className=\"flex items-start gap-3 p-3 bg-gray-50 rounded-lg\">
-                <CheckCircle className=\"w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5\" />
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className=\"text-sm text-gray-600\">Status</p>
+                  <p className="text-sm text-gray-600">Status</p>
                   <Badge variant={certificate.status === 'ACTIVE' ? 'default' : 'destructive'}>
                     {certificate.status}
                   </Badge>
@@ -153,15 +153,15 @@ title: true,
 
             {/* Revocation Info */}
             {certificate.revokedAt && (
-              <div className=\"bg-red-50 border border-red-200 rounded-lg p-4\">
-                <p className=\"text-sm font-medium text-red-900 mb-1\">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm font-medium text-red-900 mb-1">
                   ⚠️ Certificate Revoked
                 </p>
-                <p className=\"text-sm text-red-700\">
+                <p className="text-sm text-red-700">
                   <strong>Date:</strong> {new Date(certificate.revokedAt).toLocaleDateString('th-TH')}
                 </p>
                 {certificate.revokedReason && (
-                  <p className=\"text-sm text-red-700 mt-1\">
+                  <p className="text-sm text-red-700 mt-1">
                     <strong>Reason:</strong> {certificate.revokedReason}
                   </p>
                 )}
@@ -169,16 +169,16 @@ title: true,
             )}
 
             {/* Actions */}
-            <div className=\"flex gap-3 pt-4\">
+            <div className="flex gap-3 pt-4">
               <Link
                 href={`/certificates/${certificate.id}`}
-                className=\"flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg font-medium\"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg font-medium"
               >
                 View Certificate
               </Link>
               <Link
-                href=\"/\"
-                className=\"flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 text-center py-2 px-4 rounded-lg font-medium\"
+                href="/"
+                className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 text-center py-2 px-4 rounded-lg font-medium"
               >
                 Back to Home
               </Link>
@@ -186,26 +186,26 @@ title: true,
           </CardContent>
         </Card>
       ) : (
-        <Card className=\"border-red-500\">
-          <CardHeader className=\"bg-red-50\">
-            <div className=\"flex items-center gap-3\">
-              <XCircle className=\"w-8 h-8 text-red-600\" />
+        <Card className="border-red-500">
+          <CardHeader className="bg-red-50">
+            <div className="flex items-center gap-3">
+              <XCircle className="w-8 h-8 text-red-600" />
               <div>
-                <CardTitle className=\"text-red-900\">❌ ไม่พบใบรับรอง</CardTitle>
-                <p className=\"text-sm text-red-700\">Certificate not found</p>
+                <CardTitle className="text-red-900">❌ ไม่พบใบรับรอง</CardTitle>
+                <p className="text-sm text-red-700">Certificate not found</p>
               </div>
             </div>
           </CardHeader>
-          <CardContent className=\"pt-6\">
-            <p className=\"text-gray-600 mb-4\">
-              ไม่พบใบรับรองที่มีรหัสยืนยัน: <code className=\"bg-gray-100 px-2 py-1 rounded\">{code}</code>
+          <CardContent className="pt-6">
+            <p className="text-gray-600 mb-4">
+              ไม่พบใบรับรองที่มีรหัสยืนยัน: <code className="bg-gray-100 px-2 py-1 rounded">{code}</code>
             </p>
-            <p className=\"text-sm text-gray-500 mb-4\">
+            <p className="text-sm text-gray-500 mb-4">
               กรุณาตรวจสอบรหัสยืนยันให้ถูกต้อง หรือติดต่อผู้ออกใบรับรอง
             </p>
             <Link
-              href=\"/\"
-              className=\"block w-full bg-gray-600 hover:bg-gray-700 text-white text-center py-2 px-4 rounded-lg font-medium\"
+              href="/"
+              className="block w-full bg-gray-600 hover:bg-gray-700 text-white text-center py-2 px-4 rounded-lg font-medium"
             >
               Back to Home
             </Link>
@@ -214,9 +214,9 @@ title: true,
       )}
 
       {/* Info Box */}
-      <Card className=\"mt-6 bg-blue-50 border-blue-200\">
-        <CardContent className=\"pt-6\">
-          <p className=\"text-sm text-blue-800\">
+      <Card className="mt-6 bg-blue-50 border-blue-200">
+        <CardContent className="pt-6">
+          <p className="text-sm text-blue-800">
             💡 <strong>How to verify:</strong> ใบรับรองที่ถูกต้องจะแสดงสถานะ "Active" 
             และมีข้อมูลครบถ้วน รวมถึงชื่อผู้รับ, คอร์ส, วันที่ออก และผู้ออกใบรับรอง
           </p>
