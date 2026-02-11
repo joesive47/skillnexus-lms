@@ -39,7 +39,7 @@ export function CourseProgressBar({
   if (loading) {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className=\"h-4 bg-gray-200 rounded w-full\"></div>
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
       </div>
     )
   }
@@ -53,31 +53,31 @@ export function CourseProgressBar({
     <div className={`space-y-4 ${className}`}>
       {/* Progress Bar */}
       <div>
-        <div className=\"flex items-center justify-between mb-2\">
-          <div className=\"flex items-center gap-2\">
-            <span className=\"text-sm font-medium\">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
               ความก้าวหน้า
             </span>
             {isComplete && (
-              <Badge className=\"bg-green-500\">
-                <Trophy className=\"w-3 h-3 mr-1\" />
+              <Badge className="bg-green-500">
+                <Trophy className="w-3 h-3 mr-1" />
                 จบแล้ว
               </Badge>
             )}
           </div>
-          <span className=\"text-sm text-gray-600\">
+          <span className="text-sm text-gray-600">
             {stats.completedLessons}/{stats.totalLessons} บทเรียน
           </span>
         </div>
         
-        <Progress value={stats.percentage} className=\"h-3\" />
+        <Progress value={stats.percentage} className="h-3" />
         
-        <div className=\"flex items-center justify-between mt-1\">
-          <span className=\"text-xs text-gray-500\">
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-xs text-gray-500">
             {stats.percentage}% เสร็จสมบูรณ์
           </span>
           {finalExam && (
-            <Badge variant={finalExam.passed ? 'default' : 'outline'} className=\"text-xs\">
+            <Badge variant={finalExam.passed ? 'default' : 'outline'} className="text-xs">
               {finalExam.passed ? '✅ สอบไฟนอลผ่าน' : '⏳ รอสอบไฟนอล'}
             </Badge>
           )}
@@ -86,20 +86,20 @@ export function CourseProgressBar({
 
       {/* Certificate Status */}
       {certificate && (
-        <Card className=\"p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200\">
-          <div className=\"flex items-center gap-3\">
-            <Trophy className=\"w-8 h-8 text-yellow-600 flex-shrink-0\" />
-            <div className=\"flex-1\">
-              <p className=\"font-medium text-yellow-900\">
+        <Card className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+          <div className="flex items-center gap-3">
+            <Trophy className="w-8 h-8 text-yellow-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-yellow-900">
                 🎉 คุณได้รับใบรับรองแล้ว!
               </p>
-              <p className=\"text-sm text-yellow-700\">
+              <p className="text-sm text-yellow-700">
                 รหัสยืนยัน: {certificate.verificationCode}
               </p>
             </div>
             <a
               href={`/certificates/${certificate.id}`}
-              className=\"bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap\"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
             >
               ดูใบรับรอง
             </a>
@@ -109,20 +109,20 @@ export function CourseProgressBar({
 
       {/* Can Issue Certificate */}
       {!certificate && progress.canIssueCertificate && (
-        <Card className=\"p-4 bg-green-50 border-green-200\">
-          <div className=\"flex items-center gap-3\">
-            <CheckCircle className=\"w-6 h-6 text-green-600\" />
-            <div className=\"flex-1\">
-              <p className=\"font-medium text-green-900\">
+        <Card className="p-4 bg-green-50 border-green-200">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="flex-1">
+              <p className="font-medium text-green-900">
                 ✅ คุณจบคอร์สแล้ว!
               </p>
-              <p className=\"text-sm text-green-700\">
+              <p className="text-sm text-green-700">
                 คลิกเพื่อรับใบรับรอง
               </p>
             </div>
             <a
               href={`/courses/${courseId}/certificate`}
-              className=\"bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap\"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
             >
               รับใบรับรอง
             </a>
@@ -132,11 +132,11 @@ export function CourseProgressBar({
 
       {/* Detailed Lesson List (Optional) */}
       {showDetails && lessons && lessons.length > 0 && (
-        <div className=\"space-y-2 mt-4\">
-          <h4 className=\"text-sm font-medium text-gray-700 mb-2\">
+        <div className="space-y-2 mt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">
             รายละเอียดบทเรียน
           </h4>
-          <div className=\"space-y-1 max-h-96 overflow-y-auto\">
+          <div className="space-y-1 max-h-96 overflow-y-auto">
             {lessons.map((lesson: any, index: number) => (
               <div
                 key={lesson.id}
@@ -147,9 +147,9 @@ export function CourseProgressBar({
                 }`}
               >
                 {lesson.completed ? (
-                  <CheckCircle className=\"w-4 h-4 text-green-600 flex-shrink-0\" />
+                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
                 ) : (
-                  <Circle className=\"w-4 h-4 text-gray-400 flex-shrink-0\" />
+                  <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 )}
                 
                 <span className={`text-sm flex-1 ${
@@ -159,14 +159,14 @@ export function CourseProgressBar({
                 </span>
 
                 {lesson.isFinalExam && (
-                  <Badge variant=\"destructive\" className=\"text-xs\">
+                  <Badge variant="destructive" className="text-xs">
                     Final
                   </Badge>
                 )}
 
                 {!lesson.completed && lesson.progressPercent > 0 && (
-                  <div className=\"flex items-center gap-1 text-xs text-gray-500\">
-                    <Clock className=\"w-3 h-3\" />
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Clock className="w-3 h-3" />
                     {lesson.progressPercent}%
                   </div>
                 )}
