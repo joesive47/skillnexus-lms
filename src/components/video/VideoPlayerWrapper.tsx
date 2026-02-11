@@ -62,6 +62,7 @@ export function VideoPlayerWrapper({
       // Check if certificate was issued (for final exam)
       if (result.courseComplete && result.certificate && !certificateIssued) {
         setCertificateIssued(true)
+        const certificateId = result.certificate.id
         
         // Show certificate notification with toast
         toast.success('ยินดีด้วย! คุณได้รับใบรับรอง', {
@@ -69,7 +70,7 @@ export function VideoPlayerWrapper({
           action: {
             label: 'ดูใบรับรอง',
             onClick: () => {
-              window.location.href = `/certificates/${result.certificate.id}`
+              window.location.href = `/certificates/${certificateId}`
             }
           },
           duration: 10000,
@@ -80,7 +81,7 @@ export function VideoPlayerWrapper({
           type: 'certificate',
           title: 'ยินดีด้วย! คุณได้รับใบรับรอง',
           message: `คุณได้รับใบรับรองสำหรับคอร์สนี้แล้ว`,
-          link: `/certificates/${result.certificate.id}`,
+          link: `/certificates/${certificateId}`,
           linkText: 'ดูใบรับรอง'
         })
       }
