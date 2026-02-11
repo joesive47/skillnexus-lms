@@ -219,6 +219,7 @@ export function EnhancedClassroom({
                         <QuizForm
                           quiz={quizData}
                           lessonId={selectedLesson.id}
+                          courseId={course.id}
                           userId={userId}
                           isFinalExam={selectedLesson.isFinalExam}
                         />
