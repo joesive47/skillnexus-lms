@@ -101,6 +101,7 @@
     "@vercel/blob": "^2.2.0",
     "@xenova/transformers": "^2.17.2",
     "autoprefixer": "^10.4.22",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
