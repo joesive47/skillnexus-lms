@@ -312,7 +312,13 @@ export function AnalyticsDashboard({ userRole }: AnalyticsDashboardProps) {
   )
 }
 
-function StatCard({ icon, title, value, subtext, color }: any) {
+function StatCard({ icon, title, value, subtext, color }: {
+  icon: React.ReactNode
+  title: string
+  value: string | number
+  subtext: string
+  color: 'blue' | 'green' | 'purple' | 'yellow'
+}) {
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600',
     green: 'bg-green-100 text-green-600',
