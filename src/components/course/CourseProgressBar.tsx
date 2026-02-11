@@ -178,9 +178,9 @@ export function CourseProgressBar({
 
       {/* Next Steps */}
       {!isComplete && stats.percentage > 0 && (
-        <div className=\"text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200\">
+        <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
           💡 <strong>สิ่งที่ต้องทำต่อ:</strong>
-          <ul className=\"ml-4 mt-1 space-y-1\">
+          <ul className="ml-4 mt-1 space-y-1">
             {stats.completedLessons < stats.totalLessons && (
               <li>• เรียนบทเรียนที่เหลืออีก {stats.totalLessons - stats.completedLessons} บท</li>
             )}

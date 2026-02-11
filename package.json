@@ -24,6 +24,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node -r esbuild-register prisma/seed.ts || tsx prisma/seed.ts || node prisma/seed.js",
+    "db:seed:lms": "tsx prisma/seed-lms-testing.ts",
     "db:seed:analytics": "tsx scripts/seed-analytics.ts",
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",

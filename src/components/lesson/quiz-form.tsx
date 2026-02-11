@@ -63,8 +63,7 @@ export function QuizForm({ quiz, lessonId, courseId, userId, isFinalExam }: Quiz
     event.preventDefault()
     
     if (Object.keys(answers).length !== quiz.questions.length) {
-      toast({
-        tit.error('กรุณาตอบคำถามให้ครบ', {
+      toast.error('กรุณาตอบคำถามให้ครบ', {
         description: 'โปรดตอบคำถามทุกข้อก่อนส่งคำตอบ',
       })
       return

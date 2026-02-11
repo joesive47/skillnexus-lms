@@ -55,8 +55,7 @@ export function VideoPlayerWrapper({
       })
 
       // Show success message
-      toast({
-        tit.success('บันทึกความก้าวหน้าสำเร็จ', {
+      toast.success('บันทึกความก้าวหน้าสำเร็จ', {
         description: result.message,
       })
 
@@ -89,6 +88,7 @@ export function VideoPlayerWrapper({
       console.error('Failed to mark as complete:', error)
       toast.error('เกิดข้อผิดพลาด', {
         description: 'ไม่สามารถบันทึกความก้าวหน้าได้'
+      })
     }
   }
 
