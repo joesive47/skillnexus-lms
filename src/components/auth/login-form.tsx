@@ -54,16 +54,13 @@ export function LoginForm() {
     }
   }, [errorMessage, email])
 
-  // Role-based redirect หลัง login สำเร็จ
+  // Simple redirect หลัง login สำเร็จ - ไปที่หน้าเบาๆ ก่อน
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       const role = session.user.role
-      const redirectMap: Record<string, string> = {
-        'ADMIN': '/admin/dashboard',
-        'TEACHER': '/teacher/dashboard',
-        'STUDENT': '/dashboard'
-      }
-      const redirectTo = redirectMap[role] || '/dashboard'
+      // Redirect ไปหน้า welcome (client component, ไม่มี database queries)
+      // เพื่อหลีกเลี่ยง 504 timeout จากการ query database ช้า
+      const redirectTo = '/welcome'
       
       // Log successful redirect
       if (email) {
@@ -73,15 +70,15 @@ export function LoginForm() {
           body: JSON.stringify({ 
             email, 
             step: 'REDIRECT_SUCCESS', 
-            message: `Redirecting to ${redirectTo}`,
+            message: `Redirecting to ${redirectTo} (role: ${role})`,
             level: 'success',
             data: { role, redirectTo }
           })
         }).catch(console.error)
       }
       
-      // ใช้ router.replace เพื่อไม่ให้กดปุ่ม back กลับมาหน้า login
-      router.replace(redirectTo)
+      // ใช้ router.push แทน replace เพื่อให้สามารถกลับมาได้ถ้าต้องการ
+      router.push(redirectTo)
     }
   }, [status, session, router, email])
 
