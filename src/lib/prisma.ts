@@ -16,20 +16,12 @@ const createPrismaClient = () => {
     return new PrismaClient({
       log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
       errorFormat: 'minimal',
-      // เพิ่ม connection pooling และ timeout สำหรับ production
+      // เพิ่ม connection pooling สำหรับ production
       datasources: {
         db: {
           url: process.env.DATABASE_URL,
         },
       },
-      // เพิ่ม connection timeout
-      __internal: {
-        engine: {
-          env: {
-            QUERY_ENGINE_TIMEOUT: '10', // 10 seconds timeout
-          },
-        },
-      } as any,
     })
   } catch (error) {
     console.error('❌ Failed to create Prisma Client:', error)
