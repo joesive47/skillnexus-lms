@@ -1,0 +1,68 @@
+# Environment Variables สำหรับ Vercel Production
+# ตั้งค่าที่: https://vercel.com/dashboard → Settings → Environment Variables
+
+NEXTAUTH_URL=https://www.uppowerskill.com
+AUTH_URL=https://www.uppowerskill.com
+NEXTAUTH_SECRET=c69Gal8rBohLyvSOIvXjxqgDxZc1qMGCEkdPVCcjF/A=
+AUTH_SECRET=c69Gal8rBohLyvSOIvXjxqgDxZc1qMGCEkdPVCcjF/A=
+AUTH_TRUST_HOST=true
+NODE_ENV=production
+NEXT_PUBLIC_URL=https://www.uppowerskill.com
+NEXT_PUBLIC_BASE_URL=https://www.uppowerskill.com
+
+# ⚠️ อย่าลืมตั้งค่า DATABASE_URL ด้วย!
+# DATABASE_URL=postgresql://user:pass@host:5432/db?sslmode=require
+
+🎯 สรุป: สิ่งที่ต้องทำต่อ (เพียง 5 นาที)
+✅ สิ่งที่ระบบทำให้คุณแล้ว:
+✅ สร้าง Secret Keys ใหม่ ที่ปลอดภัย
+✅ สร้างไฟล์ vercel-env-values.txt - ดูค่าที่นี่!
+✅ คัดลอกค่าลง Clipboard พร้อมใช้
+✅ เปิด Vercel Dashboard ให้แล้ว
+✅ เปิด Notepad แสดงค่าทั้งหมด
+🔧 ขั้นตอนที่คุณต้องทำ (ใน Vercel Dashboard):
+1. เข้าโปรเจค:
+
+ใน Vercel Dashboard ที่เปิดอยู่
+เลือก "uppowerskill" หรือ "The-SkillNexus"
+2. ไปที่ Environment Variables:
+
+คลิก Settings → Environment Variables
+3. เพิ่มค่าทั้ง 8 ตัว (จากไฟล์ที่เปิดอยู่):
+
+Variable Name	Value	Environment
+NEXTAUTH_URL	https://www.uppowerskill.com	Production
+AUTH_URL	https://www.uppowerskill.com	Production
+NEXTAUTH_SECRET	c69Gal8rBohLyvSOIvXjxqgDxZc1qMGCEkdPVCcjF/A=	Production
+AUTH_SECRET	c69Gal8rBohLyvSOIvXjxqgDxZc1qMGCEkdPVCcjF/A=	Production
+AUTH_TRUST_HOST	true	Production
+NODE_ENV	production	Production
+NEXT_PUBLIC_URL	https://www.uppowerskill.com	Production
+NEXT_PUBLIC_BASE_URL	https://www.uppowerskill.com	Production
+4. ⚠️ ตรวจสอบ DATABASE_URL:
+
+ดูว่ามี DATABASE_URL แล้วหรือยัง
+ถ้ายังไม่มี ต้องเพิ่มด้วย (สำคัญมาก!)
+5. Redeploy:
+
+คลิก Deployments tab
+คลิก "..." (three dots) → Redeploy
+เลือก "Redeploy"
+6. รอ Deployment (2-3 นาที)
+
+7. ทดสอบ:
+
+📁 ไฟล์ที่สร้างให้:
+vercel-env-values.txt - ค่าที่ต้องตั้ง ⭐
+fix-login.bat - เมนูเครื่องมือแก้ปัญหา
+fix-login-simple.ps1 - Script แบบง่าย
+fix-vercel-env-auto.ps1 - Script แบบอัตโนมัติ (ใช้ CLI)
+check-production-auth.ps1 - ตรวจสอบสถานะ
+🔍 หลัง Redeploy เสร็จ (ทดสอบ):
+ทดสอบ Login:
+
+เปิด https://www.uppowerskill.com/login
+ใส่ Email & Password
+✅ ควร Login สำเร็จ!
+💡 หากยังมีปัญหา:
+สรุป: ระบบข้อผิดพลาด "An unexpected response was received from the server" เกิดจาก Environment Variables ไม่ถูกต้อง ใน Vercel - ตอนนี้คุณมีค่าที่ถูกต้องแล้ว เพียงแค่ตั้งค่าใน Vercel Dashboard และ Redeploy ก็จะแก้ไขได้! 🚀
