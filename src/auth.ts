@@ -72,30 +72,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      console.log('[AUTH] Redirect - url:', url, 'baseUrl:', baseUrl)
+      console.log('[AUTH] Redirect callback - url:', url, 'baseUrl:', baseUrl)
       
-      // Force localhost for development
-      const siteUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000'
-        : (process.env.NEXTAUTH_URL || process.env.AUTH_URL || baseUrl)
-      
-      // If url is relative, prepend site URL
+      // If it's a relative URL, just return it
       if (url.startsWith('/')) {
-        return `${siteUrl}${url}`
-      }
-      
-      // If url matches site URL, allow it
-      if (url.startsWith(siteUrl)) {
+        console.log('[AUTH] Redirecting to relative path:', url)
         return url
       }
       
-      // For development, force localhost
-      if (process.env.NODE_ENV === 'development' && !url.startsWith('http://localhost:3000')) {
-        return 'http://localhost:3000/dashboard'
+      // If url is on the same domain, allow it
+      if (url.startsWith(baseUrl)) {
+        console.log('[AUTH] Redirecting to same domain:', url)
+        return url
       }
       
-      // Default to dashboard
-      return `${siteUrl}/dashboard`
+      // Default to dashboard for any other case
+      console.log('[AUTH] Redirecting to default: /dashboard')
+      return '/dashboard'
     },
     async jwt({ token, user }) {
       if (user) {
