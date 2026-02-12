@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
           password: hashedPassword,
           name: userData.name,
           role: userData.role,
-          emailVerified: new Date(),
         },
         select: {
           id: true,
