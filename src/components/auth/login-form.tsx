@@ -149,7 +149,9 @@ export function LoginForm() {
                   )}
                 </Button>
               </div>
-            </div>bg-red-50 p-4 rounded-md space-y-2">
+            </div>
+            {errorMessage && (
+              <div className="text-sm bg-red-50 p-4 rounded-md space-y-2">
                 <div className="flex items-start gap-2 text-red-800">
                   <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
@@ -159,8 +161,6 @@ export function LoginForm() {
                     </p>
                   </div>
                 </div>
-              <div className="text-sm text-destructive bg-red-50 p-3 rounded-md">
-                {errorMessage}
               </div>
             )}
             <SubmitButton />
