@@ -10,6 +10,9 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
+  console.log('[AUTH ACTION] ========== LOGIN ATTEMPT START ==========')
+  const startTime = Date.now()
+  
   try {
     // Validate input
     const validatedFields = loginSchema.safeParse({
@@ -18,23 +21,43 @@ export async function authenticate(
     })
 
     if (!validatedFields.success) {
+      console.log('[AUTH ACTION] Validation failed')
       return 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีเมลและรหัสผ่าน'
     }
 
     const { email, password } = validatedFields.data
+    console.log('[AUTH ACTION] Starting signIn for:', email)
+    console.log('[AUTH ACTION] Time elapsed: 0ms')
 
-    // ลบ database test และ user query - ให้ authorize callback จัดการ
-    // เพื่อความเร็ว: query user แค่ครั้งเดียวใน authorize callback
-    await signIn('credentials', {
+    // เพิ่ม timeout protection - ถ้าเกิน 25 วินาที ให้หยุด
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Login timeout after 25 seconds')), 25000)
+    })
+
+    const signInPromise = signIn('credentials', {
       email,
       password,
-      redirectTo: '/dashboard',  // ใช้ default, JWT callback จะจัดการ role-based redirect
+      redirectTo: '/dashboard',
     })
+
+    console.log('[AUTH ACTION] Calling signIn...')
+    await Promise.race([signInPromise, timeoutPromise])
+    
+    const elapsed = Date.now() - startTime
+    console.log(`[AUTH ACTION] SignIn completed in ${elapsed}ms`)
     
   } catch (error) {
-    console.error('[AUTH ACTION] Authentication error:', error)
+    const elapsed = Date.now() - startTime
+    console.error(`[AUTH ACTION] Authentication error after ${elapsed}ms:`, error)
+    
+    // Check for timeout
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('[AUTH ACTION] TIMEOUT ERROR - Database or connection issue')
+      return 'การเข้าสู่ระบบใช้เวลานานเกินไป อาจมีปัญหาการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'
+    }
     
     if (error instanceof AuthError) {
+      console.error('[AUTH ACTION] AuthError type:', error.type)
       switch (error.type) {
         case 'CredentialsSignin':
           return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
@@ -48,11 +71,15 @@ export async function authenticate(
     // Check if it's a redirect (normal behavior)
     if (error && typeof error === 'object' && 'message' in error && 
         typeof error.message === 'string' && error.message.includes('NEXT_REDIRECT')) {
-      // Suppress redirect error logging - this is normal Next.js behavior
+      console.log('[AUTH ACTION] Redirect (normal behavior)')
       throw error
     }
     
+    console.error('[AUTH ACTION] Unknown error:', error)
     return 'เกิดข้อผิดพลาดในการเข้าระบบ กรุณาลองใหม่อีกครั้ง'
+  } finally {
+    const totalTime = Date.now() - startTime
+    console.log(`[AUTH ACTION] ========== LOGIN ATTEMPT END (${totalTime}ms) ==========`)
   }
 }
 
