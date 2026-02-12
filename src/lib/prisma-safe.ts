@@ -19,20 +19,24 @@ export async function safePrismaOperation<T>(
   fallback?: T | null
 ): Promise<T | null> {
   try {
-    // ตรวจสอบการเชื่อมต่อก่อน
-    await prisma.$queryRaw`SELECT 1`
+    // ลบ SELECT 1 เพื่อเพิ่มความเร็ว - ให้ operation จัดการ error เอง
     return await operation()
   } catch (error) {
     handleError(error, 'PRISMA_OPERATION')
     
-    // พยายามเชื่อมต่อใหม่
-    try {
-      await prisma.$connect()
-      return await operation()
-    } catch (retryError) {
-      handleError(retryError, 'PRISMA_RETRY')
-      return fallback || null
+    // พยายามเชื่อมต่อใหม่เฉพาะเมื่อเกิด connection error
+    if (error && typeof error === 'object' && 'code' in error && 
+        (error.code === 'P1001' || error.code === 'P1002')) {
+      try {
+        await prisma.$connect()
+        return await operation()
+      } catch (retryError) {
+        handleError(retryError, 'PRISMA_RETRY')
+        return fallback || null
+      }
     }
+    
+    return fallback || null
   }
 }
 

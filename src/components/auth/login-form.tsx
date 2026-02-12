@@ -1,14 +1,15 @@
 "use client"
 
 import { useFormStatus } from "react-dom"
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { authenticate } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { Eye, EyeOff } from "lucide-react"
@@ -27,8 +28,25 @@ export function LoginForm() {
   const [errorMessage, dispatch] = useActionState(authenticate, undefined)
   const [showPassword, setShowPassword] = useState(false)
   const searchParams = useSearchParams()
-  const redirectTo = searchParams?.get('callbackUrl') || searchParams?.get('redirect') || '/dashboard'
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const registered = searchParams?.get('registered')
+
+  // Role-based redirect หลัง login สำเร็จ
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      const role = session.user.role
+      const redirectMap: Record<string, string> = {
+        'ADMIN': '/admin/dashboard',
+        'TEACHER': '/teacher/dashboard',
+        'STUDENT': '/dashboard'
+      }
+      const redirectTo = redirectMap[role] || '/dashboard'
+      
+      // ใช้ router.replace เพื่อไม่ให้กดปุ่ม back กลับมาหน้า login
+      router.replace(redirectTo)
+    }
+  }, [status, session, router])
 
   return (
     <Card className="w-full max-w-md">
@@ -57,7 +75,6 @@ export function LoginForm() {
         <div className="space-y-4">
           
           <form action={dispatch} className="space-y-4">
-            <input type="hidden" name="redirectTo" value={redirectTo} />
             <div className="space-y-2">
               <Label htmlFor="email">อีเมล</Label>
               <Input

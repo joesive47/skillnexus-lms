@@ -11,8 +11,6 @@ export async function authenticate(
   formData: FormData,
 ) {
   try {
-    console.log('[AUTH ACTION] Starting authentication...')
-    
     // Validate input
     const validatedFields = loginSchema.safeParse({
       email: formData.get('email'),
@@ -20,57 +18,18 @@ export async function authenticate(
     })
 
     if (!validatedFields.success) {
-      console.log('[AUTH ACTION] Validation failed:', validatedFields.error)
       return 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีเมลและรหัสผ่าน'
     }
 
     const { email, password } = validatedFields.data
-    console.log('[AUTH ACTION] Attempting login for:', email)
 
-    // Test database connection first
-    try {
-      await prisma.$queryRaw`SELECT 1`
-      console.log('[AUTH ACTION] Database connection OK')
-    } catch (dbError) {
-      console.error('[AUTH ACTION] Database connection failed:', dbError)
-      return 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง'
-    }
-
-    // Get user to determine role-based redirect
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { role: true }
+    // ลบ database test และ user query - ให้ authorize callback จัดการ
+    // เพื่อความเร็ว: query user แค่ครั้งเดียวใน authorize callback
+    await signIn('credentials', {
+      email,
+      password,
+      redirectTo: '/dashboard',  // ใช้ default, JWT callback จะจัดการ role-based redirect
     })
-
-    const redirectMap: Record<string, string> = {
-      'ADMIN': '/admin/dashboard',
-      'TEACHER': '/teacher/dashboard', 
-      'STUDENT': '/dashboard'
-    }
-
-    const redirectTo = redirectMap[user?.role || 'STUDENT'] || '/dashboard'
-    console.log('[AUTH ACTION] Redirect target:', redirectTo)
-
-    try {
-      await signIn('credentials', {
-        email,
-        password,
-        redirectTo: redirectTo,
-      })
-    } catch (signInError) {
-      console.error('[AUTH ACTION] SignIn error:', signInError)
-      if (signInError instanceof AuthError) {
-        switch (signInError.type) {
-          case 'CredentialsSignin':
-            return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
-          case 'CallbackRouteError':
-            return 'เกิดข้อผิดพลาดในการเข้าระบบ กรุณาตรวจสอบการตั้งค่า'
-          default:
-            return `เกิดข้อผิดพลาด: ${signInError.type}`
-        }
-      }
-      throw signInError
-    }
     
   } catch (error) {
     console.error('[AUTH ACTION] Authentication error:', error)

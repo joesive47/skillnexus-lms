@@ -72,25 +72,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      console.log('[AUTH] Redirect callback - url:', url, 'baseUrl:', baseUrl)
-      
       // If it's a relative URL, just return it
       if (url.startsWith('/')) {
-        console.log('[AUTH] Redirecting to relative path:', url)
         return url
       }
       
       // If url is on the same domain, allow it
       if (url.startsWith(baseUrl)) {
-        console.log('[AUTH] Redirecting to same domain:', url)
         return url
       }
       
-      // Default to dashboard for any other case
-      console.log('[AUTH] Redirecting to default: /dashboard')
+      // Default to dashboard
       return '/dashboard'
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = user.role

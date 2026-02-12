@@ -14,8 +14,14 @@ const createPrismaClient = () => {
     }
 
     return new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
       errorFormat: 'minimal',
+      // เพิ่ม connection pooling สำหรับ production
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
     })
   } catch (error) {
     console.error('❌ Failed to create Prisma Client:', error)
