@@ -94,9 +94,7 @@ export function LoginForm() {
             alt="upPowerSkill Logo" 
             width={64}
             height={64}
-            clasvalue={email}
-                onChange={(e) => setEmail(e.target.value)}
-                sName="object-contain"
+            className="object-contain"
             priority
           />
         </div>
