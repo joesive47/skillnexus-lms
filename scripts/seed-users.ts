@@ -42,13 +42,13 @@ async function seedUsers() {
         email: 'test@uppowerskill.com',
         password: 'test1234',
         name: 'Test User',
-        role: 'USER' as const
+        role: 'STUDENT' as const
       },
       {
         email: 'instructor@uppowerskill.com',
         password: 'instructor123',
         name: 'Instructor User',
-        role: 'INSTRUCTOR' as const
+        role: 'TEACHER' as const
       }
     ]
     
@@ -96,10 +96,10 @@ async function seedUsers() {
     console.log('\n1️⃣  ADMIN:')
     console.log('   Email: admin@skillnexus.com')
     console.log('   Password: Admin@123!')
-    console.log('\n2️⃣  TEST USER:')
+    console.log('\n2️⃣  STUDENT:')
     console.log('   Email: test@uppowerskill.com')
     console.log('   Password: test1234')
-    console.log('\n3️⃣  INSTRUCTOR:')
+    console.log('\n3️⃣  TEACHER:')
     console.log('   Email: instructor@uppowerskill.com')
     console.log('   Password: instructor123')
     console.log()

@@ -35,7 +35,7 @@ export default function WelcomePage() {
   }
 
   const userName = session.user?.name || 'ผู้ใช้'
-  const userRole = session.user?.role || 'USER'
+  const userRole = session.user?.role || 'STUDENT'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-blue-50">
@@ -48,9 +48,7 @@ export default function WelcomePage() {
           <p className="text-2xl text-gray-700 mb-2">{userName}</p>
           <p className="text-gray-600">
             {userRole === 'ADMIN' && 'ผู้ดูแลระบบ'}
-            {userRole === 'INSTRUCTOR' && 'ครูผู้สอน'}
             {userRole === 'TEACHER' && 'ครูผู้สอน'}
-            {userRole === 'USER' && 'ผู้เรียน'}
             {userRole === 'STUDENT' && 'ผู้เรียน'}
           </p>
         </div>
@@ -93,7 +91,7 @@ export default function WelcomePage() {
             </Link>
           </Card>
 
-          {(userRole === 'ADMIN' || userRole === 'INSTRUCTOR' || userRole === 'TEACHER') && (
+          {(userRole === 'ADMIN' || userRole === 'TEACHER') && (
             <Card className="hover:shadow-lg transition-shadow cursor-pointer bg-white/80 backdrop-blur-sm">
               <Link href="/admin/dashboard">
                 <CardHeader>

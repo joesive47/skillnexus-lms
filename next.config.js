@@ -22,6 +22,12 @@ const nextConfig = {
   
   // Handle optional dependencies
   webpack: (config, { isServer }) => {
+    // Fix for EISDIR error with page.tsx files
+    config.snapshot = {
+      ...config.snapshot,
+      managedPaths: [],
+    }
+    
     // Externalize native modules for server only
     if (isServer) {
       config.externals = config.externals || []

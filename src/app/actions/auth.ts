@@ -37,7 +37,7 @@ export async function authenticate(
     const signInPromise = signIn('credentials', {
       email,
       password,
-      redirectTo: '/dashboard',
+      redirectTo: '/welcome',
     })
 
     console.log('[AUTH ACTION] Calling signIn...')
