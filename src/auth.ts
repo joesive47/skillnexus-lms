@@ -124,9 +124,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return url
       }
       
-      // Default to welcome page (client component, ไม่มี database queries, หลีกเลี่ยง 504 timeout)
-      authLogger.info('REDIRECT', 'Using default redirect', { defaultUrl: '/welcome' })
-      return '/welcome'
+      // Default to dashboard (client-side will handle role-based redirect)
+      authLogger.info('REDIRECT', 'Using default redirect', { defaultUrl: '/dashboard' })
+      return '/dashboard'
     },
     async jwt({ token, user, trigger }) {
       if (user) {
