@@ -3,6 +3,14 @@ const nextConfig = {
   // Docker optimization - เฉพาะ production
   ...(process.env.NODE_ENV === 'production' && { output: 'standalone' }),
   
+  // TypeScript configuration
+  typescript: {
+    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true',
+  },
+  eslint: {
+    ignoreDuringBuilds: process.env.SKIP_TYPE_CHECK === 'true',
+  },
+  
   // Server Actions configuration - แก้ไข Body Size Limit
   experimental: {
     serverActions: {
