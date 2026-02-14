@@ -7,7 +7,8 @@ import { BookOpen, Users, FileText, BarChart } from 'lucide-react';
 export default async function TeacherDashboard() {
   const session = await auth();
   
-  if (!session?.user || session.user.role !== 'TEACHER') {
+  // Allow TEACHER and ADMIN roles
+  if (!session?.user || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
     redirect('/login');
   }
 
