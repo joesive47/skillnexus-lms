@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { auth } from '@/auth'
 
-// ULTRA-MINIMAL middleware - <2kB target
-export function middleware(request: NextRequest) {
+// SECURITY-ENHANCED middleware with role-based access control
+export async function middleware(request: NextRequest) {
   // Skip static files immediately
   const { pathname } = request.nextUrl
   
@@ -10,6 +11,38 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/favicon') ||
       pathname.includes('.')) {
     return NextResponse.next()
+  }
+
+  // CRITICAL: Role-based access control for protected routes
+  const session = await auth()
+  
+  // Admin routes - ADMIN only
+  if (pathname.startsWith('/admin')) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
+    }
+    if (session.user?.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard?error=forbidden', request.url))
+    }
+  }
+  
+  // Teacher routes - TEACHER or ADMIN only
+  if (pathname.startsWith('/teacher')) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
+    }
+    if (session.user?.role !== 'TEACHER' && session.user?.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard?error=forbidden', request.url))
+    }
+  }
+  
+  // Dashboard and protected routes - authenticated users only
+  if (pathname.startsWith('/dashboard') || 
+      pathname.startsWith('/courses') ||
+      pathname.startsWith('/certificates')) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/login?redirect=' + pathname, request.url))
+    }
   }
 
   // Minimal security headers only

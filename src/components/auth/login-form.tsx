@@ -54,13 +54,19 @@ export function LoginForm() {
     }
   }, [errorMessage, email])
 
-  // Simple redirect หลัง login สำเร็จ - ไปที่หน้าเบาๆ ก่อน
+  // SECURITY: Role-based redirect after successful login
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       const role = session.user.role
-      // Redirect ไปหน้า welcome (client component, ไม่มี database queries)
-      // เพื่อหลีกเลี่ยง 504 timeout จากการ query database ช้า
-      const redirectTo = '/welcome'
+      
+      // Determine target path based on role
+      let redirectTo = '/dashboard' // Default for STUDENT
+      
+      if (role === 'ADMIN') {
+        redirectTo = '/admin/dashboard'
+      } else if (role === 'TEACHER') {
+        redirectTo = '/teacher/dashboard'
+      }
       
       // Log successful redirect
       if (email) {
@@ -77,8 +83,8 @@ export function LoginForm() {
         }).catch(console.error)
       }
       
-      // ใช้ router.push แทน replace เพื่อให้สามารถกลับมาได้ถ้าต้องการ
-      router.push(redirectTo)
+      // Use replace to prevent back button security issue
+      router.replace(redirectTo)
     }
   }, [status, session, router, email])
 

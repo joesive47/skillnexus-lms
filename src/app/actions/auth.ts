@@ -34,10 +34,11 @@ export async function authenticate(
       setTimeout(() => reject(new Error('Login timeout after 25 seconds')), 25000)
     })
 
+    // Don't specify redirectTo - let client-side handle role-based redirect
     const signInPromise = signIn('credentials', {
       email,
       password,
-      redirectTo: '/welcome',
+      redirect: false, // Handle redirect on client side for role-based routing
     })
 
     console.log('[AUTH ACTION] Calling signIn...')

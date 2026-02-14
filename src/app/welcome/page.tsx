@@ -19,6 +19,27 @@ export default function WelcomePage() {
     }
   }, [status, router])
 
+  // SECURITY: Auto-redirect based on role to prevent unauthorized access
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role) {
+      const role = session.user.role
+      let targetPath = '/dashboard' // Default for STUDENT
+
+      if (role === 'ADMIN') {
+        targetPath = '/admin/dashboard'
+      } else if (role === 'TEACHER') {
+        targetPath = '/teacher/dashboard'
+      }
+
+      // Auto-redirect after 500ms to show welcome message briefly
+      const timer = setTimeout(() => {
+        router.replace(targetPath)
+      }, 500)
+
+      return () => clearTimeout(timer)
+    }
+  }, [status, session, router])
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
