@@ -40,6 +40,7 @@ export function LoginForm() {
   const [errorMessage, dispatch] = useActionState(authenticate, undefined)
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -54,9 +55,10 @@ export function LoginForm() {
     }
   }, [errorMessage, email])
 
-  // SECURITY: Role-based redirect after successful login
+  // SECURITY: Role-based redirect ONLY after successful login (not on page load)
   useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
+    // Only redirect if user just logged in (isSubmitting was true) and session exists
+    if (isSubmitting && status === 'authenticated' && session?.user) {
       const role = session.user.role
       
       // Determine target path based on role
@@ -85,8 +87,9 @@ export function LoginForm() {
       
       // Use replace to prevent back button security issue
       router.replace(redirectTo)
+      setIsSubmitting(false) // Reset flag after redirect
     }
-  }, [status, session, router, email])
+  }, [isSubmitting, status, session, router, email])
 
   return (
     <Card className="w-full max-w-md">
@@ -114,7 +117,14 @@ export function LoginForm() {
       <CardContent>
         <div className="space-y-4">
           
-          <form action={dispatch} className="space-y-4">
+          <form 
+            action={dispatch} 
+            className="space-y-4"
+            onSubmit={() => {
+              // Set flag when form is submitted to enable redirect on successful auth
+              setIsSubmitting(true)
+            }}
+          >
             <div className="space-y-2">
               <Label htmlFor="email">อีเมล</Label>
               <Input
@@ -122,6 +132,8 @@ export function LoginForm() {
                 name="email"
                 type="email"
                 placeholder="กรอกอีเมลของคุณ"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
