@@ -61,7 +61,7 @@ export default async function VerifyCertificatePage({ params }: VerifyPageProps)
 
   // Render CourseCertificate
   if (certificate) {
-    const isExpired = certificate.expiresAt && new Date(certificate.expiresAt) < new Date()
+    const isExpired = certificate.expiryDate && new Date(certificate.expiryDate) < new Date()
     const isValid = !isExpired
 
     return (
@@ -105,18 +105,18 @@ export default async function VerifyCertificatePage({ params }: VerifyPageProps)
                     <h3 className="text-sm font-medium text-gray-600">Issue Date</h3>
                   </div>
                   <p className="text-lg font-semibold text-gray-800">
-                    {new Date(certificate.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(certificate.issueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </p>
                 </div>
 
-                {certificate.expiresAt && (
+                {certificate.expiryDate && (
                   <div className={`rounded-lg p-4 ${isExpired ? 'bg-red-50' : 'bg-gray-50'}`}>
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className={`h-4 w-4 ${isExpired ? 'text-red-600' : 'text-gray-600'}`} />
                       <h3 className={`text-sm font-medium ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>Expiry Date</h3>
                     </div>
                     <p className={`text-lg font-semibold ${isExpired ? 'text-red-700' : 'text-gray-800'}`}>
-                      {new Date(certificate.expiresAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {new Date(certificate.expiryDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                       {isExpired && <span className="ml-2 text-sm">(Expired)</span>}
                     </p>
                   </div>
