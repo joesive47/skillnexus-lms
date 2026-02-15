@@ -48,7 +48,7 @@ export const safeUserFind = async (email: string): Promise<User | null> => {
   
   try {
     // Add timeout wrapper (10 seconds max)
-    const timeoutPromise = new Promise((_, reject) => 
+    const timeoutPromise = new Promise<never>((_, reject) => 
       setTimeout(() => reject(new Error('User query timeout after 10s')), 10000)
     )
     
@@ -56,7 +56,7 @@ export const safeUserFind = async (email: string): Promise<User | null> => {
       prisma.user.findUnique({ where: { email } })
     )
     
-    const result = await Promise.race([queryPromise, timeoutPromise])
+    const result = await Promise.race([queryPromise, timeoutPromise]) as User | null
     
     const elapsed = Date.now() - startTime
     console.log(`[SAFE_USER_FIND] Query completed in ${elapsed}ms`)
