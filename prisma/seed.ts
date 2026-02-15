@@ -33,7 +33,10 @@ async function main() {
   for (const admin of admins) {
     await prisma.user.upsert({
       where: { email: admin.email },
-      update: {},
+      update: {
+        role: admin.role, // CRITICAL: Ensure role is always ADMIN
+        credits: 10000,
+      },
       create: {
         email: admin.email,
         password: adminPassword,
@@ -77,7 +80,10 @@ async function main() {
   for (const teacher of teachers) {
     await prisma.user.upsert({
       where: { email: teacher.email },
-      update: {},
+      update: {
+        role: teacher.role, // CRITICAL: Ensure role is always TEACHER
+        credits: 5000,
+      },
       create: {
         email: teacher.email,
         password: teacherPassword,
@@ -156,7 +162,10 @@ async function main() {
   for (const student of students) {
     await prisma.user.upsert({
       where: { email: student.email },
-      update: { credits: student.credits },
+      update: { 
+        credits: student.credits,
+        role: 'STUDENT', // CRITICAL: Ensure role is always STUDENT
+      },
       create: {
         email: student.email,
         password: studentPassword,
