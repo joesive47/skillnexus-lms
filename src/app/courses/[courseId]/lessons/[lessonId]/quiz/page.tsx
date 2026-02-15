@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { QuizComponent } from '@/components/quiz/QuizComponent'
+import { QuizWithPrerequisiteCheck } from '@/components/quiz/quiz-with-prerequisite-check'
 import { getQuizForStudent } from '@/app/actions/quiz'
 
 interface QuizPageProps {
@@ -25,7 +25,9 @@ export default async function QuizPage({ params }: QuizPageProps) {
           randomize: true,
           shuffleOptions: true,
           questionsToShow: true,
-          questionPoolSize: true
+          questionPoolSize: true,
+          passScore: true,
+          prerequisiteQuizId: true
         }
       }
     }
@@ -60,6 +62,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
   const sanitizedQuiz = {
     id: lesson.quiz.id,
     title: lesson.quiz.title,
+    passScore: lesson.quiz.passScore,
     questions: quizDataResult.questions.map(q => ({
       id: q.id,
       text: q.text,
@@ -72,7 +75,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
   }
 
   return (
-    <QuizComponent
+    <QuizWithPrerequisiteCheck
       quiz={sanitizedQuiz}
       lessonId={lessonId}
       courseId={courseId}

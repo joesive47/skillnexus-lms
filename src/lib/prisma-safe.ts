@@ -41,10 +41,32 @@ export async function safePrismaOperation<T>(
 }
 
 // Helper functions สำหรับ operations ที่ใช้บ่อย
-export const safeUserFind = (email: string) =>
-  safePrismaOperation(() => 
-    prisma.user.findUnique({ where: { email } })
-  )
+export const safeUserFind = async (email: string) => {
+  console.log('[SAFE_USER_FIND] Starting query for:', email)
+  const startTime = Date.now()
+  
+  try {
+    // Add timeout wrapper (10 seconds max)
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('User query timeout after 10s')), 10000)
+    )
+    
+    const queryPromise = safePrismaOperation(() => 
+      prisma.user.findUnique({ where: { email } })
+    )
+    
+    const result = await Promise.race([queryPromise, timeoutPromise])
+    
+    const elapsed = Date.now() - startTime
+    console.log(`[SAFE_USER_FIND] Query completed in ${elapsed}ms`)
+    
+    return result
+  } catch (error) {
+    const elapsed = Date.now() - startTime
+    console.error(`[SAFE_USER_FIND] Query failed after ${elapsed}ms:`, error)
+    throw error
+  }
+}
 
 export const safeCourseList = () =>
   safePrismaOperation(() => 

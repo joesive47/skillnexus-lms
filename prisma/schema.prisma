@@ -132,23 +132,28 @@ model WatchHistory {
 }
 
 model Quiz {
-  id               String              @id @default(cuid())
-  title            String
-  courseId         String?
-  timeLimit        Int?                @default(0)
-  randomize        Boolean             @default(false)
-  shuffleOptions   Boolean             @default(false)
-  questionPoolSize Int?                // จำนวนข้อทั้งหมดในคลัง (เช่น 30)
-  questionsToShow  Int?                // จำนวนข้อที่จะให้ทำ (เช่น 20)
-  passScore        Int                 @default(70) // Minimum score to pass (%)
-  createdAt        DateTime            @default(now())
-  lessons          Lesson[]
-  questions        Question[]
-  course           Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  submissions      StudentSubmission[]
-  attemptRecords   QuizAttemptRecord[]
+  id                  String              @id @default(cuid())
+  title               String
+  courseId            String?
+  timeLimit           Int?                @default(0)
+  randomize           Boolean             @default(false)
+  shuffleOptions      Boolean             @default(false)
+  questionPoolSize    Int?                // จำนวนข้อทั้งหมดในคลัง (เช่น 30)
+  questionsToShow     Int?                // จำนวนข้อที่จะให้ทำ (เช่น 20)
+  passScore           Int                 @default(70) // Minimum score to pass (%)
+  prerequisiteQuizId  String?             // Quiz ID ที่ต้องผ่านก่อน (Sequential Dependency)
+  retryDelayMinutes   Int?                @default(0) // เวลารอก่อนสอบใหม่ถ้าไม่ผ่าน (นาที)
+  createdAt           DateTime            @default(now())
+  lessons             Lesson[]
+  questions           Question[]
+  course              Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions         StudentSubmission[]
+  attemptRecords      QuizAttemptRecord[]
+  prerequisiteQuiz    Quiz?               @relation("QuizPrerequisite", fields: [prerequisiteQuizId], references: [id], onDelete: SetNull)
+  dependentQuizzes    Quiz[]              @relation("QuizPrerequisite")
 
   @@index([courseId])
+  @@index([prerequisiteQuizId])
   @@map("quizzes")
 }
 

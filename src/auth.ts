@@ -52,7 +52,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Step 3: Find user
           authLogger.info('USER_QUERY', 'Querying user from database', {}, email)
+          const userQueryStart = Date.now()
+          
           const user = await safeUserFind(email)
+          
+          const userQueryTime = Date.now() - userQueryStart
+          console.log(`[AUTH] User query took ${userQueryTime}ms`)
 
           if (!user) {
             authLogger.error('USER_QUERY', 'User not found in database', {}, email)
@@ -61,12 +66,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           authLogger.success('USER_QUERY', 'User found', { 
             userId: user.id, 
-            role: user.role 
+            role: user.role,
+            queryTime: userQueryTime 
           }, email)
 
           // Step 4: Verify password
           authLogger.info('PASSWORD_CHECK', 'Verifying password', {}, email)
+          
+          // DEBUG: Log password comparison details
+          console.log('[AUTH DEBUG] Password comparison:')
+          console.log('[AUTH DEBUG] Input password length:', password?.length)
+          console.log('[AUTH DEBUG] Input password (first 5 chars):', password?.substring(0, 5))
+          console.log('[AUTH DEBUG] Stored hash (first 20 chars):', user.password?.substring(0, 20))
+          console.log('[AUTH DEBUG] Hash starts with $2a$12$:', user.password?.startsWith('$2a$12$'))
+          
+          const bcryptStart = Date.now()
           const isPasswordValid = await bcrypt.compare(password, user.password)
+          const bcryptTime = Date.now() - bcryptStart
+          
+          console.log(`[AUTH DEBUG] bcrypt.compare took ${bcryptTime}ms`)
+          console.log('[AUTH DEBUG] bcrypt.compare result:', isPasswordValid)
 
           if (!isPasswordValid) {
             authLogger.error('PASSWORD_CHECK', 'Invalid password', {}, email)

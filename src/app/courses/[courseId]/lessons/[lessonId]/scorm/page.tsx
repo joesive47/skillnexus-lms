@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
-import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrapper'
+import { ScormWithVideoCheck } from '@/components/scorm/scorm-with-video-check'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -71,7 +71,7 @@ export default async function ScormLessonPage({ params }: ScormLessonPageProps) 
   }
 
   return (
-    <ScormFullscreenWrapper
+    <ScormWithVideoCheck
       packagePath={lesson.scormPackage.packagePath}
       lessonId={lesson.id}
       userId={session.user.id}
