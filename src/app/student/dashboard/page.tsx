@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Award, TrendingUp, Clock } from 'lucide-react';
 import prisma from '@/lib/prisma';
+import { LogoutButton } from '@/components/auth/logout-button';
 
 export default async function StudentDashboard() {
   const session = await auth();
@@ -32,7 +33,10 @@ export default async function StudentDashboard() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Student Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Student Dashboard</h1>
+        <LogoutButton />
+      </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card>

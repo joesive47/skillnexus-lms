@@ -10,6 +10,7 @@ import {
   Building2, Lock, Zap, BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
+import { LogoutButton } from '@/components/auth/logout-button'
 
 export default function EnterpriseDashboard() {
   const [loading, setLoading] = useState(true)
@@ -36,13 +37,16 @@ export default function EnterpriseDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Enterprise Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Monitor and manage your enterprise learning platform
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Enterprise Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Monitor and manage your enterprise learning platform
+            </p>
+          </div>
+          <LogoutButton />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

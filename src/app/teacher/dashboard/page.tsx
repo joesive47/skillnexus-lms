@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Users, FileText, BarChart } from 'lucide-react';
+import { LogoutButton } from '@/components/auth/logout-button';
 
 export default async function TeacherDashboard() {
   const session = await auth();
@@ -14,7 +15,10 @@ export default async function TeacherDashboard() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Teacher Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Teacher Dashboard</h1>
+        <LogoutButton />
+      </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card>
