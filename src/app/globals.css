@@ -134,3 +134,58 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
 }
+
+/* ========================================
+   SCORM Fullscreen Optimization
+   Removes letterboxing and maximizes screen usage
+   ======================================== */
+
+/* Force SCORM containers to use full viewport */
+:fullscreen iframe[title="SCORM Content"] {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  object-fit: contain;
+  background-color: transparent !important;
+}
+
+/* Remove black background in fullscreen mode */
+:fullscreen {
+  background-color: transparent !important;
+}
+
+/* Responsive aspect ratio handling */
+@media (min-aspect-ratio: 16/9) {
+  :fullscreen iframe[title="SCORM Content"] {
+    width: 100vw !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+}
+
+@media (max-aspect-ratio: 16/9) {
+  :fullscreen iframe[title="SCORM Content"] {
+    width: auto !important;
+    height: 100vh !important;
+    min-width: 100vw;
+  }
+}
+
+/* Override Articulate Storyline/Captivate fixed dimensions */
+:fullscreen #app,
+:fullscreen #story_content,
+:fullscreen .story-container,
+:fullscreen .captivate-container,
+:fullscreen [id*="scorm"],
+:fullscreen [class*="scorm"] {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  transform: none !important;
+  position: relative !important;
+}

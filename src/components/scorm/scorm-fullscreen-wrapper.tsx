@@ -105,7 +105,12 @@ export function ScormFullscreenWrapper({
       )}
 
       {/* Main Container - Fullscreen support */}
-      <div ref={fullscreenRef} className={`relative flex h-screen overflow-hidden ${isFullscreen ? 'bg-black' : 'bg-gray-50'}`}>
+      <div ref={fullscreenRef} className={`relative flex h-screen overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-gray-50'}`}
+      style={{
+        maxWidth: isFullscreen ? '100vw' : undefined,
+        maxHeight: isFullscreen ? '100vh' : undefined
+      }}
+      >
         
         {/* Toggle Sidebar Button - Hide in fullscreen */}
         {!isFullscreen && (

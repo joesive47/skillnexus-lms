@@ -342,14 +342,19 @@ export function ScormPlayer({
           </div>
         )}
 
-        {/* SCORM Content Frame - Flex-based, no fixed height, no scroll overlap */}
+        {/* SCORM Content Frame - Full viewport in fullscreen, flex-based otherwise */}
         <div className={`relative overflow-hidden ${
           isFullscreen 
-            ? 'flex-1 min-h-0' 
+            ? 'w-full h-full' 
             : fullHeight 
               ? 'flex-1 min-h-0 bg-gray-100 rounded-lg' 
               : 'h-[600px] bg-gray-100 rounded-lg'
-        }`}>
+        }`}
+        style={{
+          maxWidth: isFullscreen ? '100vw' : undefined,
+          maxHeight: isFullscreen ? '100vh' : undefined
+        }}
+        >
           {isLoading && !extractionError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
               <div className="text-center">
@@ -382,14 +387,22 @@ export function ScormPlayer({
             <iframe
               ref={iframeRef}
               src={extractedUrl}
-              className={`w-full h-full ${
-                isFullscreen ? 'rounded-none border-0' : 'bg-white border-0 rounded-lg'
+              className={`${
+                isFullscreen 
+                  ? 'w-screen h-screen rounded-none border-0' 
+                  : 'w-full h-full bg-white border-0 rounded-lg'
               }`}
               onLoad={handleIframeLoad}
               title="SCORM Content"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox"
               allowFullScreen
-              style={{ minHeight: fullHeight ? '100%' : '600px' }}
+              style={{
+                minHeight: fullHeight ? '100%' : '600px',
+                maxWidth: isFullscreen ? '100vw' : '100%',
+                maxHeight: isFullscreen ? '100vh' : '100%',
+                objectFit: isFullscreen ? 'contain' : undefined,
+                backgroundColor: isFullscreen ? 'transparent' : undefined
+              }}
             />
           )}
         </div>
