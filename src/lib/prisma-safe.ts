@@ -1,5 +1,6 @@
 import prisma from './prisma'
 import { handleError } from './error-handler'
+import type { User } from '@prisma/client'
 
 export async function safeQuery<T>(
   operation: () => Promise<T>,
@@ -41,7 +42,7 @@ export async function safePrismaOperation<T>(
 }
 
 // Helper functions สำหรับ operations ที่ใช้บ่อย
-export const safeUserFind = async (email: string) => {
+export const safeUserFind = async (email: string): Promise<User | null> => {
   console.log('[SAFE_USER_FIND] Starting query for:', email)
   const startTime = Date.now()
   
