@@ -278,7 +278,7 @@ export function ScormPlayer({
   }
 
   return (
-    <Card className={`flex flex-col ${fullHeight ? 'h-full' : ''} ${className}`}>
+    <Card className={`flex flex-col ${fullHeight ? 'h-full' : ''} ${isFullscreen ? 'border-0 shadow-none' : ''} ${className}`}>
       {!hideHeader && (
         <CardHeader className="flex-shrink-0 pb-3">
           <CardTitle className="flex items-center justify-between">
@@ -323,8 +323,8 @@ export function ScormPlayer({
           </CardTitle>
         </CardHeader>
       )}
-      <CardContent className={`flex flex-col ${fullHeight ? 'flex-1 min-h-0' : ''} ${hideHeader ? 'p-0' : 'pt-0 space-y-3'}`}>
-        {!hideHeader && (
+      <CardContent className={`flex flex-col ${fullHeight ? 'flex-1 min-h-0' : ''} ${hideHeader || isFullscreen ? 'p-0' : 'pt-0 space-y-3'}`}>
+        {!hideHeader && !isFullscreen && (
           <div className="space-y-2 flex-shrink-0">
             <div className="flex justify-between text-sm text-gray-700">
               <span className="font-medium">ความคืบหน้า:</span>
@@ -343,8 +343,12 @@ export function ScormPlayer({
         )}
 
         {/* SCORM Content Frame - Flex-based, no fixed height, no scroll overlap */}
-        <div className={`relative bg-gray-100 rounded-lg overflow-hidden ${
-          fullHeight ? 'flex-1 min-h-0' : 'h-[600px]'
+        <div className={`relative overflow-hidden ${
+          isFullscreen 
+            ? 'flex-1 min-h-0' 
+            : fullHeight 
+              ? 'flex-1 min-h-0 bg-gray-100 rounded-lg' 
+              : 'h-[600px] bg-gray-100 rounded-lg'
         }`}>
           {isLoading && !extractionError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
@@ -378,8 +382,8 @@ export function ScormPlayer({
             <iframe
               ref={iframeRef}
               src={extractedUrl}
-              className={`w-full h-full bg-white ${
-                hideHeader ? 'rounded-none border-0' : 'border-0 rounded-lg'
+              className={`w-full h-full ${
+                isFullscreen ? 'rounded-none border-0' : 'bg-white border-0 rounded-lg'
               }`}
               onLoad={handleIframeLoad}
               title="SCORM Content"

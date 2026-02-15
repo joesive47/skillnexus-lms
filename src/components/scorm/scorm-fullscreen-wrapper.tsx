@@ -105,7 +105,7 @@ export function ScormFullscreenWrapper({
       )}
 
       {/* Main Container - Fullscreen support */}
-      <div ref={fullscreenRef} className="relative flex h-screen overflow-hidden bg-gray-50">
+      <div ref={fullscreenRef} className={`relative flex h-screen overflow-hidden ${isFullscreen ? 'bg-black' : 'bg-gray-50'}`}>
         
         {/* Toggle Sidebar Button - Hide in fullscreen */}
         {!isFullscreen && (
