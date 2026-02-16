@@ -36,7 +36,6 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
             id: true,
             title: true,
             order: true,
-            type: true,
             lessonType: true,
             youtubeUrl: true,
             duration: true,
@@ -45,6 +44,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
             scormPackage: {
               select: {
                 id: true,
+                title: true,
                 packagePath: true
               }
             }
@@ -60,6 +60,13 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       notFound()
     }
 
+    console.log('[COURSE_EDIT] Course data:', {
+      id: course.id,
+      title: course.title,
+      lessonsCount: course.lessons.length,
+      lessonTypes: course.lessons.map(l => ({ order: l.order, type: l.lessonType, title: l.title }))
+    })
+
     // Convert to plain object for client component
     const courseData = {
       id: course.id,
@@ -68,7 +75,17 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       published: course.published,
       price: course.price,
       imageUrl: course.imageUrl,
-      lessons: course.lessons
+      lessons: course.lessons.map(lesson => ({
+        id: lesson.id,
+        title: lesson.title,
+        order: lesson.order,
+        lessonType: lesson.lessonType,
+        youtubeUrl: lesson.youtubeUrl,
+        duration: lesson.duration,
+        requiredCompletionPercentage: lesson.requiredCompletionPercentage,
+        quizId: lesson.quizId,
+        scormPackage: lesson.scormPackage
+      }))
     }
 
     return (

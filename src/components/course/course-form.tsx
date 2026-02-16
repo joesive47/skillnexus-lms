@@ -133,17 +133,31 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
   useEffect(() => {
     fetchQuizzes()
     if (course?.lessons) {
-      const existingLessons = course.lessons.map(lesson => ({
-        id: lesson.id,
-        type: (lesson.type || lesson.lessonType) as 'VIDEO' | 'QUIZ' | 'SCORM',
-        order: lesson.order,
-        title: lesson.title || '',
-        youtubeUrl: lesson.youtubeUrl || '',
-        requiredPct: lesson.requiredCompletionPercentage || 80,
-        durationMin: lesson.duration ? Math.round(lesson.duration / 60) : 0,
-        quizId: lesson.quizId || '',
-        scormPackagePath: lesson.scormPackage?.packagePath || '',
-      }))
+      console.log('[CourseForm] Raw lessons data:', course.lessons)
+      const existingLessons = course.lessons.map(lesson => {
+        const lessonType = (lesson.type || lesson.lessonType) as 'VIDEO' | 'QUIZ' | 'SCORM'
+        console.log('[CourseForm] Processing lesson:', {
+          id: lesson.id,
+          rawType: lesson.type,
+          rawLessonType: lesson.lessonType,
+          mappedType: lessonType,
+          title: lesson.title,
+          order: lesson.order
+        })
+        
+        return {
+          id: lesson.id,
+          type: lessonType,
+          order: lesson.order,
+          title: lesson.title || '',
+          youtubeUrl: lesson.youtubeUrl || '',
+          requiredPct: lesson.requiredCompletionPercentage || 80,
+          durationMin: lesson.duration ? Math.round(lesson.duration / 60) : 0,
+          quizId: lesson.quizId || '',
+          scormPackagePath: lesson.scormPackage?.packagePath || '',
+        }
+      })
+      console.log('[CourseForm] Mapped lessons:', existingLessons)
       setLessons(existingLessons)
     }
   }, [course])
