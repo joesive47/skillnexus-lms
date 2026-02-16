@@ -25,22 +25,53 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       notFound()
     }
 
-    const result = await getCourse(courseId)
-    console.log('[COURSE_EDIT] Result:', result.success, result.course ? 'found' : 'not found')
+    // Fetch course with only necessary fields
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        imageUrl: true,
+        published: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    })
     
-    if (!result.success || !result.course) {
+    console.log('[COURSE_EDIT] Result:', course ? 'found' : 'not found')
+    
+    if (!course) {
       console.log('[COURSE_EDIT] Course not found, returning 404')
       notFound()
     }
 
-    // Get lessons for this course with all fields
+    // Get lessons for this course with only necessary fields
     let lessonsData
     try {
       lessonsData = await prisma.lesson.findMany({
         where: { courseId },
-        include: {
-          quiz: true,
-          scormPackage: true
+        select: {
+          id: true,
+          title: true,
+          order: true,
+          youtubeUrl: true,
+          duration: true,
+          content: true,
+          createdAt: true,
+          quiz: {
+            select: {
+              id: true,
+              title: true
+            }
+          },
+          scormPackage: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
         },
         orderBy: { order: 'asc' }
       })
@@ -56,23 +87,31 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       title: lesson.title || 'Untitled Lesson'
     }))
 
-    // Deep serialize all Date objects to ISO strings
-    // Use double serialization to ensure complete conversion
-    let serializedCourse
-    let serializedLessons
-    
-    try {
-      serializedCourse = JSON.parse(
-        JSON.stringify(serializeDates(result.course))
-      )
-      serializedLessons = JSON.parse(
-        JSON.stringify(serializeDates(lessons))
-      )
-      console.log('[COURSE_EDIT] Serialization complete')
-    } catch (serializeError) {
-      console.error('[COURSE_EDIT] Serialization error:', serializeError)
-      throw new Error('Failed to serialize course data')
+    // Simple serialization - convert to plain objects with ISO dates
+    const serializedCourse = {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: course.price,
+      imageUrl: course.imageUrl,
+      published: course.published,
+      createdAt: course.createdAt.toISOString(),
+      updatedAt: course.updatedAt.toISOString()
     }
+    
+    const serializedLessons = lessons.map(lesson => ({
+      id: lesson.id,
+      title: lesson.title,
+      order: lesson.order,
+      youtubeUrl: lesson.youtubeUrl,
+      duration: lesson.duration,
+      content: lesson.content,
+      createdAt: lesson.createdAt.toISOString(),
+      quiz: lesson.quiz,
+      scormPackage: lesson.scormPackage
+    }))
+
+    console.log('[COURSE_EDIT] Serialization complete')
 
     return (
       <div className="p-6 max-w-6xl mx-auto">
@@ -81,6 +120,8 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     )
   } catch (error) {
     console.error('[COURSE_EDIT_ERROR] Full error:', error)
+    console.error('[COURSE_EDIT_ERROR] Name:', (error as Error).name)
+    console.error('[COURSE_EDIT_ERROR] Message:', (error as Error).message)
     console.error('[COURSE_EDIT_ERROR] Stack:', (error as Error).stack)
     throw error
   }
