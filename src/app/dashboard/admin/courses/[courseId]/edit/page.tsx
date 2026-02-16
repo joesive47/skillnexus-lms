@@ -10,12 +10,20 @@ interface EditCoursePageProps {
   }>
 }
 
+// Enable dynamic rendering
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+
 export default async function EditCoursePage({ params }: EditCoursePageProps) {
   try {
     const { courseId } = await params
+    console.log('[COURSE_EDIT] Fetching course:', courseId)
+    
     const result = await getCourse(courseId)
+    console.log('[COURSE_EDIT] Result:', result.success, result.course ? 'found' : 'not found')
     
     if (!result.success || !result.course) {
+      console.log('[COURSE_EDIT] Course not found, returning 404')
       notFound()
     }
 
