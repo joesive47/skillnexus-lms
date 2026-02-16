@@ -31,17 +31,8 @@ const createPrismaClient = () => {
 
 const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
-// Test database connection on startup
-if (process.env.NODE_ENV === 'production') {
-  prisma.$connect()
-    .then(() => {
-      console.log('✅ Database connected successfully')
-    })
-    .catch((error) => {
-      console.error('❌ Database connection failed:', error)
-      // Don't throw here, let individual queries handle the error
-    })
-}
+// Database connection happens automatically on first query
+// Removed eager connection to prevent build-time hangs
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma

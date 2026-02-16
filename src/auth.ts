@@ -7,14 +7,8 @@ import bcrypt from "bcryptjs"
 import { UserRole } from "@/lib/types"
 import { authLogger } from '@/lib/auth-logger'
 
-// Test database connection
-if (process.env.NODE_ENV === 'development') {
-  prisma.$connect().then(() => {
-    console.log('[AUTH] Database connected successfully')
-  }).catch((error) => {
-    console.error('[AUTH] Database connection failed:', error)
-  })
-}
+// Database connection happens automatically on first query
+// Removed eager connection to prevent build-time hangs
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

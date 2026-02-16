@@ -10,12 +10,14 @@ const MAX_CACHE_SIZE = parseInt(process.env.RAG_CACHE_SIZE || '2000')
 const FAST_MODE = process.env.RAG_FAST_MODE === 'true'
 const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD || '0.25')
 
-// Preload embedder if enabled
-if (process.env.RAG_ENABLE_PRELOAD === 'true') {
+// Preload embedder if enabled (disabled during build)
+// Build time is detected by checking if we're actually in a request context
+// Commenting out to prevent build-time loading
+/* if (process.env.RAG_ENABLE_PRELOAD === 'true') {
   setTimeout(() => {
     getEmbedder().catch(console.error)
   }, 1000)
-}
+} */
 
 async function getEmbedder() {
   if (embedder) return embedder
