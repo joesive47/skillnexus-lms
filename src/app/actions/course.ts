@@ -273,6 +273,13 @@ export async function updateCourse(id: string, formData: FormData) {
       // Handle lessons update if provided
       if (lessons.length > 0) {
         console.log('[UPDATE_COURSE] Processing', lessons.length, 'lessons')
+        console.log('[UPDATE_COURSE] Lessons summary:', lessons.map(l => ({
+          id: l.id,
+          type: l.type,
+          order: l.order,
+          title: l.title
+        })))
+        
         // Get or create default module
         let module = await tx.module.findFirst({
           where: { courseId: id }
@@ -302,8 +309,19 @@ export async function updateCourse(id: string, formData: FormData) {
 
         // Create or update lessons
         for (const lessonData of lessons) {
+          console.log('[UPDATE_COURSE] Processing lesson:', {
+            id: lessonData.id,
+            type: lessonData.type,
+            title: lessonData.title,
+            order: lessonData.order,
+            hasQuizId: !!lessonData.quizId,
+            hasYoutubeUrl: !!lessonData.youtubeUrl,
+            hasScormPackagePath: !!lessonData.scormPackagePath
+          })
+          
           if (lessonData.id) {
             // Update existing lesson
+            console.log('[UPDATE_COURSE] Updating existing lesson:', lessonData.id)
             await tx.lesson.update({
               where: { id: lessonData.id },
               data: {
@@ -316,8 +334,10 @@ export async function updateCourse(id: string, formData: FormData) {
                 quizId: lessonData.quizId || null,
               },
             })
+            console.log('[UPDATE_COURSE] Lesson updated successfully')
           } else {
             // Create new lesson
+            console.log('[UPDATE_COURSE] Creating new lesson')
             const lesson = await tx.lesson.create({
               data: {
                 courseId: id,
@@ -331,6 +351,7 @@ export async function updateCourse(id: string, formData: FormData) {
                 quizId: lessonData.quizId || null,
               },
             })
+            console.log('[UPDATE_COURSE] New lesson created:', lesson.id)
 
             // Store lesson ID for SCORM upload after transaction
             if (lessonData.type === 'SCORM') {

@@ -135,21 +135,36 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
     if (course?.lessons) {
       console.log('[CourseForm] Raw lessons data:', course.lessons)
       const existingLessons = course.lessons.map(lesson => {
-        const lessonType = (lesson.type || lesson.lessonType) as 'VIDEO' | 'QUIZ' | 'SCORM'
+        // Use lessonType as primary source (it's the actual lesson type in DB)
+        const lessonType = lesson.lessonType as 'VIDEO' | 'QUIZ' | 'SCORM'
+        
+        // Generate default title based on lesson type if null
+        let title = lesson.title || ''
+        if (!title) {
+          if (lessonType === 'QUIZ') {
+            title = 'Quiz Lesson'
+          } else if (lessonType === 'SCORM') {
+            title = 'SCORM Lesson'
+          } else if (lessonType === 'VIDEO') {
+            title = 'Video Lesson'
+          }
+        }
+        
         console.log('[CourseForm] Processing lesson:', {
           id: lesson.id,
-          rawType: lesson.type,
-          rawLessonType: lesson.lessonType,
+          lessonType: lesson.lessonType,
           mappedType: lessonType,
-          title: lesson.title,
-          order: lesson.order
+          title: title,
+          order: lesson.order,
+          hasQuizId: !!lesson.quizId,
+          hasScorm: !!lesson.scormPackage
         })
         
         return {
           id: lesson.id,
           type: lessonType,
           order: lesson.order,
-          title: lesson.title || '',
+          title: title,
           youtubeUrl: lesson.youtubeUrl || '',
           requiredPct: lesson.requiredCompletionPercentage || 80,
           durationMin: lesson.duration ? Math.round(lesson.duration / 60) : 0,
@@ -157,7 +172,8 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
           scormPackagePath: lesson.scormPackage?.packagePath || '',
         }
       })
-      console.log('[CourseForm] Mapped lessons:', existingLessons)
+      console.log('[CourseForm] Mapped lessons count:', existingLessons.length)
+      console.log('[CourseForm] Lesson types:', existingLessons.map(l => l.type))
       setLessons(existingLessons)
     }
   }, [course])
