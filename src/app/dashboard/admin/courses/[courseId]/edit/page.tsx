@@ -44,16 +44,24 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     }))
 
     // Deep serialize all Date objects to ISO strings
-    const serializedCourse = serializeDates(result.course)
-    const serializedLessons = serializeDates(lessons)
+    // Use double serialization to ensure complete conversion
+    const serializedCourse = JSON.parse(
+      JSON.stringify(serializeDates(result.course))
+    )
+    const serializedLessons = JSON.parse(
+      JSON.stringify(serializeDates(lessons))
+    )
+
+    console.log('[COURSE_EDIT] Serialization complete')
 
     return (
       <div className="p-6 max-w-6xl mx-auto">
-        <CourseEditTabs course={serializedCourse as any} lessons={serializedLessons as any} />
+        <CourseEditTabs course={serializedCourse} lessons={serializedLessons} />
       </div>
     )
   } catch (error) {
-    console.error('[COURSE_EDIT_ERROR]', error)
+    console.error('[COURSE_EDIT_ERROR] Full error:', error)
+    console.error('[COURSE_EDIT_ERROR] Stack:', (error as Error).stack)
     throw error
   }
 }

@@ -17,12 +17,20 @@ export function serializeDates<T>(obj: T): T {
     return obj.map(item => serializeDates(item)) as any
   }
 
-  // Handle plain objects
-  if (typeof obj === 'object' && obj.constructor === Object) {
+  // Handle objects (including Prisma objects)
+  if (typeof obj === 'object') {
     const serialized: any = {}
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        serialized[key] = serializeDates(obj[key])
+      // Skip prototype properties and internal properties
+      if (key.startsWith('_') || key.startsWith('$')) {
+        continue
+      }
+      try {
+        const value = (obj as any)[key]
+        serialized[key] = serializeDates(value)
+      } catch (error) {
+        // Skip properties that can't be serialized
+        console.warn(`Failed to serialize property: ${key}`, error)
       }
     }
     return serialized
