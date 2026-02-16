@@ -19,6 +19,12 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     const { courseId } = await params
     console.log('[COURSE_EDIT] Fetching course:', courseId)
     
+    // Validate courseId format
+    if (!courseId || typeof courseId !== 'string') {
+      console.error('[COURSE_EDIT] Invalid courseId:', courseId)
+      notFound()
+    }
+
     const result = await getCourse(courseId)
     console.log('[COURSE_EDIT] Result:', result.success, result.course ? 'found' : 'not found')
     
@@ -28,14 +34,21 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     }
 
     // Get lessons for this course with all fields
-    const lessonsData = await prisma.lesson.findMany({
-      where: { courseId },
-      include: {
-        quiz: true,
-        scormPackage: true
-      },
-      orderBy: { order: 'asc' }
-    })
+    let lessonsData
+    try {
+      lessonsData = await prisma.lesson.findMany({
+        where: { courseId },
+        include: {
+          quiz: true,
+          scormPackage: true
+        },
+        orderBy: { order: 'asc' }
+      })
+      console.log(`[COURSE_EDIT] Found ${lessonsData.length} lessons`)
+    } catch (dbError) {
+      console.error('[COURSE_EDIT] Database error fetching lessons:', dbError)
+      lessonsData = []
+    }
 
     // Ensure all lessons have non-null titles
     const lessons = lessonsData.map(lesson => ({
@@ -45,14 +58,21 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
 
     // Deep serialize all Date objects to ISO strings
     // Use double serialization to ensure complete conversion
-    const serializedCourse = JSON.parse(
-      JSON.stringify(serializeDates(result.course))
-    )
-    const serializedLessons = JSON.parse(
-      JSON.stringify(serializeDates(lessons))
-    )
-
-    console.log('[COURSE_EDIT] Serialization complete')
+    let serializedCourse
+    let serializedLessons
+    
+    try {
+      serializedCourse = JSON.parse(
+        JSON.stringify(serializeDates(result.course))
+      )
+      serializedLessons = JSON.parse(
+        JSON.stringify(serializeDates(lessons))
+      )
+      console.log('[COURSE_EDIT] Serialization complete')
+    } catch (serializeError) {
+      console.error('[COURSE_EDIT] Serialization error:', serializeError)
+      throw new Error('Failed to serialize course data')
+    }
 
     return (
       <div className="p-6 max-w-6xl mx-auto">
