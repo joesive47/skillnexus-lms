@@ -69,8 +69,8 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
                   The full editing interface will be restored once the error is fixed.
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
         </Card>
       </div>
     )
