@@ -48,7 +48,31 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     const serializedCourse = {
       ...result.course,
       createdAt: result.course.createdAt.toISOString(),
-      updatedAt: result.course.updatedAt.toISOString()
+      updatedAt: result.course.updatedAt.toISOString(),
+      // Serialize lessons from getCourse()
+      lessons: result.course.lessons?.map((lesson: any) => ({
+        ...lesson,
+        createdAt: lesson.createdAt.toISOString(),
+        scormPackage: lesson.scormPackage ? {
+          ...lesson.scormPackage,
+          createdAt: lesson.scormPackage.createdAt.toISOString(),
+          updatedAt: lesson.scormPackage.updatedAt.toISOString()
+        } : null
+      })) || [],
+      // Serialize modules and their nested lessons
+      modules: result.course.modules?.map((module: any) => ({
+        ...module,
+        createdAt: module.createdAt.toISOString(),
+        lessons: module.lessons?.map((lesson: any) => ({
+          ...lesson,
+          createdAt: lesson.createdAt.toISOString(),
+          scormPackage: lesson.scormPackage ? {
+            ...lesson.scormPackage,
+            createdAt: lesson.scormPackage.createdAt.toISOString(),
+            updatedAt: lesson.scormPackage.updatedAt.toISOString()
+          } : null
+        })) || []
+      })) || []
     }
 
     return (
