@@ -1,5 +1,6 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import prisma from '@/lib/prisma'
+import { CourseForm } from '@/components/course/course-form'
 
 interface EditCoursePageProps {
   params: Promise<{
@@ -15,18 +16,12 @@ export const runtime = 'nodejs'
 export default async function EditCoursePage({ params }: EditCoursePageProps) {
   const { courseId } = await params
   
-  console.log('[COURSE_EDIT] Starting - courseId:', courseId)
-  
-  // Simple validation
   if (!courseId) {
-    console.log('[COURSE_EDIT] No courseId provided')
     notFound()
   }
 
   try {
-    console.log('[COURSE_EDIT] Querying database...')
-    
-    // Ultra-simple query - no Date fields
+    // Fetch course with all necessary data including lessons
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       select: {
@@ -34,82 +29,55 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
         title: true,
         description: true,
         published: true,
-        price: true
+        price: true,
+        imageUrl: true,
+        lessons: {
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            type: true,
+            lessonType: true,
+            youtubeUrl: true,
+            duration: true,
+            requiredCompletionPercentage: true,
+            quizId: true,
+            scormPackage: {
+              select: {
+                id: true,
+                packagePath: true
+              }
+            }
+          },
+          orderBy: {
+            order: 'asc'
+          }
+        }
       }
     })
     
-    console.log('[COURSE_EDIT] Query result:', course ? 'found' : 'null')
-    
     if (!course) {
-      console.log('[COURSE_EDIT] Course not found')
       notFound()
     }
 
-    console.log('[COURSE_EDIT] Rendering page...')
+    // Convert to plain object for client component
+    const courseData = {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      published: course.published,
+      price: course.price,
+      imageUrl: course.imageUrl,
+      lessons: course.lessons
+    }
 
-    // Ultra-simple HTML - no external components
     return (
-      <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <a 
-            href="/dashboard/admin/courses" 
-            style={{ 
-              padding: '8px 16px', 
-              background: '#f0f0f0', 
-              borderRadius: '4px',
-              textDecoration: 'none',
-              color: '#333'
-            }}
-          >
-            ← กลับ
-          </a>
-        </div>
-
-        <div style={{ 
-          border: '1px solid #ddd', 
-          borderRadius: '8px', 
-          padding: '24px',
-          background: 'white'
-        }}>
-          <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>
-            แก้ไขคอร์ส: {course.title}
-          </h1>
-          
-          <div style={{ marginBottom: '16px' }}>
-            <strong>Course ID:</strong> {course.id}
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <strong>Title:</strong> {course.title}
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <strong>Description:</strong> {course.description || 'N/A'}
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <strong>Price:</strong> {course.price} บาท
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <strong>Published:</strong> {course.published ? 'Yes ✅' : 'No ❌'}
-          </div>
-          
-          <div style={{ 
-            marginTop: '32px', 
-            padding: '16px', 
-            background: '#fff3cd', 
-            borderRadius: '4px',
-            fontSize: '14px'
-          }}>
-            ⚠️ Ultra-simple debug version - Testing basic rendering
-          </div>
-        </div>
+      <div className="p-6">
+        <CourseForm mode="edit" course={courseData} />
       </div>
     )
   } catch (error) {
-    console.error('[COURSE_EDIT_ERROR] Exception caught:', error)
-    console.error('[COURSE_EDIT_ERROR] Error type:', error instanceof Error ? error.constructor.name : typeof error)
-    console.error('[COURSE_EDIT_ERROR] Error message:', error instanceof Error ? error.message : String(error))
-    console.error('[COURSE_EDIT_ERROR] Stack trace:', error instanceof Error ? error.stack : 'No stack')
-    
-    // Re-throw to trigger error.tsx
+    console.error('[COURSE_EDIT_ERROR]', error)
     throw error
   }
 }
