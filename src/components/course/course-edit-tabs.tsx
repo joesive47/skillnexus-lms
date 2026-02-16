@@ -33,8 +33,8 @@ interface Course {
   price?: number | null
   imageUrl?: string | null
   published: boolean
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date | string
+  updatedAt: Date | string
 }
 
 interface Lesson {
@@ -46,7 +46,7 @@ interface Lesson {
   scormPackage?: any
   quiz?: any
   content?: string | null
-  createdAt: Date
+  createdAt: Date | string
 }
 
 interface CourseEditTabsProps {
