@@ -167,13 +167,16 @@ export async function createCourse(formData: FormData) {
 
 export async function updateCourse(id: string, formData: FormData) {
   try {
+    console.log('[UPDATE_COURSE] Starting update for course:', id)
     const session = await auth()
     if (!session?.user?.id) {
+      console.error('[UPDATE_COURSE] No session or user ID')
       return { success: false, error: 'Authentication required' }
     }
 
     // Check if user has admin role
     if (session.user.role !== 'ADMIN') {
+      console.error('[UPDATE_COURSE] User is not admin:', session.user.role)
       return { success: false, error: 'Admin access required' }
     }
 
@@ -185,7 +188,10 @@ export async function updateCourse(id: string, formData: FormData) {
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
 
+    console.log('[UPDATE_COURSE] Form data:', { title, price, published, hasImage: !!imageFile && imageFile.size > 0, hasLessons: !!lessonsData })
+
     if (!title || title.trim() === '') {
+      console.error('[UPDATE_COURSE] Title is missing')
       return { success: false, error: 'Title is required' }
     }
 
@@ -255,14 +261,18 @@ export async function updateCourse(id: string, formData: FormData) {
     }
 
     // Update course and lessons in a transaction
+    console.log('[UPDATE_COURSE] Starting database transaction')
     const result = await prisma.$transaction(async (tx) => {
+      console.log('[UPDATE_COURSE] Updating course with data:', updateData)
       const course = await tx.course.update({
         where: { id },
         data: updateData,
       })
+      console.log('[UPDATE_COURSE] Course updated successfully')
 
       // Handle lessons update if provided
       if (lessons.length > 0) {
+        console.log('[UPDATE_COURSE] Processing', lessons.length, 'lessons')
         // Get or create default module
         let module = await tx.module.findFirst({
           where: { courseId: id }
@@ -359,13 +369,21 @@ export async function updateCourse(id: string, formData: FormData) {
     revalidatePath(`/dashboard/admin/courses/${id}/edit`)
     revalidatePath(`/courses/${id}`)
     
+    console.log('[UPDATE_COURSE] Success! Course updated:', result.id)
     return { success: true, course: result }
   } catch (error) {
-    console.error('Error updating course:', error)
+    console.error('[UPDATE_COURSE] Error updating course:', error)
+    console.error('[UPDATE_COURSE] Error type:', error instanceof Error ? error.constructor.name : typeof error)
+    console.error('[UPDATE_COURSE] Error message:', error instanceof Error ? error.message : String(error))
+    console.error('[UPDATE_COURSE] Stack:', error instanceof Error ? error.stack : 'No stack')
+    
     if (error instanceof z.ZodError) {
+      console.error('[UPDATE_COURSE] Zod validation errors:', error.errors)
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: 'Failed to update course' }
+    
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update course'
+    return { success: false, error: errorMessage }
   }
 }
 
