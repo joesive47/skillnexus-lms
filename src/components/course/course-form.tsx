@@ -112,11 +112,13 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
     course?.imageUrl ? (
-      course.imageUrl.startsWith('/uploads/') 
-        ? `/api/images${course.imageUrl.replace('/uploads/', '/')}`
-        : course.imageUrl.startsWith('/') 
-          ? course.imageUrl 
-          : `/${course.imageUrl}`
+      course.imageUrl.startsWith('http://') || course.imageUrl.startsWith('https://')
+        ? course.imageUrl
+        : course.imageUrl.startsWith('/uploads/') 
+          ? `/api/images${course.imageUrl.replace('/uploads/', '/')}`
+          : course.imageUrl.startsWith('/') 
+            ? course.imageUrl 
+            : `/${course.imageUrl}`
     ) : null
   )
   const [error, setError] = useState<string | null>(null)
@@ -438,11 +440,13 @@ export function CourseForm({ course, mode = 'create' }: CourseFormProps) {
                 <p className="text-sm font-medium text-blue-800 mb-2">📸 รูปหน้าปกปัจจุบัน:</p>
                 <div className="relative w-[200px] h-[120px] border-2 border-blue-300 rounded-lg overflow-hidden bg-white">
                   <CourseImage
-                    src={course.imageUrl.startsWith('/uploads/') 
-                      ? `/api/images${course.imageUrl.replace('/uploads/', '/')}`
-                      : course.imageUrl.startsWith('/') 
-                        ? course.imageUrl 
-                        : `/${course.imageUrl}`}
+                    src={course.imageUrl.startsWith('http://') || course.imageUrl.startsWith('https://')
+                      ? course.imageUrl
+                      : course.imageUrl.startsWith('/uploads/') 
+                        ? `/api/images${course.imageUrl.replace('/uploads/', '/')}`
+                        : course.imageUrl.startsWith('/') 
+                          ? course.imageUrl 
+                          : `/${course.imageUrl}`}
                     alt="Current course cover"
                     fill
                     className="object-cover"
