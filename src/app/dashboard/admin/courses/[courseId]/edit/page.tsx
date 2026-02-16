@@ -2,6 +2,7 @@ import { getCourse } from '@/app/actions/course'
 import { notFound } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import { CourseEditTabs } from '@/components/course/course-edit-tabs'
+import { serializeDates } from '@/lib/serialize-dates'
 
 interface EditCoursePageProps {
   params: Promise<{
@@ -28,56 +29,19 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       orderBy: { order: 'asc' }
     })
 
-    // Ensure all lessons have non-null titles and serialize dates
+    // Ensure all lessons have non-null titles
     const lessons = lessonsData.map(lesson => ({
       ...lesson,
-      title: lesson.title || 'Untitled Lesson',
-      createdAt: lesson.createdAt.toISOString(),
-      quiz: lesson.quiz ? {
-        ...lesson.quiz,
-        createdAt: lesson.quiz.createdAt.toISOString()
-      } : null,
-      scormPackage: lesson.scormPackage ? {
-        ...lesson.scormPackage,
-        createdAt: lesson.scormPackage.createdAt.toISOString(),
-        updatedAt: lesson.scormPackage.updatedAt.toISOString()
-      } : null
+      title: lesson.title || 'Untitled Lesson'
     }))
 
-    // Serialize course dates
-    const serializedCourse = {
-      ...result.course,
-      createdAt: result.course.createdAt.toISOString(),
-      updatedAt: result.course.updatedAt.toISOString(),
-      // Serialize lessons from getCourse()
-      lessons: result.course.lessons?.map((lesson: any) => ({
-        ...lesson,
-        createdAt: lesson.createdAt.toISOString(),
-        scormPackage: lesson.scormPackage ? {
-          ...lesson.scormPackage,
-          createdAt: lesson.scormPackage.createdAt.toISOString(),
-          updatedAt: lesson.scormPackage.updatedAt.toISOString()
-        } : null
-      })) || [],
-      // Serialize modules and their nested lessons
-      modules: result.course.modules?.map((module: any) => ({
-        ...module,
-        createdAt: module.createdAt.toISOString(),
-        lessons: module.lessons?.map((lesson: any) => ({
-          ...lesson,
-          createdAt: lesson.createdAt.toISOString(),
-          scormPackage: lesson.scormPackage ? {
-            ...lesson.scormPackage,
-            createdAt: lesson.scormPackage.createdAt.toISOString(),
-            updatedAt: lesson.scormPackage.updatedAt.toISOString()
-          } : null
-        })) || []
-      })) || []
-    }
+    // Deep serialize all Date objects to ISO strings
+    const serializedCourse = serializeDates(result.course)
+    const serializedLessons = serializeDates(lessons)
 
     return (
       <div className="p-6 max-w-6xl mx-auto">
-        <CourseEditTabs course={serializedCourse as any} lessons={lessons as any} />
+        <CourseEditTabs course={serializedCourse as any} lessons={serializedLessons as any} />
       </div>
     )
   } catch (error) {
