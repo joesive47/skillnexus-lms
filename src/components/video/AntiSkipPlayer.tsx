@@ -55,8 +55,13 @@ export function AntiSkipPlayer({
           controls: 0,
           disablekb: 1,
           modestbranding: 1,
-          rel: 0,
+          rel: 0,              // ไม่แสดงคลิปแนะนำจาก YouTube
           fs: 0,
+          iv_load_policy: 3,   // ปิด video annotations
+          cc_load_policy: 0,   // ปิด captions
+          showinfo: 0,         // ไม่แสดงข้อมูลวิดีโอ
+          enablejsapi: 1,      // เปิด JavaScript API
+          playsinline: 1,      // เล่นแบบ inline (สำหรับมือถือ)
           start: Math.floor(initialWatchedTime)
         },
         events: {

@@ -81,9 +81,19 @@ export function validateYouTubeID(id: string): { isValid: boolean; cleanId: stri
 
 /**
  * Generate YouTube embed URL from Video ID
+ * Includes parameters to disable related videos and annotations
  */
 export function getYouTubeEmbedUrl(videoId: string): string {
-  return `https://www.youtube.com/embed/${videoId}`
+  const params = new URLSearchParams({
+    rel: '0',              // ไม่แสดงคลิปแนะนำจาก YouTube
+    modestbranding: '1',   // ลด YouTube branding
+    iv_load_policy: '3',   // ปิด video annotations
+    cc_load_policy: '0',   // ปิด captions
+    showinfo: '0',         // ไม่แสดงข้อมูลวิดีโอ
+    enablejsapi: '1',      // เปิด JavaScript API
+    playsinline: '1'       // เล่นแบบ inline (สำหรับมือถือ)
+  })
+  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`
 }
 
 /**
