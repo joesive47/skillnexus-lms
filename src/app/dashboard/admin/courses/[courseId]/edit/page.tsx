@@ -60,13 +60,6 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       notFound()
     }
 
-    console.log('[COURSE_EDIT] Course data:', {
-      id: course.id,
-      title: course.title,
-      lessonsCount: course.lessons.length,
-      lessonTypes: course.lessons.map(l => ({ order: l.order, type: l.lessonType, title: l.title }))
-    })
-
     // Convert to plain object for client component
     const courseData = {
       id: course.id,
@@ -84,7 +77,11 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
         duration: lesson.duration,
         requiredCompletionPercentage: lesson.requiredCompletionPercentage,
         quizId: lesson.quizId,
-        scormPackage: lesson.scormPackage
+        scormPackage: lesson.scormPackage ? {
+          id: lesson.scormPackage.id,
+          title: lesson.scormPackage.title,
+          packagePath: lesson.scormPackage.packagePath
+        } : null
       }))
     }
 
@@ -94,7 +91,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       </div>
     )
   } catch (error) {
-    console.error('[COURSE_EDIT_ERROR]', error)
+    console.error('[COURSE_EDIT_ERROR]', error instanceof Error ? error.message : 'Unknown error')
     throw error
   }
 }

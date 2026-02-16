@@ -263,7 +263,7 @@ export async function updateCourse(id: string, formData: FormData) {
     // Update course and lessons in a transaction
     console.log('[UPDATE_COURSE] Starting database transaction')
     const result = await prisma.$transaction(async (tx) => {
-      console.log('[UPDATE_COURSE] Updating course with data:', updateData)
+      console.log('[UPDATE_COURSE] Updating course:', id)
       const course = await tx.course.update({
         where: { id },
         data: updateData,
@@ -273,12 +273,6 @@ export async function updateCourse(id: string, formData: FormData) {
       // Handle lessons update if provided
       if (lessons.length > 0) {
         console.log('[UPDATE_COURSE] Processing', lessons.length, 'lessons')
-        console.log('[UPDATE_COURSE] Lessons summary:', lessons.map(l => ({
-          id: l.id,
-          type: l.type,
-          order: l.order,
-          title: l.title
-        })))
         
         // Get or create default module
         let module = await tx.module.findFirst({
@@ -309,15 +303,7 @@ export async function updateCourse(id: string, formData: FormData) {
 
         // Create or update lessons
         for (const lessonData of lessons) {
-          console.log('[UPDATE_COURSE] Processing lesson:', {
-            id: lessonData.id,
-            type: lessonData.type,
-            title: lessonData.title,
-            order: lessonData.order,
-            hasQuizId: !!lessonData.quizId,
-            hasYoutubeUrl: !!lessonData.youtubeUrl,
-            hasScormPackagePath: !!lessonData.scormPackagePath
-          })
+          console.log('[UPDATE_COURSE] Processing lesson:', lessonData.id || 'new', lessonData.type, lessonData.order)
           
           if (lessonData.id) {
             // Update existing lesson
