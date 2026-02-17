@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { QuizWithPrerequisiteCheck } from '@/components/quiz/quiz-with-prerequisite-check'
+import { QuizClient } from '@/components/quiz/quiz-client'
 
 interface QuizPageProps {
   params: Promise<{ courseId: string; lessonId: string }>
@@ -15,7 +15,6 @@ export default async function QuizPage({ params }: QuizPageProps) {
     redirect('/login')
   }
 
-  // Minimal query - just check if quiz exists and user has access
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
     select: {
@@ -23,7 +22,9 @@ export default async function QuizPage({ params }: QuizPageProps) {
       courseId: true,
       quiz: {
         select: {
-          id: true
+          id: true,
+          title: true,
+          passScore: true
         }
       }
     }
@@ -48,10 +49,12 @@ export default async function QuizPage({ params }: QuizPageProps) {
     redirect(`/courses/${courseId}`)
   }
 
-  // Pass only IDs to client component - let it fetch quiz data via API
+  // Pass only serializable primitive data
   return (
-    <QuizWithPrerequisiteCheck
+    <QuizClient
       quizId={lesson.quiz.id}
+      quizTitle={lesson.quiz.title}
+      quizPassScore={lesson.quiz.passScore || 80}
       lessonId={lessonId}
       courseId={courseId}
       userId={session.user.id}
