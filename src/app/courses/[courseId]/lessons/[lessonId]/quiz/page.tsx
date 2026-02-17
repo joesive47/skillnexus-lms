@@ -62,7 +62,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
   }
 
   // Explicitly serialize all data to plain objects
-  const sanitizedQuiz = {
+  const sanitizedQuiz = JSON.parse(JSON.stringify({
     id: lesson.quiz.id,
     title: lesson.quiz.title,
     passScore: lesson.quiz.passScore || 80,
@@ -75,7 +75,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
         text: opt.text,
       }))
     }))
-  }
+  }))
 
   return (
     <QuizWithPrerequisiteCheck
