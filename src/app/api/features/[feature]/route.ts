@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isFeatureEnabled, type FeatureFlags } from '@/lib/feature-flags'
 
-const VALID_FEATURES = ['gamification', 'videoProgress', 'chatbot', 'socialFeatures', 'advancedAnalytics'] as const
+// Map snake_case to camelCase for feature names
+const FEATURE_MAP: Record<string, keyof FeatureFlags> = {
+  'gamification': 'gamification',
+  'videoProgress': 'videoProgress',
+  'video_progress': 'videoProgress',
+  'chatbot': 'chatbot',
+  'socialFeatures': 'socialFeatures',
+  'social_features': 'socialFeatures',
+  'advancedAnalytics': 'advancedAnalytics',
+  'advanced_features': 'advancedAnalytics',
+  'ai_recommendations': 'ai_recommendations'
+}
 
 export async function GET(
   request: NextRequest,
@@ -10,11 +21,12 @@ export async function GET(
   try {
     const { feature } = await params
     
-    if (!VALID_FEATURES.includes(feature as any)) {
+    const mappedFeature = FEATURE_MAP[feature]
+    if (!mappedFeature) {
       return NextResponse.json({ error: 'Invalid feature' }, { status: 400 })
     }
     
-    const enabled = await isFeatureEnabled(feature as keyof FeatureFlags)
+    const enabled = await isFeatureEnabled(mappedFeature)
     return NextResponse.json({ enabled })
   } catch (error) {
     return NextResponse.json({ enabled: false })
