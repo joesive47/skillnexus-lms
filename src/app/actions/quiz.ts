@@ -171,7 +171,7 @@ export async function importQuizFromExcel(formData: FormData) {
       message: `นำเข้าสำเร็จ ${totalQuestions} ข้อ${questionsToShow && questionsToShow < totalQuestions ? ` (จะสุ่ม ${questionsToShow} ข้อให้ผู้ทำ)` : ''}`
     }
   } catch (error) {
-    console.error('Error importing quiz:', error)
+    console.error('Error importing quiz:', error instanceof Error ? error.message : 'Unknown error')
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
@@ -191,7 +191,7 @@ export async function deleteQuiz(quizId: string) {
     revalidatePath('/dashboard/admin/quizzes')
     return { success: true }
   } catch (error) {
-    console.error('Error deleting quiz:', error)
+    console.error('Error deleting quiz:', error instanceof Error ? error.message : 'Unknown error')
     return { success: false, error: 'Failed to delete quiz' }
   }
 }
@@ -206,7 +206,7 @@ export async function updateQuizMetadata(quizId: string, title: string) {
     revalidatePath('/dashboard/admin/quizzes')
     return { success: true, quiz }
   } catch (error) {
-    console.error('Error updating quiz:', error)
+    console.error('Error updating quiz:', error instanceof Error ? error.message : 'Unknown error')
     return { success: false, error: 'Failed to update quiz' }
   }
 }
@@ -261,7 +261,7 @@ export async function updateQuizSettings(
     
     return { success: true, quiz: updatedQuiz }
   } catch (error) {
-    console.error('Error updating quiz settings:', error)
+    console.error('Error updating quiz settings:', error instanceof Error ? error.message : 'Unknown error')
     return { success: false, error: 'Failed to update quiz settings' }
   }
 }
@@ -406,7 +406,7 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
       }
     }
   } catch (error) {
-    console.error('Error submitting quiz:', error)
+    console.error('Error submitting quiz:', error instanceof Error ? error.message : 'Unknown error')
     return { success: false, error: 'Failed to submit quiz' }
   }
 }
@@ -429,7 +429,7 @@ export async function getQuizzes() {
 
     return { success: true, quizzes }
   } catch (error) {
-    console.error('Error fetching quizzes:', error)
+    console.error('Error fetching quizzes:', error instanceof Error ? error.message : 'Unknown error')
     return { success: false, error: 'Failed to fetch quizzes' }
   }
 }
@@ -453,10 +453,28 @@ export async function getQuizForStudent(quizId: string) {
 
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        timeLimit: true,
+        randomize: true,
+        shuffleOptions: true,
+        questionsToShow: true,
+        questionPoolSize: true,
         questions: {
-          include: {
-            options: true
+          select: {
+            id: true,
+            text: true,
+            order: true,
+            quizId: true,
+            options: {
+              select: {
+                id: true,
+                text: true,
+                questionId: true,
+                isCorrect: true
+              }
+            }
           },
           orderBy: {
             order: 'asc'
@@ -491,7 +509,10 @@ export async function getQuizForStudent(quizId: string) {
 
     // Remove correct answer indicators from options for student view
     const sanitizedQuestions = questions.map(q => ({
-      ...q,
+      id: q.id,
+      text: q.text,
+      order: q.order,
+      quizId: q.quizId,
       options: q.options.map(opt => ({
         id: opt.id,
         text: opt.text,
@@ -514,7 +535,7 @@ export async function getQuizForStudent(quizId: string) {
       questions: sanitizedQuestions
     }
   } catch (error) {
-    console.error('Error fetching quiz for student:', error)
+    console.error('Error fetching quiz for student:', error instanceof Error ? error.message : 'Unknown error')
     return { success: false, error: 'Failed to fetch quiz' }
   }
 }
