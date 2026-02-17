@@ -33,7 +33,7 @@ export async function importQuizFromExcel(formData: FormData) {
     const shuffleOptions = formData.get('shuffleOptions') === 'true'
     const randomize = formData.get('randomize') === 'true'
     
-    console.log('📋 Form data:', { title, fileName: excelFile?.name, questionsToShowStr, timeLimitStr, shuffleOptions, randomize })
+    console.log('📋 Form data: title=', title, 'file=', excelFile?.name)
 
     const questionsToShow = questionsToShowStr ? parseInt(questionsToShowStr) : undefined
     const timeLimit = timeLimitStr ? parseInt(timeLimitStr) : 0
@@ -113,14 +113,7 @@ export async function importQuizFromExcel(formData: FormData) {
     }
 
     console.log('💾 Creating quiz in database...')
-    console.log('Quiz data:', { 
-      title: validatedFields.title,
-      timeLimit: validatedFields.timeLimit,
-      shuffleOptions: validatedFields.shuffleOptions,
-      randomize: validatedFields.randomize,
-      questionPoolSize: totalQuestions,
-      questionsToShow: questionsToShow || totalQuestions
-    })
+    console.log('Quiz data: title=', validatedFields.title, 'questions=', totalQuestions, 'toShow=', questionsToShow || totalQuestions)
 
     // Create quiz with questions atomically (with extended timeout for large imports)
     const quiz = await prisma.$transaction(async (tx) => {
@@ -326,13 +319,7 @@ export async function submitQuizAttempt(quizId: string, lessonId: string, answer
     const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0
     const passed = percentage >= 80
 
-    console.log('📊 Quiz Results:', {
-      correctAnswers,
-      totalQuestions,
-      percentage: `${percentage}%`,
-      passed,
-      details: `${correctAnswers}/${totalQuestions} = ${percentage}%`
-    })
+    console.log('📊 Quiz Results: correct=', correctAnswers, 'total=', totalQuestions, 'percentage=', percentage, '%', 'passed=', passed)
 
     // Save submission
     await prisma.studentSubmission.create({

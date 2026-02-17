@@ -17,7 +17,9 @@ export default async function QuizPage({ params }: QuizPageProps) {
 
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
-    include: {
+    select: {
+      id: true,
+      courseId: true,
       quiz: {
         select: {
           id: true,
@@ -59,10 +61,11 @@ export default async function QuizPage({ params }: QuizPageProps) {
     redirect(`/courses/${courseId}/lessons/${lessonId}`)
   }
 
+  // Explicitly serialize all data to plain objects
   const sanitizedQuiz = {
     id: lesson.quiz.id,
     title: lesson.quiz.title,
-    passScore: lesson.quiz.passScore,
+    passScore: lesson.quiz.passScore || 80,
     questions: quizDataResult.questions.map(q => ({
       id: q.id,
       text: q.text,
@@ -80,6 +83,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
       lessonId={lessonId}
       courseId={courseId}
       userId={session.user.id}
+      prerequisiteQuizId={lesson.quiz.prerequisiteQuizId || null}
     />
   )
 }
