@@ -22,15 +22,11 @@ export async function GET(
         id: true,
         title: true,
         passScore: true,
-        lesson: {
-          select: {
-            courseId: true
-          }
-        }
+        courseId: true
       }
     })
 
-    if (!quiz) {
+    if (!quiz || !quiz.courseId) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 })
     }
 
@@ -39,7 +35,7 @@ export async function GET(
       where: {
         userId_courseId: {
           userId: session.user.id,
-          courseId: quiz.lesson.courseId
+          courseId: quiz.courseId
         }
       }
     })
