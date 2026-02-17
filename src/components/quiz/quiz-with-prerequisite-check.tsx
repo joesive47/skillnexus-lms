@@ -1,48 +1,116 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QuizLockStatus } from './quiz-lock-status'
 import { QuizRetryStatus } from './quiz-retry-status'
 import { QuizComponent } from './QuizComponent'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 interface QuizWithPrerequisiteCheckProps {
-  quiz: {
-    id: string
-    title: string
-    passScore: number
-    questions: any[]
-  }
+  quizId: string
   lessonId: string
   courseId: string
   userId: string
 }
 
+interface QuizData {
+  id: string
+  title: string
+  passScore: number
+  questions: {
+    id: string
+    text: string
+    order: number
+    options: {
+      id: string
+      text: string
+    }[]
+  }[]
+}
+
 export function QuizWithPrerequisiteCheck({
-  quiz,
+  quizId,
   lessonId,
   courseId,
   userId
 }: QuizWithPrerequisiteCheckProps) {
+  const [quizData, setQuizData] = useState<QuizData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
   const [canRetry, setCanRetry] = useState<boolean | null>(null)
 
-  // Step 1: รอให้เช็ค prerequisite เสร็จก่อน
+  // Fetch quiz data from API
+  useEffect(() => {
+    async function fetchQuiz() {
+      try {
+        const response = await fetch(`/api/quiz/${quizId}`)
+        if (!response.ok) {
+          throw new Error('Failed to load quiz')
+        }
+        const data = await response.json()
+        setQuizData(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load quiz')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchQuiz()
+  }, [quizId])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2">กำลังโหลดแบบทดสอบ...</span>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !quizData) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>เกิดข้อผิดพลาด</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-red-500">{error || 'ไม่พบแบบทดสอบ'}</p>
+            <Link href={`/courses/${courseId}/lessons/${lessonId}`}>
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                ย้อนกลับ
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Step 1: Check prerequisite
   if (canAccess === null) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle>{quiz.title}</CardTitle>
+            <CardTitle>{quizData.title}</CardTitle>
           </CardHeader>
           <CardContent>
             <QuizLockStatus
-              quizId={quiz.id}
-              quizTitle={quiz.title}
-              quizPassScore={quiz.passScore}
+              quizId={quizId}
+              quizTitle={quizData.title}
+              quizPassScore={quizData.passScore}
               onStatusChecked={setCanAccess}
             />
           </CardContent>
@@ -51,19 +119,19 @@ export function QuizWithPrerequisiteCheck({
     )
   }
 
-  // Step 2: ถ้าไม่ผ่าน prerequisite แสดงหน้า lock
+  // Step 2: Prerequisite not met
   if (!canAccess) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle>{quiz.title}</CardTitle>
+            <CardTitle>{quizData.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <QuizLockStatus
-              quizId={quiz.id}
-              quizTitle={quiz.title}
-              quizPassScore={quiz.passScore}
+              quizId={quizId}
+              quizTitle={quizData.title}
+              quizPassScore={quizData.passScore}
               onStatusChecked={setCanAccess}
             />
             
@@ -81,18 +149,18 @@ export function QuizWithPrerequisiteCheck({
     )
   }
 
-  // Step 3: ผ่าน prerequisite แล้ว ให้เช็ค retry cooldown
+  // Step 3: Check retry cooldown
   if (canRetry === null) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle>{quiz.title}</CardTitle>
+            <CardTitle>{quizData.title}</CardTitle>
           </CardHeader>
           <CardContent>
             <QuizRetryStatus
-              quizId={quiz.id}
-              quizTitle={quiz.title}
+              quizId={quizId}
+              quizTitle={quizData.title}
               onStatusChecked={setCanRetry}
             />
           </CardContent>
@@ -101,18 +169,18 @@ export function QuizWithPrerequisiteCheck({
     )
   }
 
-  // Step 4: ถ้ายังอยู่ใน cooldown period
+  // Step 4: In cooldown period
   if (!canRetry) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <Card>
           <CardHeader>
-            <CardTitle>{quiz.title}</CardTitle>
+            <CardTitle>{quizData.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <QuizRetryStatus
-              quizId={quiz.id}
-              quizTitle={quiz.title}
+              quizId={quizId}
+              quizTitle={quizData.title}
               onStatusChecked={setCanRetry}
               onRetryReady={() => setCanRetry(true)}
             />
@@ -131,14 +199,10 @@ export function QuizWithPrerequisiteCheck({
     )
   }
 
-  // Step 5: ผ่านทุกเงื่อนไขแล้ว ให้แสดง Quiz
+  // Step 5: All checks passed - show quiz
   return (
     <QuizComponent
-      quiz={{
-        id: quiz.id,
-        title: quiz.title,
-        questions: quiz.questions
-      }}
+      quiz={quizData}
       lessonId={lessonId}
       courseId={courseId}
       userId={userId}
