@@ -83,7 +83,6 @@ export default async function QuizPage({ params }: QuizPageProps) {
       lessonId={lessonId}
       courseId={courseId}
       userId={session.user.id}
-      prerequisiteQuizId={lesson.quiz.prerequisiteQuizId || null}
     />
   )
 }
