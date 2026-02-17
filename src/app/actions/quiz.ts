@@ -499,12 +499,10 @@ export async function getQuizForStudent(quizId: string) {
       id: q.id,
       text: q.text,
       order: q.order,
-      quizId: q.quizId,
       options: q.options.map(opt => ({
         id: opt.id,
-        text: opt.text,
-        questionId: opt.questionId
-        // isCorrect is intentionally omitted
+        text: opt.text
+        // isCorrect and questionId are intentionally omitted
       }))
     }))
 
@@ -513,11 +511,11 @@ export async function getQuizForStudent(quizId: string) {
       quiz: {
         id: quiz.id,
         title: quiz.title,
-        timeLimit: quiz.timeLimit,
-        randomize: quiz.randomize,
-        shuffleOptions: quiz.shuffleOptions,
-        questionsToShow: quiz.questionsToShow,
-        questionPoolSize: quiz.questionPoolSize
+        timeLimit: quiz.timeLimit || null,
+        randomize: quiz.randomize || false,
+        shuffleOptions: quiz.shuffleOptions || false,
+        questionsToShow: quiz.questionsToShow || null,
+        questionPoolSize: quiz.questionPoolSize || null
       },
       questions: sanitizedQuestions
     }
