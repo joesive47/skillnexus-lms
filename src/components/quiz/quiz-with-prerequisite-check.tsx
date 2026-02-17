@@ -47,13 +47,21 @@ export function QuizWithPrerequisiteCheck({
   useEffect(() => {
     async function fetchQuiz() {
       try {
+        console.log('[QUIZ_CLIENT] Fetching quiz:', quizId)
         const response = await fetch(`/api/quiz/${quizId}`)
+        console.log('[QUIZ_CLIENT] Response status:', response.status)
+        
         if (!response.ok) {
-          throw new Error('Failed to load quiz')
+          const errorText = await response.text()
+          console.error('[QUIZ_CLIENT] Error response:', errorText)
+          throw new Error(`Failed to load quiz (${response.status}): ${errorText}`)
         }
+        
         const data = await response.json()
+        console.log('[QUIZ_CLIENT] Quiz data loaded:', data.title)
         setQuizData(data)
       } catch (err) {
+        console.error('[QUIZ_CLIENT] Fetch error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load quiz')
       } finally {
         setIsLoading(false)
