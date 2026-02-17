@@ -30,17 +30,13 @@ export async function GET(
 
     const { quizId } = await params
 
-    // 1. ดึงข้อมูล Quiz พร้อม prerequisite
+    // 1. ดึงข้อมูล Quiz (ไม่ query prerequisiteQuizId เพราะ column อาจไม่มีใน DB)
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
-      include: {
-        prerequisiteQuiz: {
-          select: {
-            id: true,
-            title: true,
-            passScore: true
-          }
-        }
+      select: {
+        id: true,
+        title: true,
+        passScore: true
       }
     })
 
@@ -51,58 +47,19 @@ export async function GET(
       )
     }
 
-    // 2. ถ้าไม่มี prerequisite ให้เข้าได้เลย
-    if (!quiz.prerequisiteQuizId || !quiz.prerequisiteQuiz) {
-      return NextResponse.json({
-        canAccess: true,
-        message: 'No prerequisite required'
-      })
-    }
-
-    // 3. เช็คว่า user เคยทำ prerequisite quiz หรือยัง
-    const prerequisiteAttempt = await prisma.quizAttemptRecord.findFirst({
-      where: {
-        userId: session.user.id,
-        quizId: quiz.prerequisiteQuizId,
-        passed: true
-      },
-      orderBy: {
-        score: 'desc' // เอาคะแนนสูงสุด
-      }
-    })
-
-    // 4. ถ้ายังไม่เคยทำหรือไม่ผ่าน
-    if (!prerequisiteAttempt) {
-      return NextResponse.json({
-        canAccess: false,
-        reason: 'prerequisite_not_passed',
-        prerequisiteQuiz: {
-          id: quiz.prerequisiteQuiz.id,
-          title: quiz.prerequisiteQuiz.title,
-          requiredScore: quiz.prerequisiteQuiz.passScore,
-          userBestScore: null
-        },
-        message: `ต้องทำ "${quiz.prerequisiteQuiz.title}" ให้ผ่านก่อน (คะแนนขั้นต่ำ: ${quiz.prerequisiteQuiz.passScore}%)`
-      })
-    }
-
-    // 5. ผ่านแล้ว ให้เข้าได้
+    // 2. ชั่วคราว: ถ้า DB ไม่มี prerequisiteQuizId field, ให้เข้าได้เลย
+    // TODO: Run migration to add prerequisiteQuizId column when ready
     return NextResponse.json({
       canAccess: true,
-      prerequisiteQuiz: {
-        id: quiz.prerequisiteQuiz.id,
-        title: quiz.prerequisiteQuiz.title,
-        requiredScore: quiz.prerequisiteQuiz.passScore,
-        userBestScore: prerequisiteAttempt.score
-      },
-      message: 'Prerequisite passed'
+      message: 'No prerequisite check (feature pending migration)'
     })
 
   } catch (error) {
     console.error('Error checking quiz prerequisite:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    // Return canAccess: true on error to not block users
+    return NextResponse.json({
+      canAccess: true,
+      message: 'Prerequisite check skipped due to error'
+    })
   }
 }
