@@ -20,6 +20,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
     select: {
       id: true,
       courseId: true,
+      isFinalExam: true,
       quiz: {
         select: {
           id: true,
@@ -49,7 +50,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
     redirect(`/courses/${courseId}`)
   }
 
-  // Pass only serializable primitive data
+  // Pass only serializable primitive data + isFinalExam flag
   return (
     <QuizClient
       quizId={lesson.quiz.id}
@@ -58,6 +59,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
       lessonId={lessonId}
       courseId={courseId}
       userId={session.user.id}
+      isFinalExam={lesson.isFinalExam}
     />
   )
 }

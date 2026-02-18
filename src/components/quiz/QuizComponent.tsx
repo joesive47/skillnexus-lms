@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { useRouter } from 'next/navigation'
+import { CertificateSuccessDialog } from './certificate-success-dialog'
 
 interface QuizComponentProps {
   quiz: {
@@ -25,14 +26,16 @@ interface QuizComponentProps {
   lessonId: string
   courseId: string
   userId: string
+  isFinalExam?: boolean
 }
 
-export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponentProps) {
+export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = false }: QuizComponentProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [score, setScore] = useState(0)
+  const [showCertificateDialog, setShowCertificateDialog] = useState(false)
   const [quizResults, setQuizResults] = useState<{
     correctAnswers: number
     totalQuestions: number
@@ -83,6 +86,13 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
         setScore(result.score)
         setQuizResults(result)
         setShowResults(true)
+        
+        // 🎓 ถ้าเป็น Final Exam และผ่าน → แสดง Certificate Dialog
+        if (isFinalExam && result.passed) {
+          setTimeout(() => {
+            setShowCertificateDialog(true)
+          }, 1000) // รอ 1 วินาทีให้เห็นผลคะแนนก่อน
+        }
       }
     } catch (error) {
       console.error('Error submitting quiz:', error)
@@ -261,6 +271,15 @@ export function QuizComponent({ quiz, lessonId, courseId, userId }: QuizComponen
           </div>
         </CardContent>
       </Card>
+
+      {/* Certificate Success Dialog */}
+      <CertificateSuccessDialog
+        open={showCertificateDialog}
+        onClose={() => setShowCertificateDialog(false)}
+        courseName={quiz.title}
+        score={score}
+        courseId={courseId}
+      />
     </div>
   )
 }

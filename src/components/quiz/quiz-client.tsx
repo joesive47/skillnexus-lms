@@ -17,6 +17,7 @@ interface QuizClientProps {
   lessonId: string
   courseId: string
   userId: string
+  isFinalExam?: boolean
 }
 
 interface QuizData {
@@ -38,6 +39,11 @@ export function QuizClient({
   quizId,
   quizTitle,
   quizPassScore,
+  lessonId,
+  courseId,
+  userId,
+  isFinalExam = false
+}: QuizClientProps) {
   lessonId,
   courseId,
   userId
@@ -223,6 +229,7 @@ export function QuizClient({
       lessonId={lessonId}
       courseId={courseId}
       userId={userId}
+      isFinalExam={isFinalExam}
     />
   )
 }
