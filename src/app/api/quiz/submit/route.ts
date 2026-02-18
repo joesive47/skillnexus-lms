@@ -4,28 +4,46 @@ import prisma from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[QUIZ_SUBMIT] Starting submission')
+    
     const session = await auth()
     if (!session?.user?.id) {
+      console.log('[QUIZ_SUBMIT] Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    console.log('[QUIZ_SUBMIT] User:', session.user.id)
 
     const { quizId, lessonId, answers } = await request.json()
+    console.log('[QUIZ_SUBMIT] QuizId:', quizId, 'LessonId:', lessonId, 'Answers count:', Object.keys(answers).length)
 
     // Get quiz with questions and correct answers
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        passScore: true,
         questions: {
-          include: {
-            options: true
+          select: {
+            id: true,
+            text: true,
+            options: {
+              select: {
+                id: true,
+                text: true,
+                isCorrect: true
+              }
+            }
           }
         }
       }
     })
 
     if (!quiz) {
+      console.log('[QUIZ_SUBMIT] Quiz not found')
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 })
     }
+    console.log('[QUIZ_SUBMIT] Quiz found:', quiz.title, 'PassScore:', quiz.passScore)
 
     // Calculate score with detailed analysis
     // Only count questions that were actually answered (shown to user)
@@ -69,49 +87,70 @@ export async function POST(request: NextRequest) {
     const totalQuestions = answeredQuestions.length
     const score = Math.round((correctAnswers / totalQuestions) * 100)
     const percentage = score
+    const passScore = quiz.passScore || 70
+    const passed = score >= passScore
+
+    console.log('[QUIZ_SUBMIT] Score:', score, 'PassScore:', passScore, 'Passed:', passed)
 
     // Save quiz submission
-    await prisma.studentSubmission.create({
-      data: {
-        userId: session.user.id,
-        quizId,
-        score,
-        passed: score >= 70,
-        answers: JSON.stringify(answers)
-      }
-    })
-
-    // Mark lesson as completed if score >= 70%
-    if (score >= 70) {
-      await prisma.watchHistory.upsert({
-        where: {
-          userId_lessonId: {
-            userId: session.user.id,
-            lessonId
-          }
-        },
-        update: {
-          completed: true
-        },
-        create: {
+    try {
+      await prisma.studentSubmission.create({
+        data: {
           userId: session.user.id,
-          lessonId,
-          completed: true,
-          watchTime: 0
+          quizId,
+          score,
+          passed,
+          answers: JSON.stringify(answers)
         }
       })
+      console.log('[QUIZ_SUBMIT] Submission saved')
+    } catch (dbError) {
+      console.error('[QUIZ_SUBMIT] DB Error saving submission:', dbError)
+      // Continue even if save fails
     }
 
+    // Mark lesson as completed if passed
+    if (passed && lessonId) {
+      try {
+        await prisma.watchHistory.upsert({
+          where: {
+            userId_lessonId: {
+              userId: session.user.id,
+              lessonId
+            }
+          },
+          update: {
+            completed: true
+          },
+          create: {
+            userId: session.user.id,
+            lessonId,
+            completed: true,
+            watchTime: 0
+          }
+        })
+        console.log('[QUIZ_SUBMIT] Lesson marked as completed')
+      } catch (dbError) {
+        console.error('[QUIZ_SUBMIT] DB Error marking lesson complete:', dbError)
+        // Continue even if this fails
+      }
+    }
+
+    console.log('[QUIZ_SUBMIT] Success - returning results')
     return NextResponse.json({
       score,
       correctAnswers,
       totalQuestions,
       percentage,
-      passed: score >= 70,
+      passed,
       questionResults
     })
   } catch (error) {
-    console.error('Quiz submission error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('[QUIZ_SUBMIT] Error:', error instanceof Error ? error.message : 'Unknown')
+    console.error('[QUIZ_SUBMIT] Stack:', error instanceof Error ? error.stack : '')
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
