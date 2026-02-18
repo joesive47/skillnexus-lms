@@ -30,13 +30,12 @@ export async function GET(
 
     const { quizId } = await params
 
-    // 1. ดึงข้อมูล Quiz พร้อม retry delay setting
+    // 1. ดึงข้อมูล Quiz (ไม่ query retryDelayMinutes เพราะ column อาจไม่มีใน DB)
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
       select: {
         id: true,
         title: true,
-        retryDelayMinutes: true,
         passScore: true
       }
     })
@@ -48,36 +47,22 @@ export async function GET(
       )
     }
 
-    // 2. ถ้าไม่มีการตั้ง retry delay หรือเป็น 0 ให้ทำได้เลย
-    if (!quiz.retryDelayMinutes || quiz.retryDelayMinutes === 0) {
-      return NextResponse.json({
-        canRetry: true,
-        message: 'No retry delay configured'
-      })
-    }
-
-    // 3. หา attempt ล่าสุดของ user
-    const lastAttempt = await prisma.quizAttemptRecord.findFirst({
-      where: {
-        userId: session.user.id,
-        quizId: quizId
-      },
-      orderBy: {
-        submittedAt: 'desc'
-      },
-      select: {
-        id: true,
-        score: true,
-        passed: true,
-        submittedAt: true,
-        attemptNumber: true
-      }
+    // 2. ชั่วคราว: ถ้า DB ไม่มี retryDelayMinutes field, ให้ retry ได้เลย
+    // TODO: Run migration to add retryDelayMinutes column when ready
+    return NextResponse.json({
+      canRetry: true,
+      message: 'No retry delay (feature pending migration)'
     })
 
-    // 4. ถ้ายังไม่เคยทำให้ทำได้เลย
-    if (!lastAttempt) {
-      return NextResponse.json({
-        canRetry: true,
+  } catch (error) {
+    console.error('Error checking quiz retry status:', error)
+    // Return canRetry: true on error to not block users
+    return NextResponse.json({
+      canRetry: true,
+      message: 'Retry check skipped due to error'
+    })
+  }
+}
         message: 'No previous attempts'
       })
     }
