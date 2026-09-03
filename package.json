@@ -22,7 +22,7 @@
     "clean:build": "rimraf .next dist build *.tsbuildinfo",
     "optimize": "node build-optimizer.js",
     "analyze": "cross-env ANALYZE=true npm run build",
-    "db:generate": "prisma generate",
+    "db:generate": "node node_modules/prisma/build/index.js generate",
     "db:push": "prisma db push",
     "db:seed": "node -r esbuild-register prisma/seed.ts || tsx prisma/seed.ts || node prisma/seed.js",
     "db:seed:lms": "tsx prisma/seed-lms-testing.ts",
