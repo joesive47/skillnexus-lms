@@ -56,6 +56,9 @@
     "dist/**/*",
     "node_modules/**/*",
     "prisma/**/*",
-    ".local-backups/**/*"
+    ".local-backups/**/*",
+    "playwright.config.ts",
+    "e2e/**/*",
+    "tests/**/*"
   ]
 }
