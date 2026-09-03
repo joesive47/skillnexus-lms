@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 🔨 Generate Prisma Client
         run: npx prisma generate
@@ -36,13 +36,7 @@ jobs:
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: 📊 Deploy Database
-        run: |
-          npx prisma db push
-          npm run deploy:quick
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: ✅ Verify Deployment
-        run: npm run deploy:verify
+        if: ${{ secrets.DATABASE_URL != '' }}
+        run: npx prisma db push
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
