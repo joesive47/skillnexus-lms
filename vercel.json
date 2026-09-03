@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx prisma generate && npm run build",
+  "buildCommand": "./node_modules/.bin/prisma generate && npm run build",
   "installCommand": "npm install --prefer-offline --no-audit",
   "outputDirectory": ".next",
   "env": {
