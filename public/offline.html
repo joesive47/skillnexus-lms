@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ออฟไลน์ - SkillNexus LMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #7c3aed 50%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+        }
+
+        .retry-button {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .features {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .offline {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .online {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 640px) {
+            .offline-container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status offline pulse" id="connectionStatus">
+        📡 ออฟไลน์
+    </div>
+
+    <div class="offline-container">
+        <div class="offline-icon">
+            📚
+        </div>
+        
+        <h1>คุณอยู่ในโหมดออฟไลน์</h1>
+        
+        <p>
+            ขณะนี้คุณไม่ได้เชื่อมต่ออินเทอร์เน็ต แต่ยังสามารถใช้งานฟีเจอร์บางส่วนของ SkillNexus ได้
+        </p>
+        
+        <button class="retry-button" onclick="retryConnection()">
+            🔄 ลองเชื่อมต่อใหม่
+        </button>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>
+                    <strong>เนื้อหาที่บันทึกไว้</strong><br>
+                    <small>เข้าถึงบทเรียนที่ดาวน์โหลดไว้</small>
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>
+                    <strong>ความก้าวหน้าการเรียน</strong><br>
+                    <small>ข้อมูลจะซิงค์เมื่อกลับมาออนไลน์</small>
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>
+                    <strong>โหมดการเรียนออฟไลน์</strong><br>
+                    <small>เรียนรู้ต่อได้โดยไม่ต้องใช้อินเทอร์เน็ต</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Monitor connection status
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('connectionStatus');
+            
+            if (navigator.onLine) {
+                statusElement.textContent = '🌐 ออนไลน์';
+                statusElement.className = 'connection-status online';
+                
+                // Auto-reload when back online
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                statusElement.textContent = '📡 ออฟไลน์';
+                statusElement.className = 'connection-status offline pulse';
+            }
+        }
+
+        function retryConnection() {
+            const button = document.querySelector('.retry-button');
+            button.textContent = '🔄 กำลังตรวจสอบ...';
+            button.disabled = true;
+            
+            // Check connection after a delay
+            setTimeout(() => {
+                if (navigator.onLine) {
+                    button.textContent = '✅ เชื่อมต่อแล้ว!';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    button.textContent = '🔄 ลองเชื่อมต่อใหม่';
+                    button.disabled = false;
+                }
+            }, 2000);
+        }
+
+        // Listen for connection changes
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Initial status check
+        updateConnectionStatus();
+
+        // Periodic connection check
+        setInterval(() => {
+            // Try to fetch a small resource to verify connection
+            fetch('/manifest.json', { 
+                method: 'HEAD',
+                cache: 'no-cache'
+            }).then(() => {
+                if (!navigator.onLine) {
+                    // Force online status update
+                    window.dispatchEvent(new Event('online'));
+                }
+            }).catch(() => {
+                // Connection failed
+            });
+        }, 5000);
+
+        // Service Worker registration check
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                console.log('Service Worker is ready');
+                
+                // Listen for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    if (newWorker) {
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Show update notification
+                                const updateBanner = document.createElement('div');
+                                updateBanner.innerHTML = `
+                                    <div style="
+                                        position: fixed;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        background: linear-gradient(135deg, #10b981, #059669);
+                                        color: white;
+                                        padding: 15px;
+                                        text-align: center;
+                                        z-index: 1000;
+                                        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                                    ">
+                                        🎉 มีเวอร์ชันใหม่พร้อมใช้งาน! 
+                                        <button onclick="window.location.reload()" style="
+                                            background: white;
+                                            color: #059669;
+                                            border: none;
+                                            padding: 5px 15px;
+                                            border-radius: 20px;
+                                            margin-left: 10px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                        ">อัปเดต</button>
+                                    </div>
+                                `;
+                                document.body.appendChild(updateBanner);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

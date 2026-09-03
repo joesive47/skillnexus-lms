@@ -1,0 +1,419 @@
+/* Layout-specific styles for SkillNexus LMS */
+
+/* Main Layout Container */
+.app-container {
+  @apply min-h-screen bg-background;
+}
+
+/* Header Layout */
+.header-layout {
+  @apply sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+}
+
+.header-content {
+  @apply container flex h-16 items-center justify-between px-4;
+}
+
+.header-left {
+  @apply flex items-center gap-4;
+}
+
+.header-center {
+  @apply hidden md:flex flex-1 items-center justify-center max-w-md mx-8;
+}
+
+.header-right {
+  @apply flex items-center gap-2;
+}
+
+/* Logo */
+.logo-container {
+  @apply flex items-center gap-2;
+}
+
+.logo-text {
+  @apply text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+}
+
+/* Navigation Menu */
+.nav-menu-desktop {
+  @apply hidden md:flex items-center gap-6;
+}
+
+.nav-menu-mobile {
+  @apply md:hidden;
+}
+
+.nav-item {
+  @apply relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground;
+}
+
+.nav-item.active {
+  @apply bg-accent text-accent-foreground;
+}
+
+.nav-dropdown {
+  @apply absolute top-full left-0 mt-1 w-48 rounded-md border bg-popover p-1 shadow-md;
+}
+
+/* Sidebar Layout */
+.sidebar-layout {
+  @apply flex h-screen;
+}
+
+.sidebar-container {
+  @apply w-64 border-r bg-muted/40 hidden lg:block;
+}
+
+.sidebar-mobile {
+  @apply fixed inset-y-0 left-0 z-50 w-64 border-r bg-background shadow-lg transform -translate-x-full transition-transform lg:hidden;
+}
+
+.sidebar-mobile.open {
+  @apply translate-x-0;
+}
+
+.sidebar-overlay {
+  @apply fixed inset-0 z-40 bg-black/50 lg:hidden;
+}
+
+.sidebar-header {
+  @apply flex h-16 items-center border-b px-6;
+}
+
+.sidebar-content {
+  @apply flex-1 overflow-y-auto py-4;
+}
+
+.sidebar-footer {
+  @apply border-t p-4;
+}
+
+/* Main Content Area */
+.main-content {
+  @apply flex-1 flex flex-col min-h-0;
+}
+
+.content-header {
+  @apply border-b bg-muted/40 px-6 py-4;
+}
+
+.content-body {
+  @apply flex-1 overflow-y-auto p-6;
+}
+
+.content-footer {
+  @apply border-t bg-muted/40 px-6 py-4;
+}
+
+/* Page Layout */
+.page-container {
+  @apply container mx-auto px-4 py-8 max-w-7xl;
+}
+
+.page-header {
+  @apply mb-8;
+}
+
+.page-title {
+  @apply text-3xl font-bold tracking-tight;
+}
+
+.page-description {
+  @apply text-muted-foreground mt-2;
+}
+
+.page-actions {
+  @apply flex items-center gap-2 mt-4;
+}
+
+.page-content {
+  @apply space-y-6;
+}
+
+/* Grid Layouts */
+.grid-layout-1 {
+  @apply grid gap-6;
+}
+
+.grid-layout-2 {
+  @apply grid gap-6 md:grid-cols-2;
+}
+
+.grid-layout-3 {
+  @apply grid gap-6 md:grid-cols-2 lg:grid-cols-3;
+}
+
+.grid-layout-4 {
+  @apply grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.grid-layout-auto {
+  @apply grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))];
+}
+
+/* Flex Layouts */
+.flex-layout-row {
+  @apply flex items-center gap-4;
+}
+
+.flex-layout-col {
+  @apply flex flex-col gap-4;
+}
+
+.flex-layout-between {
+  @apply flex items-center justify-between;
+}
+
+.flex-layout-center {
+  @apply flex items-center justify-center;
+}
+
+/* Card Layouts */
+.card-layout {
+  @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+}
+
+.card-layout-header {
+  @apply flex flex-col space-y-1.5 p-6;
+}
+
+.card-layout-content {
+  @apply p-6 pt-0;
+}
+
+.card-layout-footer {
+  @apply flex items-center p-6 pt-0;
+}
+
+/* Dashboard Specific Layouts */
+.dashboard-container {
+  @apply grid min-h-screen w-full lg:grid-cols-[280px_1fr];
+}
+
+.dashboard-sidebar {
+  @apply hidden border-r bg-muted/40 lg:block;
+}
+
+.dashboard-main {
+  @apply flex flex-col;
+}
+
+.dashboard-header {
+  @apply flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6;
+}
+
+.dashboard-content {
+  @apply flex-1 overflow-y-auto p-4 lg:p-6;
+}
+
+/* Course Layout */
+.course-layout {
+  @apply grid gap-6 lg:grid-cols-[1fr_300px];
+}
+
+.course-main {
+  @apply space-y-6;
+}
+
+.course-sidebar {
+  @apply space-y-6;
+}
+
+.course-video-container {
+  @apply aspect-video w-full rounded-lg overflow-hidden bg-black;
+}
+
+.course-content-tabs {
+  @apply border-b;
+}
+
+.course-content-panel {
+  @apply py-6;
+}
+
+/* Quiz Layout */
+.quiz-layout {
+  @apply max-w-4xl mx-auto space-y-6;
+}
+
+.quiz-header-layout {
+  @apply flex items-center justify-between p-4 border-b;
+}
+
+.quiz-content-layout {
+  @apply p-6;
+}
+
+.quiz-footer-layout {
+  @apply flex items-center justify-between p-4 border-t;
+}
+
+/* Profile Layout */
+.profile-layout {
+  @apply grid gap-6 lg:grid-cols-[300px_1fr];
+}
+
+.profile-sidebar {
+  @apply space-y-6;
+}
+
+.profile-main {
+  @apply space-y-6;
+}
+
+.profile-avatar-section {
+  @apply text-center p-6;
+}
+
+.profile-info-section {
+  @apply space-y-4 p-6;
+}
+
+/* Settings Layout */
+.settings-layout {
+  @apply grid gap-6 lg:grid-cols-[250px_1fr];
+}
+
+.settings-nav {
+  @apply space-y-1;
+}
+
+.settings-content {
+  @apply space-y-6;
+}
+
+.settings-section {
+  @apply space-y-4 p-6 border rounded-lg;
+}
+
+/* Modal/Dialog Layout */
+.modal-overlay {
+  @apply fixed inset-0 z-50 bg-black/80;
+}
+
+.modal-container {
+  @apply fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg;
+}
+
+.modal-header {
+  @apply flex flex-col space-y-1.5 text-center sm:text-left;
+}
+
+.modal-content {
+  @apply space-y-4;
+}
+
+.modal-footer {
+  @apply flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 640px) {
+  .page-container {
+    @apply px-2 py-4;
+  }
+  
+  .dashboard-container {
+    @apply grid-cols-1;
+  }
+  
+  .course-layout {
+    @apply grid-cols-1;
+  }
+  
+  .profile-layout {
+    @apply grid-cols-1;
+  }
+  
+  .settings-layout {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-layout-3 {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  .grid-layout-4 {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  .header-center {
+    @apply hidden;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar-container {
+    @apply hidden;
+  }
+  
+  .dashboard-sidebar {
+    @apply hidden;
+  }
+}
+
+/* Print Layout */
+@media print {
+  .no-print {
+    @apply hidden !important;
+  }
+  
+  .print-full-width {
+    @apply w-full !important;
+  }
+  
+  .page-container {
+    @apply max-w-none px-0;
+  }
+}
+/* Focus Styles for Accessibility */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Enhanced Responsive Utilities */
+.container-fluid {
+  @apply w-full px-4 sm:px-6 lg:px-8 xl:px-12;
+}
+
+.text-responsive-sm {
+  @apply text-xs sm:text-sm md:text-base;
+}
+
+.text-responsive-lg {
+  @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
+}
+
+.grid-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+.flex-responsive {
+  @apply flex flex-col sm:flex-row gap-4;
+}
+
+/* Mobile-first breakpoints */
+@media (max-width: 480px) {
+  .mobile-stack {
+    @apply flex-col space-y-2;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+  
+  .mobile-center {
+    @apply text-center;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-grid {
+    @apply grid-cols-2;
+  }
+}

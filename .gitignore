@@ -1,0 +1,133 @@
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules/
+/.pnp
+.pnp.js
+.npm-cache/
+
+# ============================================================
+# Next.js build output
+# ============================================================
+/.next/
+/.next-runall/
+/out/
+/build
+next-env.d.ts
+.next-standalone/
+
+# ============================================================
+# Environment variables — NEVER commit these
+# ============================================================
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.backup
+.env.docker
+.env.postgresql
+.env.sqlite
+.env.vercel
+.env.production.payment
+.env*.local
+.env.backup.*
+# Keep example/template files
+!.env.example
+!.env.*.example
+!.env.production.example
+!.env.postgresql.example
+
+# ============================================================
+# Database
+# ============================================================
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db
+prisma/*.db-journal
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+database/*.sql
+!prisma/schema.prisma
+!prisma/migrations/
+
+# ============================================================
+# Logs
+# ============================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+debug.log
+error.log
+build-log.txt
+build-output.txt
+scripts/*.log
+.runall/
+
+# ============================================================
+# Cache & build artifacts
+# ============================================================
+.cache
+.swc/
+.turbo/
+*.tsbuildinfo
+.eslintcache
+node_modules/.cache/
+.playwright-browsers/
+/playwright-report/
+/test-results/
+
+# ============================================================
+# IDE & OS
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# Uploads & media (large binary files)
+# ============================================================
+/public/uploads/
+/uploads/
+/scorm-courses/
+/scorm-packages/
+public/scorm-packages/
+*.zip
+*.tar.gz
+*.rar
+
+# ============================================================
+# Vercel
+# ============================================================
+.vercel
+
+# ============================================================
+# Local backup files
+# ============================================================
+.local-backups/
+*.bak
+*.backup
+*.old
+*.tmp
+*.temp
+temp/
+
+# ============================================================
+# Secrets / keys (extra safety)
+# ============================================================
+*.pem
+*.key
+*.cert
+*.p12
+bucket-policy.json
+s3-policy.json
+vercel-env-values.txt
+VERCEL-ENV-VARS.txt
+Authall.txt

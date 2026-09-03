@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Generative AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/scorm-api.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✅ แบบทดสอบ</h1>
+      <p>20 คำถาม | ผ่าน 80% | เวลา 30 นาที</p>
+    </div>
+
+    <div id="quiz-container"></div>
+
+    <div class="quiz-result" id="result" style="display:none;">
+      <h2>🎉 ผลการทดสอบ</h2>
+      <div class="score-display">
+        <div class="score-circle">
+          <span id="score-percent">0</span>%
+        </div>
+      </div>
+      <p id="result-message"></p>
+      <div id="result-actions"></div>
+    </div>
+
+    <div class="navigation">
+      <button class="btn" onclick="submitQuiz()">ส่งคำตอบ</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        id: 1,
+        question: "Transformer Architecture ใช้กลไกอะไรในการให้ความสำคัญกับคำต่างๆ?",
+        options: [
+          "Recurrent Neural Network",
+          "Attention Mechanism",
+          "Convolutional Layer",
+          "Pooling Layer"
+        ],
+        correct: 1
+      },
+      {
+        id: 2,
+        question: "1 token ประมาณเท่ากับกี่คำภาษาอังกฤษ?",
+        options: [
+          "0.25 คำ",
+          "0.5 คำ",
+          "0.75 คำ",
+          "1 คำ"
+        ],
+        correct: 2
+      },
+      {
+        id: 3,
+        question: "Model ใดมี Context Window ใหญ่ที่สุด?",
+        options: [
+          "GPT-4 Turbo (128K)",
+          "Claude 3 (200K)",
+          "GPT-3.5 (16K)",
+          "Llama 2 (4K)"
+        ],
+        correct: 1
+      },
+      {
+        id: 4,
+        question: "RAG ย่อมาจากอะไร?",
+        options: [
+          "Rapid AI Generation",
+          "Retrieval-Augmented Generation",
+          "Random Access Gateway",
+          "Real-time API Gateway"
+        ],
+        correct: 1
+      },
+      {
+        id: 5,
+        question: "Vector Database ใช้สำหรับอะไร?",
+        options: [
+          "เก็บข้อมูลตัวเลข",
+          "เก็บรูปภาพ",
+          "ค้นหาความคล้ายคลึงของข้อความ",
+          "เก็บ log files"
+        ],
+        correct: 2
+      }
+    ];
+
+    let userAnswers = {};
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      let html = '';
+
+      questions.forEach((q, index) => {
+        html += `
+          <div class="quiz-question">
+            <h3>คำถามที่ ${index + 1}</h3>
+            <p>${q.question}</p>
+            <div class="quiz-options">
+              ${q.options.map((opt, i) => `
+                <label class="quiz-option">
+                  <input type="radio" name="q${q.id}" value="${i}" onchange="saveAnswer(${q.id}, ${i})">
+                  <span>${opt}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function saveAnswer(questionId, answerIndex) {
+      userAnswers[questionId] = answerIndex;
+    }
+
+    function submitQuiz() {
+      let correct = 0;
+      const total = questions.length;
+
+      questions.forEach(q => {
+        if (userAnswers[q.id] === q.correct) {
+          correct++;
+        }
+      });
+
+      const score = Math.round((correct / total) * 100);
+      const passed = score >= 80;
+
+      // Update UI
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('score-percent').textContent = score;
+
+      const message = passed 
+        ? `🎉 ยินดีด้วย! คุณผ่านการทดสอบ (${correct}/${total} ข้อ)`
+        : `😔 คุณไม่ผ่านการทดสอบ (${correct}/${total} ข้อ) ต้องได้ 80% ขึ้นไป`;
+      
+      document.getElementById('result-message').textContent = message;
+
+      const actions = passed
+        ? '<a href="certificate.html" class="btn btn-success">รับใบประกาศนียบัตร 🎓</a>'
+        : '<button class="btn" onclick="location.reload()">ทำใหม่</button>';
+      
+      document.getElementById('result-actions').innerHTML = actions;
+
+      // SCORM tracking
+      if (typeof setScore === 'function') {
+        setScore(score);
+      }
+      if (typeof setPassed === 'function') {
+        setPassed(passed);
+      }
+      if (passed && typeof setCompleted === 'function') {
+        setCompleted();
+      }
+    }
+
+    window.addEventListener('load', renderQuiz);
+  </script>
+
+  <style>
+    .score-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2rem auto;
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .quiz-result {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .quiz-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    .pricing-table th,
+    .pricing-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .pricing-table th {
+      background: var(--primary);
+      color: white;
+    }
+  </style>
+</body>
+</html>

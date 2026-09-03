@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+  "ignorePatterns": [
+    "**/*.bak",
+    "public/**",
+    ".next/**"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unsafe-function-type": "warn",
+    "@typescript-eslint/no-empty-object-type": "warn",
+    "@typescript-eslint/no-require-imports": "warn",
+    "react/no-unescaped-entities": "warn",
+    "@next/next/no-assign-module-variable": "warn"
+  }
+}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="ai-automation-mastery" version="1.0"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+                      http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd
+                      http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="ORG-ai-automation-mastery">
+    <organization identifier="ORG-ai-automation-mastery">
+      <title>AI Automation Mastery</title>
+      <item identifier="ITEM-INDEX" identifierref="RES-INDEX">
+        <title>Course Introduction</title>
+      </item>
+      
+      <item identifier="ITEM-MODULE1" identifierref="RES-MODULE1">
+        <title>Module 1: Automation Strategy</title>
+      </item>
+      <item identifier="ITEM-MODULE2" identifierref="RES-MODULE2">
+        <title>Module 2: AI Tools & Platforms</title>
+      </item>
+      <item identifier="ITEM-MODULE3" identifierref="RES-MODULE3">
+        <title>Module 3: Workflow Design</title>
+      </item>
+      <item identifier="ITEM-MODULE4" identifierref="RES-MODULE4">
+        <title>Module 4: Advanced Automation</title>
+      </item>
+      <item identifier="ITEM-QUIZ" identifierref="RES-QUIZ">
+        <title>Final Assessment</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="RES-INDEX" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
+      <file href="shared/premium-style.css"/>
+      <file href="shared/interactive.js"/>
+      <file href="shared/scorm.js"/>
+    </resource>
+    
+    <resource identifier="RES-MODULE1" type="webcontent" adlcp:scormtype="sco" href="module1.html">
+      <file href="module1.html"/>
+      <file href="shared/premium-style.css"/>
+      <file href="shared/interactive.js"/>
+      <file href="shared/scorm.js"/>
+    </resource>
+    <resource identifier="RES-MODULE2" type="webcontent" adlcp:scormtype="sco" href="module2.html">
+      <file href="module2.html"/>
+      <file href="shared/premium-style.css"/>
+      <file href="shared/interactive.js"/>
+      <file href="shared/scorm.js"/>
+    </resource>
+    <resource identifier="RES-MODULE3" type="webcontent" adlcp:scormtype="sco" href="module3.html">
+      <file href="module3.html"/>
+      <file href="shared/premium-style.css"/>
+      <file href="shared/interactive.js"/>
+      <file href="shared/scorm.js"/>
+    </resource>
+    <resource identifier="RES-MODULE4" type="webcontent" adlcp:scormtype="sco" href="module4.html">
+      <file href="module4.html"/>
+      <file href="shared/premium-style.css"/>
+      <file href="shared/interactive.js"/>
+      <file href="shared/scorm.js"/>
+    </resource>
+    <resource identifier="RES-QUIZ" type="webcontent" adlcp:scormtype="sco" href="quiz.html">
+      <file href="quiz.html"/>
+      <file href="shared/premium-style.css"/>
+      <file href="shared/interactive.js"/>
+      <file href="shared/scorm.js"/>
+      <file href="shared/quiz.js"/>
+    </resource>
+  </resources>
+</manifest>

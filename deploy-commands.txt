@@ -1,0 +1,75 @@
+# ⚡ Copy-Paste Commands for Google Cloud Run Deployment
+# Project: skillnexus-lms-2025
+# Account: joesive@gmail.com
+
+# ============================================
+# STEP 1: Set Project
+# ============================================
+gcloud config set project skillnexus-lms-2025
+
+# ============================================
+# STEP 2: Enable APIs
+# ============================================
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com
+
+# ============================================
+# STEP 3: Clone Repository (แก้ YOUR_USERNAME)
+# ============================================
+git clone https://github.com/YOUR_USERNAME/The-SkillNexus.git
+cd The-SkillNexus
+
+# ============================================
+# STEP 4: Deploy to Cloud Run
+# ============================================
+gcloud run deploy skillnexus-lms \
+  --source . \
+  --region=asia-southeast1 \
+  --platform=managed \
+  --allow-unauthenticated \
+  --memory=1Gi \
+  --cpu=1 \
+  --max-instances=10 \
+  --min-instances=0
+
+# ============================================
+# STEP 5: Run Migrations (แก้ DATABASE_URL)
+# ============================================
+export DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.sorvxmipetkhofhhqjio.supabase.co:5432/postgres"
+
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npm run db:seed
+
+# ============================================
+# USEFUL COMMANDS
+# ============================================
+
+# View logs
+gcloud run logs read skillnexus-lms --region=asia-southeast1 --limit=50
+
+# View service details
+gcloud run services describe skillnexus-lms --region=asia-southeast1
+
+# Update environment variables
+gcloud run services update skillnexus-lms \
+  --region=asia-southeast1 \
+  --update-env-vars="DATABASE_URL=postgresql://...,NEXTAUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=,AUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=,AUTH_TRUST_HOST=true,NODE_ENV=production"
+
+# Redeploy
+gcloud run deploy skillnexus-lms --source . --region=asia-southeast1
+
+# Delete service
+gcloud run services delete skillnexus-lms --region=asia-southeast1
+
+# ============================================
+# ENVIRONMENT VARIABLES (Add in Console)
+# ============================================
+# DATABASE_URL=postgresql://postgres:[YOUR_PASSWORD]@db.sorvxmipetkhofhhqjio.supabase.co:5432/postgres
+# NEXTAUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=
+# AUTH_SECRET=hJtNdWscf3RFT97SZ3V/UesWs3X86lgN8zfLTMD0qJA=
+# NEXTAUTH_URL=https://skillnexus-lms-xxxxx-as.a.run.app
+# AUTH_URL=https://skillnexus-lms-xxxxx-as.a.run.app
+# NEXT_PUBLIC_URL=https://skillnexus-lms-xxxxx-as.a.run.app
+# AUTH_TRUST_HOST=true
+# NODE_ENV=production

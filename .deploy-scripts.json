@@ -1,0 +1,8 @@
+{
+  "name": "skillnexus-lms",
+  "scripts": {
+    "deploy:all": "npx prisma generate && npx prisma db push && npx tsx prisma/deploy-all.ts",
+    "deploy:verify": "npx tsx prisma/verify-courses.ts",
+    "deploy:quick": "npx tsx prisma/deploy-all.ts"
+  }
+}

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="com.skillnexus.corporate.course001" version="1.0"
+          xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+          xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3"
+          xmlns:adlnav="http://www.adlnet.org/xsd/adlnav_v1p3"
+          xmlns:imsss="http://www.imsglobal.org/xsd/imsss"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 imscp_v1p1.xsd
+                              http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd
+                              http://www.adlnet.org/xsd/adlseq_v1p3 adlseq_v1p3.xsd
+                              http://www.adlnet.org/xsd/adlnav_v1p3 adlnav_v1p3.xsd
+                              http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd">
+
+  <!-- Metadata Section -->
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+    <adlcp:location>metadata.xml</adlcp:location>
+  </metadata>
+
+  <!-- Organizations Section -->
+  <organizations default="ORG-001">
+    <organization identifier="ORG-001">
+      <title>Executive Leadership Excellence</title>
+      
+      <!-- Module 1: Strategic Leadership & Vision -->
+      <item identifier="ITEM-M1" identifierref="RES-M1">
+        <title>Module 1: Strategic Leadership & Vision</title>
+        
+        <!-- Lesson 1.1 -->
+        <item identifier="ITEM-M1-L1" identifierref="RES-M1-L1">
+          <title>1.1 Strategic Thinking Framework</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 1.2 -->
+        <item identifier="ITEM-M1-L2" identifierref="RES-M1-L2">
+          <title>1.2 Vision Creation & Communication</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 1.3 -->
+        <item identifier="ITEM-M1-L3" identifierref="RES-M1-L3">
+          <title>1.3 Strategic Planning Process</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Module 1 Quiz -->
+        <item identifier="ITEM-M1-QUIZ" identifierref="RES-M1-QUIZ">
+          <title>Module 1 Quiz</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+          <adlcp:datafromlms>Module 1 Assessment</adlcp:datafromlms>
+        </item>
+      </item>
+
+      <!-- Module 2: Executive Decision Making -->
+      <item identifier="ITEM-M2" identifierref="RES-M2">
+        <title>Module 2: Executive Decision Making</title>
+        
+        <!-- Lesson 2.1 -->
+        <item identifier="ITEM-M2-L1" identifierref="RES-M2-L1">
+          <title>2.1 Decision-Making Frameworks</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 2.2 -->
+        <item identifier="ITEM-M2-L2" identifierref="RES-M2-L2">
+          <title>2.2 Data-Driven vs Intuition-Based Decisions</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 2.3 -->
+        <item identifier="ITEM-M2-L3" identifierref="RES-M2-L3">
+          <title>2.3 Risk Assessment & Management</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Module 2 Quiz -->
+        <item identifier="ITEM-M2-QUIZ" identifierref="RES-M2-QUIZ">
+          <title>Module 2 Quiz</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+      </item>
+
+      <!-- Module 3: Building High-Performance Organizations -->
+      <item identifier="ITEM-M3" identifierref="RES-M3">
+        <title>Module 3: Building High-Performance Organizations</title>
+        
+        <!-- Lesson 3.1 -->
+        <item identifier="ITEM-M3-L1" identifierref="RES-M3-L1">
+          <title>3.1 Organizational Design & Structure</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 3.2 -->
+        <item identifier="ITEM-M3-L2" identifierref="RES-M3-L2">
+          <title>3.2 Culture Transformation</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 3.3 -->
+        <item identifier="ITEM-M3-L3" identifierref="RES-M3-L3">
+          <title>3.3 Talent Strategy & Succession Planning</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Module 3 Quiz -->
+        <item identifier="ITEM-M3-QUIZ" identifierref="RES-M3-QUIZ">
+          <title>Module 3 Quiz</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+      </item>
+
+      <!-- Module 4: Executive Communication & Influence -->
+      <item identifier="ITEM-M4" identifierref="RES-M4">
+        <title>Module 4: Executive Communication & Influence</title>
+        
+        <!-- Lesson 4.1 -->
+        <item identifier="ITEM-M4-L1" identifierref="RES-M4-L1">
+          <title>4.1 Executive Presence & Gravitas</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 4.2 -->
+        <item identifier="ITEM-M4-L2" identifierref="RES-M4-L2">
+          <title>4.2 Board Communication</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Lesson 4.3 -->
+        <item identifier="ITEM-M4-L3" identifierref="RES-M4-L3">
+          <title>4.3 Negotiation at Executive Level</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+        
+        <!-- Module 4 Quiz -->
+        <item identifier="ITEM-M4-QUIZ" identifierref="RES-M4-QUIZ">
+          <title>Module 4 Quiz</title>
+          <adlcp:masteryscore>80</adlcp:masteryscore>
+        </item>
+      </item>
+
+      <!-- Final Assessment -->
+      <item identifier="ITEM-FINAL" identifierref="RES-FINAL">
+        <title>Final Assessment</title>
+        <adlcp:masteryscore>85</adlcp:masteryscore>
+        <adlcp:datafromlms>Final Exam</adlcp:datafromlms>
+      </item>
+
+    </organization>
+  </organizations>
+
+  <!-- Resources Section -->
+  <resources>
+    
+    <!-- Module 1 Resources -->
+    <resource identifier="RES-M1" type="webcontent" adlcp:scormtype="asset" href="modules/module1/index.html">
+      <file href="modules/module1/index.html"/>
+      <file href="modules/module1/content.html"/>
+      <file href="assets/css/styles.css"/>
+      <file href="assets/js/course.js"/>
+    </resource>
+    
+    <resource identifier="RES-M1-L1" type="webcontent" adlcp:scormtype="sco" href="modules/module1/lesson1.html">
+      <file href="modules/module1/lesson1.html"/>
+      <file href="assets/videos/m1-l1-strategic-thinking.mp4"/>
+      <file href="assets/images/m1-l1-framework.png"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M1-L2" type="webcontent" adlcp:scormtype="sco" href="modules/module1/lesson2.html">
+      <file href="modules/module1/lesson2.html"/>
+      <file href="assets/videos/m1-l2-vision-creation.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M1-L3" type="webcontent" adlcp:scormtype="sco" href="modules/module1/lesson3.html">
+      <file href="modules/module1/lesson3.html"/>
+      <file href="assets/videos/m1-l3-strategic-planning.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M1-QUIZ" type="webcontent" adlcp:scormtype="sco" href="assessments/module1-quiz.html">
+      <file href="assessments/module1-quiz.html"/>
+      <file href="assets/js/quiz-engine.js"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+
+    <!-- Module 2 Resources -->
+    <resource identifier="RES-M2" type="webcontent" adlcp:scormtype="asset" href="modules/module2/index.html">
+      <file href="modules/module2/index.html"/>
+    </resource>
+    
+    <resource identifier="RES-M2-L1" type="webcontent" adlcp:scormtype="sco" href="modules/module2/lesson1.html">
+      <file href="modules/module2/lesson1.html"/>
+      <file href="assets/videos/m2-l1-decision-frameworks.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M2-L2" type="webcontent" adlcp:scormtype="sco" href="modules/module2/lesson2.html">
+      <file href="modules/module2/lesson2.html"/>
+      <file href="assets/videos/m2-l2-data-driven.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M2-L3" type="webcontent" adlcp:scormtype="sco" href="modules/module2/lesson3.html">
+      <file href="modules/module2/lesson3.html"/>
+      <file href="assets/videos/m2-l3-risk-management.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M2-QUIZ" type="webcontent" adlcp:scormtype="sco" href="assessments/module2-quiz.html">
+      <file href="assessments/module2-quiz.html"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+
+    <!-- Module 3 Resources -->
+    <resource identifier="RES-M3" type="webcontent" adlcp:scormtype="asset" href="modules/module3/index.html">
+      <file href="modules/module3/index.html"/>
+    </resource>
+    
+    <resource identifier="RES-M3-L1" type="webcontent" adlcp:scormtype="sco" href="modules/module3/lesson1.html">
+      <file href="modules/module3/lesson1.html"/>
+      <file href="assets/videos/m3-l1-org-design.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M3-L2" type="webcontent" adlcp:scormtype="sco" href="modules/module3/lesson2.html">
+      <file href="modules/module3/lesson2.html"/>
+      <file href="assets/videos/m3-l2-culture.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M3-L3" type="webcontent" adlcp:scormtype="sco" href="modules/module3/lesson3.html">
+      <file href="modules/module3/lesson3.html"/>
+      <file href="assets/videos/m3-l3-talent.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M3-QUIZ" type="webcontent" adlcp:scormtype="sco" href="assessments/module3-quiz.html">
+      <file href="assessments/module3-quiz.html"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+
+    <!-- Module 4 Resources -->
+    <resource identifier="RES-M4" type="webcontent" adlcp:scormtype="asset" href="modules/module4/index.html">
+      <file href="modules/module4/index.html"/>
+    </resource>
+    
+    <resource identifier="RES-M4-L1" type="webcontent" adlcp:scormtype="sco" href="modules/module4/lesson1.html">
+      <file href="modules/module4/lesson1.html"/>
+      <file href="assets/videos/m4-l1-executive-presence.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M4-L2" type="webcontent" adlcp:scormtype="sco" href="modules/module4/lesson2.html">
+      <file href="modules/module4/lesson2.html"/>
+      <file href="assets/videos/m4-l2-board-comm.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M4-L3" type="webcontent" adlcp:scormtype="sco" href="modules/module4/lesson3.html">
+      <file href="modules/module4/lesson3.html"/>
+      <file href="assets/videos/m4-l3-negotiation.mp4"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+    
+    <resource identifier="RES-M4-QUIZ" type="webcontent" adlcp:scormtype="sco" href="assessments/module4-quiz.html">
+      <file href="assessments/module4-quiz.html"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+
+    <!-- Final Assessment -->
+    <resource identifier="RES-FINAL" type="webcontent" adlcp:scormtype="sco" href="assessments/final-exam.html">
+      <file href="assessments/final-exam.html"/>
+      <file href="assets/js/exam-engine.js"/>
+      <dependency identifierref="COMMON-FILES"/>
+    </resource>
+
+    <!-- Common Files (Shared Resources) -->
+    <resource identifier="COMMON-FILES" type="webcontent" adlcp:scormtype="asset">
+      <file href="shared/scormdriver.js"/>
+      <file href="assets/css/styles.css"/>
+      <file href="assets/css/responsive.css"/>
+      <file href="assets/js/course.js"/>
+      <file href="assets/js/jquery.min.js"/>
+      <file href="assets/images/logo.png"/>
+      <file href="assets/images/background.jpg"/>
+    </resource>
+
+  </resources>
+
+</manifest>
