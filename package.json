@@ -3,7 +3,6 @@
   "version": "1.0.2",
   "private": true,
   "scripts": {
-    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build && node scripts/prepare-standalone.cjs",
     "build:local": "next build && node scripts/post-build.js",
