@@ -166,6 +166,9 @@
     "ts-jest": "^29.4.6",
     "tsx": "^4.19.2"
   },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "overrides": {
     "sharp": "$sharp",
     "protobufjs": "^7.6.3"
