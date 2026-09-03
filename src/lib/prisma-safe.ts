@@ -49,7 +49,7 @@ export const safeUserFind = async (email: string): Promise<User | null> => {
   try {
     // Add timeout wrapper (10 seconds max)
     const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('User query timeout after 10s')), 10000)
+      setTimeout(() => reject(new Error('User query timeout after 5s')), 5000)
     )
     
     const queryPromise = safePrismaOperation(() => 

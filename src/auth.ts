@@ -35,16 +35,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         authLogger.info('START', 'Login attempt started', {}, email)
 
         try {
-          // Step 2: Database connection check
-          authLogger.info('DB_CHECK', 'Checking database connection', {}, email)
-          try {
-            await prisma.$queryRaw`SELECT 1`
-            authLogger.success('DB_CHECK', 'Database connected', {}, email)
-          } catch (dbError) {
-            authLogger.error('DB_CHECK', 'Database connection failed', { error: String(dbError) }, email)
-            return null
-          }
-
           // Step 3: Find user
           authLogger.info('USER_QUERY', 'Querying user from database', {}, email)
           const userQueryStart = Date.now()
@@ -136,15 +126,38 @@ const bcryptStart = Date.now()
       return destination
     },
     async jwt({ token, user }) {
-      const id = user?.id || (token.id as string | undefined)
-      if (!id) return null
-      const current = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true, password: true } })
-      if (!current) return null
-      const passwordVersion = createHash('sha256').update(current.password).digest('hex')
-      if (!user && token.passwordVersion !== passwordVersion) return null
-      token.id = current.id
-      token.role = current.role
-      token.passwordVersion = passwordVersion
+      // เมื่อ login ใหม่ (user object มา) — set token จาก user
+      if (user) {
+        token.id = user.id
+        token.role = (user as any).role
+        // เก็บ passwordVersion เพื่อ invalidate token เมื่อ password เปลี่ยน
+        try {
+          const current = await prisma.user.findUnique({ where: { id: user.id as string }, select: { password: true } })
+          if (current?.password) {
+            token.passwordVersion = createHash('sha256').update(current.password).digest('hex')
+          }
+        } catch { /* ถ้า DB error ให้ login ผ่านไปก่อน */ }
+        return token
+      }
+
+      // Session refresh — ตรวจสอบแค่ว่า user ยังมีอยู่ใน DB ทุก 5 นาที
+      const now = Math.floor(Date.now() / 1000)
+      const lastCheck = (token.lastDbCheck as number) || 0
+      if (now - lastCheck < 300) return token // ยังไม่ถึง 5 นาที ใช้ cache
+
+      try {
+        const current = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { id: true, role: true, password: true }
+        })
+        if (!current) return null
+        const passwordVersion = createHash('sha256').update(current.password).digest('hex')
+        if (token.passwordVersion && token.passwordVersion !== passwordVersion) return null
+        token.role = current.role
+        token.passwordVersion = passwordVersion
+        token.lastDbCheck = now
+      } catch { /* DB error — ใช้ token เดิม */ }
+
       return token
     },
     async session({ session, token }) {
