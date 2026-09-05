@@ -114,19 +114,19 @@ export default async function CoursePage({ params }: CoursePageProps) {
     : 0
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-6">
       <CourseTracker
         courseId={courseId}
         event={!isEnrolled ? 'VIEW' : progressPercentage > 0 ? 'RESUME' : 'START'}
       />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
         {/* Course Details */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex items-start gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 {course.imageUrl && (
-                  <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative h-48 w-full overflow-hidden rounded-lg sm:h-24 sm:w-32 sm:shrink-0">
                     <CourseImage
                       src={course.imageUrl}
                       alt={course.title}
@@ -136,22 +136,22 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   </div>
                 )}
                 <div className="flex-1">
-                  <CardTitle className="text-2xl mb-2">{course.title}</CardTitle>
-                  <div className="flex items-center gap-2 mb-3">
+                  <CardTitle className="text-xl sm:text-2xl mb-2">{course.title}</CardTitle>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
                     <Badge variant={course.published ? "default" : "secondary"}>
                       {course.published ? "Published" : "Draft"}
                     </Badge>
                     <Badge variant="outline">
-                      ${course.price === 0 ? "Free" : course.price}
+                      {course.price === 0 ? "ฟรี" : `${course.price} เครดิต`}
                     </Badge>
                   </div>
                   {isEnrolled && (
                     <div className="mb-3">
                       <div className="text-sm text-muted-foreground mb-1">
-                        Progress: {progressPercentage}%
+                        ความก้าวหน้า: {progressPercentage}%
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${progressPercentage}%` }}
                         />
@@ -162,40 +162,40 @@ export default async function CoursePage({ params }: CoursePageProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-6">
-                {course.description || "No description available."}
+              <p className="text-muted-foreground mb-5 text-sm sm:text-base">
+                {course.description || "ไม่มีคำอธิบาย"}
               </p>
-              
+
               {isEnrolled ? (
-                <div className="flex gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                   {firstLesson ? (
-                    <Button asChild>
+                    <Button asChild className="w-full sm:w-auto">
                       <Link href={`/courses/${courseId}/lessons/${firstLesson.id}`}>
-                        {session.user.role === 'ADMIN' || session.user.role === 'TEACHER' 
-                          ? "Preview Course" 
-                          : progressPercentage > 0 ? "Continue Learning" : "Start Course"}
+                        {session.user.role === 'ADMIN' || session.user.role === 'TEACHER'
+                          ? "Preview Course"
+                          : progressPercentage > 0 ? "เรียนต่อ" : "เริ่มเรียน"}
                       </Link>
                     </Button>
                   ) : (
-                    <Button disabled>No lessons available</Button>
+                    <Button disabled className="w-full sm:w-auto">ยังไม่มีบทเรียน</Button>
                   )}
-                  <Button variant="outline" asChild>
-                    <Link href="/dashboard">Back to Dashboard</Link>
+                  <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <Link href="/dashboard">กลับแดชบอร์ด</Link>
                   </Button>
                 </div>
               ) : (
-                <div className="flex gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                   {isStudent ? (
-                    <PurchaseButton 
-                      courseId={courseId} 
-                      price={course.price} 
+                    <PurchaseButton
+                      courseId={courseId}
+                      price={course.price}
                       userCredits={userCredits}
                     />
                   ) : (
-                    <Button>Enroll Now</Button>
+                    <Button className="w-full sm:w-auto">ลงทะเบียน</Button>
                   )}
-                  <Button variant="outline" asChild>
-                    <Link href="/courses">Browse Courses</Link>
+                  <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <Link href="/courses">ดูหลักสูตรอื่น</Link>
                   </Button>
                 </div>
               )}
@@ -219,7 +219,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           {isEnrolled && (
             <Card>
               <CardHeader>
-                <CardTitle>Course Discussion</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Course Discussion</CardTitle>
               </CardHeader>
               <CardContent>
                 <DiscussionList courseId={courseId} />
@@ -228,8 +228,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
           )}
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
+        {/* Sidebar — stacks below on mobile, right column on lg */}
+        <div className="space-y-4 sm:space-y-6">
           {/* Progress Card */}
           {isEnrolled && progressData && (
             <CourseProgressCard
