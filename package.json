@@ -147,6 +147,8 @@
     "xlsx": "^0.20.3",
     "xml2js": "^0.6.2",
     "yauzl": "^3.2.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.25",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -158,8 +160,6 @@
     "@types/canvas-confetti": "^1.9.0",
     "@types/jest": "^30.0.0",
     "cross-env": "^7.0.3",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.25",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "rimraf": "^6.1.2",

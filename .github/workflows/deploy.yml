@@ -26,7 +26,14 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔨 Generate Prisma Client
-        run: npx prisma generate
+        run: node node_modules/prisma/build/index.js generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: 🗄️ Run Database Migrations
+        run: node node_modules/prisma/build/index.js migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: 🚀 Deploy to Vercel
         run: |
@@ -34,9 +41,5 @@ jobs:
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: 📊 Deploy Database
-        if: ${{ secrets.DATABASE_URL != '' }}
-        run: npx prisma db push
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
