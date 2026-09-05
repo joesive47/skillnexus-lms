@@ -52,24 +52,22 @@ export default async function CoursesPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-blue-50">
         <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-yellow-200/50">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-between">
+          <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent sm:text-4xl">
                   หลักสูตรทั้งหมด
                 </h1>
-                <p className="text-gray-600">
-                  ค้นหาและลงทะเบียนเรียนหลักสูตรที่เหมาะกับคุณ
-                </p>
+                <p className="text-gray-600 text-sm mt-1">ค้นหาและลงทะเบียนเรียนหลักสูตรที่เหมาะกับคุณ</p>
               </div>
-              <div className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 px-4 py-2 rounded-full">
-                <Coins className="h-5 w-5 text-yellow-600" />
-                <span className="font-semibold text-yellow-800">เครดิต: {userCredits}</span>
+              <div className="flex items-center gap-2 bg-yellow-100 border border-yellow-300 px-3 py-1.5 rounded-full self-start sm:self-auto">
+                <Coins className="h-4 w-4 text-yellow-600" />
+                <span className="font-semibold text-yellow-800 text-sm">เครดิต: {userCredits}</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
 
           {courses.length === 0 ? (
             <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-yellow-200/50">
@@ -82,7 +80,7 @@ export default async function CoursesPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
             {courses.map((course) => {
               const isEnrolled = course.enrollments.length > 0
               const canPurchase = userCredits >= course.price

@@ -50,11 +50,11 @@ export default async function StudentCoursesPage() {
     const notStarted = coursesWithProgress.filter((e) => e.progress === 0)
 
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">หลักสูตรของฉัน</h1>
-          <p className="text-gray-500">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">หลักสูตรของฉัน</h1>
+          <p className="text-gray-500 text-sm mt-1">
             ลงทะเบียนแล้ว {enrollments.length} หลักสูตร
             {completed.length > 0 && ` · เสร็จสิ้น ${completed.length} หลักสูตร`}
           </p>
@@ -76,10 +76,10 @@ export default async function StudentCoursesPage() {
             {/* In Progress */}
             {inProgress.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-500" /> กำลังเรียน ({inProgress.length})
+                <h2 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2 sm:text-lg sm:mb-4">
+                  <Clock className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" /> กำลังเรียน ({inProgress.length})
                 </h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 sm:gap-4">
                   {inProgress.map((e) => (
                     <CourseCard key={e.id} enrollment={e} progress={e.progress} />
                   ))}
@@ -90,10 +90,10 @@ export default async function StudentCoursesPage() {
             {/* Not Started */}
             {notStarted.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-gray-400" /> ยังไม่ได้เริ่ม ({notStarted.length})
+                <h2 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2 sm:text-lg sm:mb-4">
+                  <BookOpen className="h-4 w-4 text-gray-400 sm:h-5 sm:w-5" /> ยังไม่ได้เริ่ม ({notStarted.length})
                 </h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 sm:gap-4">
                   {notStarted.map((e) => (
                     <CourseCard key={e.id} enrollment={e} progress={0} />
                   ))}
@@ -104,10 +104,10 @@ export default async function StudentCoursesPage() {
             {/* Completed */}
             {completed.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <Award className="h-5 w-5 text-green-500" /> เสร็จสิ้นแล้ว ({completed.length})
+                <h2 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2 sm:text-lg sm:mb-4">
+                  <Award className="h-4 w-4 text-green-500 sm:h-5 sm:w-5" /> เสร็จสิ้นแล้ว ({completed.length})
                 </h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 sm:gap-4">
                   {completed.map((e) => (
                     <CourseCard key={e.id} enrollment={e} progress={100} />
                   ))}

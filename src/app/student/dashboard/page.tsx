@@ -84,16 +84,16 @@ export default async function StudentDashboard() {
     : 0;
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6 flex items-center justify-between gap-4">
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Student Dashboard</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Student Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Your learning progress, credentials, paths, and skill set in one place.</p>
         </div>
-        <LogoutButton />
+        <div className="self-start sm:self-auto"><LogoutButton /></div>
       </div>
 
-      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 lg:grid-cols-4">
         <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">My Courses</CardTitle><BookOpen className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{enrollments.length}</div></CardContent></Card>
         <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Certificates Earned</CardTitle><Award className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{certificates.length}</div></CardContent></Card>
         <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Overall Progress</CardTitle><TrendingUp className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="mb-2 text-2xl font-bold">{averageProgress}%</div><Progress value={averageProgress} className="h-2" aria-label={`Overall progress ${averageProgress}%`} /></CardContent></Card>

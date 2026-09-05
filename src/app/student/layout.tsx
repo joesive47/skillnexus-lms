@@ -14,7 +14,9 @@ export default async function StudentLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <StudentSidebar />
-      <main className="lg:ml-64 pt-16 lg:pt-0">
+      {/* pt-16 = space for mobile top bar (hamburger button height ~64px) */}
+      {/* lg:ml-64 = sidebar width on desktop */}
+      <main className="pt-14 lg:pt-0 lg:ml-64 min-h-screen">
         {children}
       </main>
     </div>
