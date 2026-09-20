@@ -36,6 +36,7 @@ export async function createCourse(formData: FormData) {
     const priceStr = formData.get('price') as string
     const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
+    const hasCertificate = formData.get('hasCertificate') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
     const mainCategoryId = String(formData.get('mainCategoryId') || '')
