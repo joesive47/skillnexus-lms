@@ -26,9 +26,9 @@ export async function createCourse(formData: FormData) {
       return { success: false, error: 'Authentication required' }
     }
 
-    // Check if user has admin role
-    if (session.user.role !== 'ADMIN') {
-      return { success: false, error: 'Admin access required' }
+    // ADMIN และ TEACHER สร้าง course ได้
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
+      return { success: false, error: 'Admin or Teacher access required' }
     }
 
     const title = formData.get('title') as string
@@ -99,6 +99,7 @@ export async function createCourse(formData: FormData) {
           description: validatedFields.description,
           price: price, // Store price as-is (not in cents)
           published: validatedFields.published || false,
+          hasCertificate: hasCertificate,
           imageUrl,
           categoryId,
         },
@@ -181,10 +182,10 @@ export async function updateCourse(id: string, formData: FormData) {
       return { success: false, error: 'Authentication required' }
     }
 
-    // Check if user has admin role
-    if (session.user.role !== 'ADMIN') {
-      console.error('[UPDATE_COURSE] User is not admin:', session.user.role)
-      return { success: false, error: 'Admin access required' }
+    // Check if user has admin or teacher role
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
+      console.error('[UPDATE_COURSE] User is not admin/teacher:', session.user.role)
+      return { success: false, error: 'Admin or Teacher access required' }
     }
 
     const title = formData.get('title') as string
@@ -192,6 +193,7 @@ export async function updateCourse(id: string, formData: FormData) {
     const priceStr = formData.get('price') as string
     const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
+    const hasCertificate = formData.get('hasCertificate') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
     const mainCategoryId = String(formData.get('mainCategoryId') || '')
@@ -267,6 +269,7 @@ export async function updateCourse(id: string, formData: FormData) {
       description: validatedFields.description,
       price: price, // Store price as-is (not in cents)
       published: validatedFields.published,
+      hasCertificate: hasCertificate,
       imageUrl: imageUrl, // Always include imageUrl to preserve existing or set new
       categoryId,
     }
@@ -412,9 +415,9 @@ export async function deleteCourse(id: string) {
       return { success: false, error: 'Authentication required' }
     }
 
-    // Check if user has admin role
-    if (session.user.role !== 'ADMIN') {
-      return { success: false, error: 'Admin access required' }
+    // Check if user has admin or teacher role
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
+      return { success: false, error: 'Admin or Teacher access required' }
     }
 
     // Check if course exists and get associated files

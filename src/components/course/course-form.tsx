@@ -24,6 +24,7 @@ interface Course {
   price?: number | null
   imageUrl?: string | null
   published: boolean
+  hasCertificate?: boolean
   categoryId?: string | null
   lessons?: any[]
 }
@@ -39,6 +40,7 @@ interface CourseFormProps {
   course?: Course
   mode?: 'create' | 'edit'
   categories?: CourseCategoryOption[]
+  redirectPath?: string
 }
 
 interface Lesson {
@@ -509,16 +511,37 @@ export function CourseForm({ course, mode = 'create', categories = [] }: CourseF
             />
           </div>
 
-          {/* Published */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="published"
-              name="published"
-              defaultChecked={course?.published || false}
-              className="rounded border-gray-300"
-            />
-            <Label htmlFor="published">Published</Label>
+          {/* Published + Certificate — แถวเดียวกัน */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="published"
+                name="published"
+                defaultChecked={course?.published || false}
+                className="mt-0.5 rounded border-gray-300 h-4 w-4 accent-blue-600"
+              />
+              <div>
+                <Label htmlFor="published" className="font-medium cursor-pointer">เผยแพร่หลักสูตร</Label>
+                <p className="text-xs text-gray-500 mt-0.5">ผู้เรียนจะมองเห็นและลงทะเบียนได้</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="hasCertificate"
+                name="hasCertificate"
+                defaultChecked={course?.hasCertificate || false}
+                className="mt-0.5 rounded border-gray-300 h-4 w-4 accent-yellow-500"
+              />
+              <div>
+                <Label htmlFor="hasCertificate" className="font-medium cursor-pointer flex items-center gap-1.5">
+                  <span>🏆</span> มีใบรับรอง (Certificate)
+                </Label>
+                <p className="text-xs text-gray-500 mt-0.5">ผู้เรียนที่ผ่านเกณฑ์จะได้รับใบรับรองอัตโนมัติ</p>
+              </div>
+            </div>
           </div>
 
           {/* Course Image */}

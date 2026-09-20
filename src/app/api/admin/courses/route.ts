@@ -1,9 +1,9 @@
-import { adminAccessDenied } from '@/lib/access-control'
+import { adminOrTeacherAccessDenied } from '@/lib/access-control'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
-  const denied = await adminAccessDenied()
+  const denied = await adminOrTeacherAccessDenied()
   if (denied) return denied
 
   try {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const denied = await adminAccessDenied()
+  const denied = await adminOrTeacherAccessDenied()
   if (denied) return denied
 
   try {

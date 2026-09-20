@@ -11,6 +11,7 @@ import { CourseProgressBar } from '@/components/course/CourseProgressBar'
 import { getCourseProgress } from '@/app/actions/video'
 import { LessonProgressIndicator } from '@/components/lesson/LessonProgressIndicator'
 import { PurchaseButton } from '@/components/course/purchase-button'
+import { CertificateButton } from '@/components/course/certificate-button'
 import { DiscussionList } from '@/components/social/DiscussionList'
 import { LearningPathViewer } from '@/components/learning-flow'
 import { CourseTracker } from '@/components/course/course-tracker'
@@ -100,19 +101,26 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const firstLesson = await getFirstLesson(courseId)
   const userCredits = await getUserCredits(session.user.id)
   const isStudent = session.user.role === 'STUDENT'
-  
+
   // Get detailed progress data
   const progressData = isEnrolled ? await getCourseProgress(session.user.id, courseId) : null
-  
+
   // Calculate basic progress for display
   const allLessons = course.modules.flatMap(m => m.lessons)
-  const completedLessons = allLessons.filter(l => 
+  const completedLessons = allLessons.filter(l =>
     l.watchHistory.some(wh => wh.completed)
   )
-  const progressPercentage = allLessons.length > 0 
+  const progressPercentage = allLessons.length > 0
     ? Math.round((completedLessons.length / allLessons.length) * 100)
     : 0
 
+  // Check existing certificate
+  const existingCertificate = isEnrolled && isStudent
+    ? await prisma.certificate.findUnique({
+        where: { userId_courseId: { userId: session.user.id, courseId } },
+        select: { id: true },
+      })
+    : null
   return (
     <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-6">
       <CourseTracker
@@ -167,7 +175,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
               </p>
 
               {isEnrolled ? (
-                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:flex-wrap">
                   {firstLesson ? (
                     <Button asChild className="w-full sm:w-auto">
                       <Link href={`/courses/${courseId}/lessons/${firstLesson.id}`}>
@@ -178,6 +186,13 @@ export default async function CoursePage({ params }: CoursePageProps) {
                     </Button>
                   ) : (
                     <Button disabled className="w-full sm:w-auto">ยังไม่มีบทเรียน</Button>
+                  )}
+                  {isStudent && (
+                    <CertificateButton
+                      courseId={courseId}
+                      completionPercentage={progressPercentage}
+                      existingCertificateId={existingCertificate?.id}
+                    />
                   )}
                   <Button variant="outline" asChild className="w-full sm:w-auto">
                     <Link href="/dashboard">กลับแดชบอร์ด</Link>

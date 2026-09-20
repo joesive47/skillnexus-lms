@@ -131,3 +131,5 @@ s3-policy.json
 vercel-env-values.txt
 VERCEL-ENV-VARS.txt
 Authall.txt
+
+payment/

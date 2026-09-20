@@ -12,7 +12,7 @@ import { CourseImage } from '@/components/ui/course-image'
 export default async function AdminCoursesPage() {
   const session = await auth()
   
-  if (!session?.user || session.user.role !== 'ADMIN') {
+  if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER')) {
     redirect('/dashboard')
   }
   const result = await getCourses()

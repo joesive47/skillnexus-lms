@@ -23,6 +23,14 @@ export async function requireAdmin() {
   return user
 }
 
+export async function requireAdminOrTeacher() {
+  const user = await requireUser()
+  if (user.role !== 'ADMIN' && user.role !== 'TEACHER') {
+    throw new AccessError('Admin or Teacher access required')
+  }
+  return user
+}
+
 export async function requireSelf(userId: string) {
   const user = await requireUser()
   if (user.id !== userId) throw new AccessError('Cannot change another learner\'s progress')
@@ -57,6 +65,13 @@ export function publicError(error: unknown) {
 
 export async function adminAccessDenied() {
   try { await requireAdmin(); return null }
+  catch (error) {
+    return NextResponse.json({ error: publicError(error) }, { status: error instanceof AccessError ? error.status : 503 })
+  }
+}
+
+export async function adminOrTeacherAccessDenied() {
+  try { await requireAdminOrTeacher(); return null }
   catch (error) {
     return NextResponse.json({ error: publicError(error) }, { status: error instanceof AccessError ? error.status : 503 })
   }
