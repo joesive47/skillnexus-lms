@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { 
   Users, BookOpen, Award, Settings, BarChart, 
   MessageSquare, FileText, CreditCard, Folder, Building2,
-  Video, GraduationCap, Mic, Package, Brain, Menu, X, Tags, Activity
+  Video, GraduationCap, Mic, Package, Brain, Menu, X, Tags, Activity, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,7 @@ const menuItems = [
   { icon: BookOpen, label: 'Courses', href: '/dashboard/admin/courses' },
   { icon: Tags, label: 'Course Categories', href: '/dashboard/admin/course-categories' },
   { icon: Activity, label: 'Course Analytics', href: '/admin/course-analytics' },
+  { icon: TrendingUp, label: 'Learning Intelligence', href: '/dashboard/admin/analytics' },
   { icon: FileText, label: 'Quizzes', href: '/dashboard/admin/quizzes' },
   { icon: Package, label: 'SCORM', href: '/dashboard/admin/scorm' },
   { icon: Award, label: 'Certifications', href: '/admin/certifications' },
