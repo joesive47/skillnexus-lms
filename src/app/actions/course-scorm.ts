@@ -2,13 +2,14 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { auth } from '@/auth'
 import { uploadToS3, deleteFile } from '@/lib/upload'
 import { z } from 'zod'
 import { scormService } from '@/lib/scorm-service'
 import { join } from 'path'
 import { promises as fs } from 'fs'
 import { resolveCourseCategory, resolveUpdatedCourseCategory } from '@/lib/course-categories'
+import { requireAdminOrTeacher } from '@/lib/access-control'
+import { requireCourseManager, resolveCourseInstructorId } from '@/lib/course-ownership'
 
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -19,14 +20,7 @@ const courseSchema = z.object({
 
 export async function createCourseWithScorm(formData: FormData) {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Authentication required' }
-    }
-
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      return { success: false, error: 'Admin or Teacher access required' }
-    }
+    const user = await requireAdminOrTeacher()
 
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
@@ -80,6 +74,7 @@ export async function createCourseWithScorm(formData: FormData) {
       published,
     })
     const categoryId = await resolveCourseCategory(mainCategoryId, requestedCategoryId || undefined)
+    const instructorId = await resolveCourseInstructorId(user, formData.get('instructorId'))
 
     let imageUrl: string | undefined
 
@@ -104,6 +99,7 @@ export async function createCourseWithScorm(formData: FormData) {
           hasCertificate,
           imageUrl,
           categoryId,
+          instructorId,
         },
       })
 
@@ -191,14 +187,7 @@ export async function createCourseWithScorm(formData: FormData) {
 
 export async function updateCourseWithScorm(id: string, formData: FormData) {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Authentication required' }
-    }
-
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      return { success: false, error: 'Admin or Teacher access required' }
-    }
+    const { user } = await requireCourseManager(id)
 
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
@@ -255,9 +244,10 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
     // Get current course data to preserve existing imageUrl
     const currentCourse = await prisma.course.findUnique({
       where: { id },
-      select: { imageUrl: true, categoryId: true }
+      select: { imageUrl: true, categoryId: true, instructorId: true }
     })
     if (!currentCourse) return { success: false, error: 'Course not found' }
+    const instructorId = await resolveCourseInstructorId(user, formData.get('instructorId'), currentCourse.instructorId)
     const categoryId = await resolveUpdatedCourseCategory(
       currentCourse.categoryId,
       mainCategoryId,
@@ -285,6 +275,7 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
       hasCertificate,
       imageUrl: imageUrl,
       categoryId,
+      instructorId,
     }
 
     // Update course and lessons in a transaction

@@ -8,6 +8,8 @@ import { BookOpen, Users, Award, Plus, Eye, TrendingUp, Edit } from 'lucide-reac
 import Link from 'next/link'
 import { CourseImage } from '@/components/ui/course-image'
 import { LogoutButton } from '@/components/auth/logout-button'
+import { requireAdminOrTeacher } from '@/lib/access-control'
+import { managedCourseWhere } from '@/lib/course-ownership'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,18 +18,23 @@ export default async function InstructorDashboard() {
   if (!session?.user) redirect('/login')
   if (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN') redirect('/dashboard')
 
-  const userId = session.user.id
+  const courseManager = await requireAdminOrTeacher()
+  const courseWhere = managedCourseWhere(courseManager)
 
-  // Stats: courses ที่ instructor สร้าง + enrollment + certificate รวม
-  const [courses, totalEnrollments, totalCertificates] = await Promise.all([
-    prisma.course.findMany({
+  // Instructors only see courses explicitly assigned to them; administrators
+  // retain access to every course.
+  const courses = await prisma.course.findMany({
+      where: courseWhere,
       orderBy: { createdAt: 'desc' },
       include: {
         _count: { select: { enrollments: true, lessons: true } },
       },
-    }),
-    prisma.enrollment.count(),
-    prisma.certificate.count({ where: { status: 'ACTIVE' } }),
+    })
+
+  const courseIds = courses.map((course) => course.id)
+  const [totalEnrollments, totalCertificates] = await Promise.all([
+    prisma.enrollment.count({ where: { courseId: { in: courseIds } } }),
+    prisma.certificate.count({ where: { status: 'ACTIVE', courseId: { in: courseIds } } }),
   ])
 
   const publishedCount = courses.filter(c => c.published).length
@@ -79,7 +86,7 @@ export default async function InstructorDashboard() {
       </div>
 
       {/* Course list */}
-      <div className="mb-4 flex items-center justify-between">
+      <div id="my-courses" className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">หลักสูตรของฉัน</h2>
         {draftCount > 0 && (
           <Badge variant="outline" className="text-xs">

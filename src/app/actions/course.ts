@@ -1,16 +1,16 @@
 'use server'
 
 import { purchaseCourse } from '@/lib/payment-processing'
-import { publicError } from '@/lib/access-control'
+import { publicError, requireAdminOrTeacher } from '@/lib/access-control'
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { auth } from '@/auth'
 import { uploadToS3, deleteFile } from '@/lib/upload'
 import { z } from 'zod'
 import { redirect } from 'next/navigation'
 import { withCache } from '@/lib/cache'
 import { scormService } from '@/lib/scorm-service'
 import { resolveCourseCategory, resolveUpdatedCourseCategory } from '@/lib/course-categories'
+import { managedCourseWhere, requireCourseManager, resolveCourseInstructorId } from '@/lib/course-ownership'
 
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -21,15 +21,7 @@ const courseSchema = z.object({
 
 export async function createCourse(formData: FormData) {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Authentication required' }
-    }
-
-    // ADMIN และ TEACHER สร้าง course ได้
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      return { success: false, error: 'Admin or Teacher access required' }
-    }
+    const user = await requireAdminOrTeacher()
 
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
@@ -79,6 +71,7 @@ export async function createCourse(formData: FormData) {
       published,
     })
     const categoryId = await resolveCourseCategory(mainCategoryId, requestedCategoryId || undefined)
+    const instructorId = await resolveCourseInstructorId(user, formData.get('instructorId'))
 
     let imageUrl: string | undefined
 
@@ -103,6 +96,7 @@ export async function createCourse(formData: FormData) {
           hasCertificate: hasCertificate,
           imageUrl,
           categoryId,
+          instructorId,
         },
       })
 
@@ -177,17 +171,7 @@ export async function createCourse(formData: FormData) {
 export async function updateCourse(id: string, formData: FormData) {
   try {
     console.log('[UPDATE_COURSE] Starting update for course:', id)
-    const session = await auth()
-    if (!session?.user?.id) {
-      console.error('[UPDATE_COURSE] No session or user ID')
-      return { success: false, error: 'Authentication required' }
-    }
-
-    // Check if user has admin or teacher role
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      console.error('[UPDATE_COURSE] User is not admin/teacher:', session.user.role)
-      return { success: false, error: 'Admin or Teacher access required' }
-    }
+    const { user } = await requireCourseManager(id)
 
     const title = formData.get('title') as string
     const description = formData.get('description') as string || ''
@@ -247,9 +231,10 @@ export async function updateCourse(id: string, formData: FormData) {
     // Get current course data to preserve existing imageUrl
     const currentCourse = await prisma.course.findUnique({
       where: { id },
-      select: { imageUrl: true, categoryId: true }
+      select: { imageUrl: true, categoryId: true, instructorId: true }
     })
     if (!currentCourse) return { success: false, error: 'Course not found' }
+    const instructorId = await resolveCourseInstructorId(user, formData.get('instructorId'), currentCourse.instructorId)
     const categoryId = await resolveUpdatedCourseCategory(
       currentCourse.categoryId,
       mainCategoryId,
@@ -277,6 +262,7 @@ export async function updateCourse(id: string, formData: FormData) {
       hasCertificate: hasCertificate,
       imageUrl: imageUrl, // Always include imageUrl to preserve existing or set new
       categoryId,
+      instructorId,
     }
 
     // Update course and lessons in a transaction
@@ -415,15 +401,7 @@ export async function updateCourse(id: string, formData: FormData) {
 
 export async function deleteCourse(id: string) {
   try {
-    const session = await auth()
-    if (!session?.user) {
-      return { success: false, error: 'Authentication required' }
-    }
-
-    // Check if user has admin or teacher role
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      return { success: false, error: 'Admin or Teacher access required' }
-    }
+    await requireCourseManager(id)
 
     // Check if course exists and get associated files
     const existingCourse = await prisma.course.findUnique({
@@ -478,6 +456,7 @@ export async function deleteCourseAction(formData: FormData) {
 
 export async function getCourse(id: string) {
   try {
+    await requireCourseManager(id)
     const course = await prisma.course.findUnique({
       where: { id },
       include: {
@@ -518,16 +497,10 @@ export async function getCourse(id: string) {
 
 export async function getCourses() {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return { success: false, error: 'Authentication required', courses: [] }
-    }
-
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
-      return { success: false, error: 'Admin or Teacher access required', courses: [] }
-    }
+    const user = await requireAdminOrTeacher()
 
     const courses = await prisma.course.findMany({
+      where: managedCourseWhere(user),
       include: {
         _count: {
           select: {
@@ -551,7 +524,9 @@ export async function getCourses() {
 
 export async function getTeacherCourses() {
   try {
+    const user = await requireAdminOrTeacher()
     const courses = await prisma.course.findMany({
+      where: managedCourseWhere(user),
       include: {
         lessons: {
           include: {

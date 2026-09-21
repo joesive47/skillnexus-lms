@@ -1,4 +1,3 @@
-import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import { CourseForm } from '@/components/course/course-form'
@@ -6,6 +5,7 @@ import { getActiveCourseCategoryTree } from '@/lib/course-categories'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { requireCourseManager } from '@/lib/course-ownership'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,12 +14,13 @@ interface EditCoursePageProps {
 }
 
 export default async function InstructorEditCoursePage({ params }: EditCoursePageProps) {
-  const session = await auth()
-  if (!session?.user) redirect('/login')
-  if (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN') redirect('/dashboard')
-
   const { courseId } = await params
   if (!courseId) notFound()
+  try {
+    await requireCourseManager(courseId)
+  } catch {
+    redirect('/instructor/dashboard')
+  }
 
   const [categories, course] = await Promise.all([
     getActiveCourseCategoryTree(),

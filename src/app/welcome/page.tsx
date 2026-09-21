@@ -27,7 +27,7 @@ export default function WelcomePage() {
       if (role === 'ADMIN') {
         targetPath = '/dashboard/admin'
       } else if (role === 'TEACHER') {
-        targetPath = '/teacher/dashboard'
+        targetPath = '/instructor/dashboard'
       }
 
       // Immediate redirect - no delay

@@ -22,7 +22,14 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
   }
 
   try {
-    const categories = await getActiveCourseCategoryTree()
+    const [categories, instructors] = await Promise.all([
+      getActiveCourseCategoryTree(),
+      prisma.user.findMany({
+        where: { role: 'TEACHER' },
+        select: { id: true, name: true, email: true },
+        orderBy: [{ name: 'asc' }, { email: 'asc' }],
+      }),
+    ])
     // Fetch course with all necessary data including lessons
     const course = await prisma.course.findUnique({
       where: { id: courseId },
@@ -35,6 +42,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
         price: true,
         imageUrl: true,
         categoryId: true,
+        instructorId: true,
         lessons: {
           select: {
             id: true,
@@ -74,6 +82,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
       price: course.price,
       imageUrl: course.imageUrl,
       categoryId: course.categoryId,
+      instructorId: course.instructorId,
       lessons: course.lessons.map(lesson => ({
         id: lesson.id,
         title: lesson.title,
@@ -93,7 +102,7 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
 
     return (
       <div className="p-6">
-        <CourseForm mode="edit" course={courseData} categories={categories} />
+        <CourseForm mode="edit" course={courseData} categories={categories} instructors={instructors} />
       </div>
     )
   } catch (error) {

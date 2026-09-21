@@ -47,6 +47,8 @@ model Course {
   published     Boolean             @default(false)
   hasCertificate Boolean            @default(false)
   imageUrl      String?
+  instructorId String?
+  instructor   User?               @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: SetNull)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   certificates  Certificate[]
@@ -77,6 +79,7 @@ model Course {
   trackingEvents    CourseTrackingEvent[]
 
   @@index([categoryId, published])
+  @@index([instructorId])
   @@map("courses")
 }
 
@@ -553,6 +556,7 @@ model User {
   progressSummaries     CourseProgressSummary[]
   notifications         Notification[]
   courseTrackingEvents  CourseTrackingEvent[]
+  taughtCourses         Course[]                 @relation("CourseInstructor")
 
   @@map("users")
 }

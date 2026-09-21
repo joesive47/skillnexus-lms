@@ -26,7 +26,14 @@ interface Course {
   published: boolean
   hasCertificate?: boolean
   categoryId?: string | null
+  instructorId?: string | null
   lessons?: any[]
+}
+
+interface InstructorOption {
+  id: string
+  name?: string | null
+  email: string
 }
 
 interface CourseCategoryOption {
@@ -40,6 +47,7 @@ interface CourseFormProps {
   course?: Course
   mode?: 'create' | 'edit'
   categories?: CourseCategoryOption[]
+  instructors?: InstructorOption[]
   redirectPath?: string
 }
 
@@ -119,7 +127,7 @@ function LessonPreviewModal({ lesson, quiz, onClose }: { lesson: Lesson, quiz?: 
   )
 }
 
-export function CourseForm({ course, mode = 'create', categories = [], redirectPath }: CourseFormProps) {
+export function CourseForm({ course, mode = 'create', categories = [], instructors = [], redirectPath }: CourseFormProps) {
   const initialMainCategory = categories.find((category) =>
     category.id === course?.categoryId || category.children?.some((child) => child.id === course?.categoryId)
   )
@@ -127,6 +135,11 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
   const [mainCategoryId, setMainCategoryId] = useState(initialMainCategory?.id || '')
   const [categoryId, setCategoryId] = useState(
     initialMainCategory?.children?.some((child) => child.id === course?.categoryId) ? course?.categoryId || '' : ''
+  )
+  const [instructorId, setInstructorId] = useState(
+    course?.instructorId && instructors.some((instructor) => instructor.id === course.instructorId)
+      ? course.instructorId
+      : '__current_admin__'
   )
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
@@ -494,6 +507,26 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
             <p className="text-sm text-amber-700">
               หมวดหมู่เดิมไม่ได้อยู่ในรายการที่เปิดใช้งาน ระบบจะเก็บค่าเดิมไว้เมื่อบันทึก หากต้องการเปลี่ยนหมวดหมู่ โปรดเลือกหมวดหมู่หลักใหม่
             </p>
+          )}
+
+          {instructors.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="instructorId">เจ้าของหลักสูตร</Label>
+              <Select name="instructorId" value={instructorId} onValueChange={setInstructorId}>
+                <SelectTrigger id="instructorId">
+                  <SelectValue placeholder="เลือก Instructor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__current_admin__">ผู้ดูแลระบบ (ผู้ดำเนินการปัจจุบัน)</SelectItem>
+                  {instructors.map((instructor) => (
+                    <SelectItem key={instructor.id} value={instructor.id}>
+                      {instructor.name || instructor.email} ({instructor.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">Instructor จะแก้ไขได้เฉพาะหลักสูตรที่ได้รับมอบหมายเท่านั้น</p>
+            </div>
           )}
 
           {/* Price */}

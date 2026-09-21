@@ -1,15 +1,17 @@
-import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { CourseForm } from '@/components/course/course-form'
 import { getActiveCourseCategoryTree } from '@/lib/course-categories'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { requireAdminOrTeacher } from '@/lib/access-control'
 
 export default async function InstructorNewCoursePage() {
-  const session = await auth()
-  if (!session?.user) redirect('/login')
-  if (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN') redirect('/dashboard')
+  try {
+    await requireAdminOrTeacher()
+  } catch {
+    redirect('/login')
+  }
 
   const categories = await getActiveCourseCategoryTree()
 

@@ -3,15 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { BookOpen, Plus, Home, Settings, Users, Menu, X, GraduationCap } from 'lucide-react'
+import { BookOpen, Plus, Home, Menu, X, GraduationCap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const menuItems = [
   { icon: Home,      label: 'Dashboard',         href: '/instructor/dashboard' },
-  { icon: BookOpen,  label: 'หลักสูตรของฉัน',    href: '/instructor/dashboard' },
+  { icon: BookOpen,  label: 'หลักสูตรของฉัน',    href: '/instructor/dashboard#my-courses' },
   { icon: Plus,      label: 'สร้างหลักสูตรใหม่', href: '/instructor/courses/new' },
-  { icon: Users,     label: 'ผู้เรียน',           href: '/instructor/students' },
-  { icon: Settings,  label: 'ตั้งค่า',            href: '/instructor/settings' },
 ]
 
 export function InstructorSidebar() {
