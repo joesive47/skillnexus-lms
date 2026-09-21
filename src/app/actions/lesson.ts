@@ -128,6 +128,8 @@ export async function createLesson(courseId: string, lessonData: any) {
   try {
     await requireAdmin()
     let youtubeUrl = lessonData.youtubeUrl
+    const durationMinutes = Number(lessonData.durationMin ?? lessonData.duration)
+    const duration = Number.isFinite(durationMinutes) && durationMinutes > 0 ? durationMinutes * 60 : null
     
     // Validate YouTube Video ID if it's a video lesson
     if (lessonData.type === 'VIDEO' && youtubeUrl) {
@@ -152,8 +154,10 @@ export async function createLesson(courseId: string, lessonData: any) {
         launchUrl: lessonData.launchUrl || null,
         content: lessonData.content || null,
         requiredCompletionPercentage: lessonData.requiredPct || 80,
-        duration: lessonData.durationMin || lessonData.duration || null,
-        durationMin: lessonData.durationMin || lessonData.duration || null,
+        // The form asks for minutes, while `duration` is the canonical value
+        // in seconds used by progress and completion checks.
+        duration,
+        durationMin: duration ? Math.round(durationMinutes) : null,
         quizId: lessonData.quizId || null,
       }
     })
@@ -169,6 +173,8 @@ export async function updateLesson(lessonId: string, lessonData: any) {
   try {
     await requireAdmin()
     let youtubeUrl = lessonData.youtubeUrl
+    const durationMinutes = Number(lessonData.durationMin ?? lessonData.duration)
+    const duration = Number.isFinite(durationMinutes) && durationMinutes > 0 ? durationMinutes * 60 : null
     
     // Validate YouTube Video ID if it's a video lesson
     if (lessonData.type === 'VIDEO' && youtubeUrl) {
@@ -191,7 +197,8 @@ export async function updateLesson(lessonId: string, lessonData: any) {
         title: lessonData.title,
         youtubeUrl,
         requiredCompletionPercentage: lessonData.requiredPct || 80,
-        duration: lessonData.durationMin ? lessonData.durationMin * 60 : null,
+        duration,
+        durationMin: duration ? Math.round(durationMinutes) : null,
         quizId: lessonData.quizId || null,
       }
     })

@@ -789,13 +789,14 @@ export function CourseForm({ course, mode = 'create', categories = [], instructo
                       />
                     </div>
                     <div>
-                      <Label>Duration (min)</Label>
+                      <Label>Estimated duration (min)</Label>
                       <Input
                         type="number"
                         value={lesson.durationMin || ''}
                         onChange={(e) => updateLesson(index, 'durationMin', parseInt(e.target.value) || 0)}
                         placeholder="10"
                       />
+                      <p className="mt-1 text-xs text-muted-foreground">ระบบจะใช้ความยาวจริงจาก YouTube ขณะผู้เรียนดูวิดีโอ เพื่อคำนวณการปลดล็อกอย่างถูกต้อง</p>
                     </div>
                     <div>
                       <Label>Required Watch %</Label>

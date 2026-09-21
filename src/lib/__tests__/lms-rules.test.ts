@@ -15,7 +15,7 @@ jest.mock('@/lib/access-control', () => ({
 jest.mock('@/lib/learning-flow-engine', () => ({ canAccessNode: jest.fn() }))
 jest.mock('@/lib/progress-summary', () => ({ refreshProgressSummary: jest.fn() }))
 
-import { getCourseProgress, requireCertificateEligibility } from '@/lib/learning-evidence'
+import { getCourseProgress, lessonCompleted, requireCertificateEligibility } from '@/lib/learning-evidence'
 import prisma from '@/lib/prisma'
 
 const prismaMock = prisma as unknown as {
@@ -76,6 +76,18 @@ describe('central LMS completion rules', () => {
       nextLessonId: 'lesson-1',
       isComplete: false,
     })
+  })
+
+  it('unlocks from the verified player duration when an old lesson estimate is longer', async () => {
+    prismaMock.lesson.findUnique.mockResolvedValue({
+      id: 'lesson-1', courseId: 'course-1', duration: 480, durationMin: null, requiredPct: 80,
+      requiredCompletionPercentage: 80, quizId: null, lessonType: 'VIDEO', type: 'VIDEO', scormPackage: null,
+    })
+    prismaMock.watchHistory.findUnique.mockResolvedValue({
+      completed: true, watchTime: 163, totalTime: 163, updatedAt: new Date(),
+    })
+
+    await expect(lessonCompleted('user-1', 'lesson-1')).resolves.toBe(true)
   })
 
   it('blocks a certificate when the course has not enabled certificates', async () => {

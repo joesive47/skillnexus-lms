@@ -82,6 +82,7 @@ export function SecureVideoPlayer({
   const completedRef = useRef(initialCompleted)
   const awayRef = useRef(false)
   const savingRef = useRef(false)
+  const queuedHeartbeatRef = useRef<VideoPresenceViolation | 'FINAL' | null>(null)
   const lastCompletionAttemptRef = useRef(0)
 
   const [isPlaying, setIsPlaying] = useState(false)
@@ -99,9 +100,13 @@ export function SecureVideoPlayer({
     sessionIdRef.current = window.crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`
     let disposed = false
 
-    const sendHeartbeat = async (violation?: VideoPresenceViolation) => {
+    const sendHeartbeat = async (violation?: VideoPresenceViolation, queueIfSaving = false) => {
       const player = playerRef.current
-      if (!player?.getCurrentTime || !player?.getDuration || savingRef.current) return false
+      if (!player?.getCurrentTime || !player?.getDuration) return false
+      if (savingRef.current) {
+        if (queueIfSaving) queuedHeartbeatRef.current = violation || 'FINAL'
+        return false
+      }
       const watchedTime = Number(player.getCurrentTime())
       const videoDuration = Number(player.getDuration())
       if (!Number.isFinite(watchedTime) || !Number.isFinite(videoDuration) || videoDuration <= 0) return false
@@ -124,6 +129,11 @@ export function SecureVideoPlayer({
         return completed
       } finally {
         savingRef.current = false
+        const queuedHeartbeat = queuedHeartbeatRef.current
+        queuedHeartbeatRef.current = null
+        if (queuedHeartbeat) {
+          void sendHeartbeat(queuedHeartbeat === 'FINAL' ? undefined : queuedHeartbeat)
+        }
       }
     }
 
@@ -184,7 +194,7 @@ export function SecureVideoPlayer({
         const reachedThreshold = watchedTime >= videoDuration * requiredWatchPercentage / 100
         if (!completedRef.current && reachedThreshold && now - lastCompletionAttemptRef.current > 10_000) {
           lastCompletionAttemptRef.current = now
-          void sendHeartbeat()
+          void sendHeartbeat(undefined, true)
         }
       }, 1000)
     }
@@ -226,7 +236,7 @@ export function SecureVideoPlayer({
             playingRef.current = playing
             setIsPlaying(playing)
             lastTickRef.current = Date.now()
-            if (event.data === youtube.PlayerState.ENDED) void sendHeartbeat()
+            if (event.data === youtube.PlayerState.ENDED) void sendHeartbeat(undefined, true)
           },
           onPlaybackRateChange: (event: { data: number }) => {
             if (event.data !== 1) {
@@ -245,7 +255,7 @@ export function SecureVideoPlayer({
       // Persist the most recent position as the learner leaves this lesson. The
       // regular heartbeat keeps an audit trail during playback; this closes the
       // final gap so a learner resumes from the latest verified position.
-      void sendHeartbeat()
+      void sendHeartbeat(undefined, true)
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('blur', handleBlur)
       playerRef.current?.destroy?.()

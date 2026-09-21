@@ -16,7 +16,7 @@ export async function POST(req: NextRequest, { params }: Context) {
     } else {
       const evidence = validateVideoProgressEvidence(body.evidence)
       if (!evidence) throw new AccessError('Secure video presence evidence is required', 400)
-      await recordVideoProgress(user.id, lessonId, body.watchTime, evidence)
+      await recordVideoProgress(user.id, lessonId, body.watchTime, evidence, body.totalTime)
     }
     const watchHistory = await prisma.watchHistory.findUnique({ where: { userId_lessonId: { userId: user.id, lessonId } } })
     const certificate = watchHistory?.completed ? await issueCertificateOnCompletion(user.id, courseId) : null

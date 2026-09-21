@@ -4,6 +4,26 @@ import { canAccessNode } from '@/lib/learning-flow-engine'
 import { refreshProgressSummary } from '@/lib/progress-summary'
 import { creditedActiveSeconds, validateVideoProgressEvidence, type VideoProgressEvidence } from '@/lib/video-presence'
 
+const MAX_VIDEO_DURATION_SECONDS = 12 * 60 * 60
+
+function configuredDuration(lesson: { duration: number | null, durationMin: number | null }) {
+  return lesson.duration || (lesson.durationMin || 0) * 60
+}
+
+function recordedDuration(
+  lesson: { duration: number | null, durationMin: number | null },
+  history?: { totalTime: number | null } | null,
+) {
+  const totalTime = history?.totalTime
+  return totalTime && Number.isFinite(totalTime) && totalTime > 0
+    ? totalTime
+    : configuredDuration(lesson)
+}
+
+function validVideoDuration(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 1 && value <= MAX_VIDEO_DURATION_SECONDS
+}
+
 export async function lessonCompleted(userId: string, lessonId: string): Promise<boolean> {
   const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, include: { scormPackage: true } })
   if (!lesson) return false
@@ -21,7 +41,10 @@ export async function lessonCompleted(userId: string, lessonId: string): Promise
       ['completed', 'passed'].includes(record.completionStatus || '') && record.successStatus !== 'failed')
   }
   const history = await prisma.watchHistory.findUnique({ where: { userId_lessonId: { userId, lessonId } } })
-  const duration = lesson.duration || (lesson.durationMin || 0) * 60
+  // A YouTube player's exact duration may differ from the instructor's
+  // estimated duration. Once verified during playback, retain that duration
+  // for this learner's unlock and certificate checks.
+  const duration = recordedDuration(lesson, history)
   const threshold = lesson.requiredPct ?? lesson.requiredCompletionPercentage
   return duration > 0 && threshold > 0 && threshold <= 100 && !!history?.completed &&
     history.watchTime >= duration * threshold / 100
@@ -78,7 +101,7 @@ export async function getCourseProgress(userId: string, courseId: string) {
   const lessonProgress = lessons.map((lesson, index) => {
     const history = historyByLesson.get(lesson.id)
     const completed = completionFlags[index]
-    const totalTime = history?.totalTime || lesson.duration || (lesson.durationMin || 0) * 60
+    const totalTime = recordedDuration(lesson, history)
     const watchTime = Math.min(history?.watchTime || 0, totalTime || Number.MAX_SAFE_INTEGER)
     const progressPercent = completed
       ? 100
@@ -104,14 +127,24 @@ export async function getCourseProgress(userId: string, courseId: string) {
     lessons: lessonProgress }
 }
 
-export async function recordVideoProgress(userId: string, lessonId: string, reportedTime: number, rawEvidence?: VideoProgressEvidence) {
+export async function recordVideoProgress(
+  userId: string,
+  lessonId: string,
+  reportedTime: number,
+  rawEvidence?: VideoProgressEvidence,
+  reportedTotalTime?: unknown,
+) {
   const lesson = await requireLessonAccess(userId, lessonId)
   await requirePreviousLessons(userId, lessonId)
   if (lesson.quizId || lesson.lessonType === 'SCORM' || lesson.type === 'SCORM') throw new AccessError('Use the appropriate quiz or SCORM endpoint')
-  const duration = lesson.duration || (lesson.durationMin || 0) * 60
+  const duration = configuredDuration(lesson)
   const threshold = lesson.requiredPct ?? lesson.requiredCompletionPercentage
   if (!Number.isFinite(reportedTime) || reportedTime < 0) throw new AccessError('Invalid watch time', 400)
-  if (duration <= 0 || threshold <= 0 || threshold > 100) throw new AccessError('An administrator must configure the video duration and completion percentage', 409)
+  if (reportedTotalTime !== undefined && !validVideoDuration(reportedTotalTime)) throw new AccessError('Invalid video duration', 400)
+  if (validVideoDuration(reportedTotalTime) && reportedTime > reportedTotalTime + 2) throw new AccessError('Watch time exceeds video duration', 400)
+  if ((duration <= 0 && !validVideoDuration(reportedTotalTime)) || threshold <= 0 || threshold > 100) {
+    throw new AccessError('An administrator must configure the video duration and completion percentage', 409)
+  }
   const evidence = rawEvidence === undefined ? null : validateVideoProgressEvidence(rawEvidence)
   if (rawEvidence !== undefined && !evidence) throw new AccessError('Invalid video presence evidence', 400)
   return prisma.$transaction(async tx => {
@@ -147,25 +180,32 @@ export async function recordVideoProgress(userId: string, lessonId: string, repo
             visibility: evidence.visibility,
             playbackRate: evidence.playbackRate,
             reportedTime,
+            reportedTotalTime: validVideoDuration(reportedTotalTime) ? reportedTotalTime : null,
             violation: evidence.violation ?? null,
           },
         },
       })
     }
     const oldTime = previous?.watchTime || 0
-    const watchTime = Math.min(duration, Math.max(oldTime, Math.min(reportedTime, oldTime + allowance)))
-    const completed = watchTime >= duration * threshold / 100
+    // `getDuration()` comes from the active YouTube player. Store it on the
+    // learner's history, rather than changing the instructor's estimate for
+    // everybody. This recovers safely from legacy lessons with a wrong value.
+    const verifiedDuration = validVideoDuration(reportedTotalTime)
+      ? reportedTotalTime
+      : recordedDuration(lesson, previous)
+    const watchTime = Math.min(verifiedDuration, Math.max(oldTime, Math.min(reportedTime, oldTime + allowance)))
+    const completed = watchTime >= verifiedDuration * threshold / 100
     const progress = await tx.watchHistory.upsert({
       where: { userId_lessonId: { userId, lessonId } },
-      create: { userId, lessonId, watchTime, totalTime: duration, completed },
-      update: { watchTime, totalTime: duration, completed }
+      create: { userId, lessonId, watchTime, totalTime: verifiedDuration, completed },
+      update: { watchTime, totalTime: verifiedDuration, completed }
     })
     const node = await tx.learningNode.findFirst({ where: { courseId: lesson.courseId, refId: lessonId, nodeType: 'VIDEO' } })
-    const state = { status: completed ? 'COMPLETED' : 'IN_PROGRESS', progressPercent: watchTime / duration * 100,
+    const state = { status: completed ? 'COMPLETED' : 'IN_PROGRESS', progressPercent: watchTime / verifiedDuration * 100,
       timeSpent: Math.floor(watchTime), lastActivityAt: new Date(), completedAt: completed ? new Date() : null }
     if (node) await tx.nodeProgress.upsert({ where: { userId_nodeId: { userId, nodeId: node.id } },
       create: { userId, nodeId: node.id, courseId: lesson.courseId, ...state }, update: state })
     await refreshProgressSummary(tx, userId, lesson.courseId)
-    return { progress, completed, progressPercentage: watchTime / duration * 100 }
+    return { progress, completed, progressPercentage: watchTime / verifiedDuration * 100 }
   })
 }
