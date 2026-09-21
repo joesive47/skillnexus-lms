@@ -25,6 +25,9 @@ export default async function AdminLayout({
                 <Link href="/dashboard/admin/courses">
                   <Button variant="ghost">Courses</Button>
                 </Link>
+                <Link href="/dashboard/admin/analytics">
+                  <Button variant="ghost">Learning Intelligence</Button>
+                </Link>
                 <Link href="/dashboard/admin/users">
                   <Button variant="ghost">Users</Button>
                 </Link>
