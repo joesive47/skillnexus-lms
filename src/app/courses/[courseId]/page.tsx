@@ -13,7 +13,6 @@ import { LessonProgressIndicator } from '@/components/lesson/LessonProgressIndic
 import { PurchaseButton } from '@/components/course/purchase-button'
 import { CertificateButton } from '@/components/course/certificate-button'
 import { DiscussionList } from '@/components/social/DiscussionList'
-import { LearningPathViewer } from '@/components/learning-flow'
 import { CourseTracker } from '@/components/course/course-tracker'
 
 interface CoursePageProps {
@@ -213,29 +212,14 @@ export default async function CoursePage({ params }: CoursePageProps) {
             </CardContent>
           </Card>
 
-          {/* Learning Path Flow - Only show if enrolled */}
+          {/* Course progress is sourced from the canonical learning-evidence flow. */}
           {isEnrolled && (
-            <>
-              {/* New Course Progress Bar with Certificate */}
-              <CourseProgressBar courseId={courseId} showDetails={true} />
-              
-              <LearningPathViewer 
-                courseId={courseId} 
-                userId={session.user.id} 
-              />
-            </>
+            <CourseProgressBar courseId={courseId} showDetails={true} />
           )}
 
-          {/* Social Features - Only show if enrolled */}
+          {/* DiscussionList returns nothing when social features are disabled. */}
           {isEnrolled && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Course Discussion</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DiscussionList courseId={courseId} />
-              </CardContent>
-            </Card>
+            <DiscussionList courseId={courseId} />
           )}
         </div>
 

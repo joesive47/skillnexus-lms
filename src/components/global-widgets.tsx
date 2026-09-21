@@ -31,11 +31,13 @@ export default function GlobalWidgets() {
   const isPublicEntry = pathname === '/' || pathname === '/login' || pathname === '/register'
   const isPublicCertificate = pathname.startsWith('/certificates/')
   const isSkillAssessment = pathname.startsWith('/skills-assessment')
+  const isAdminSurface = pathname.startsWith('/admin') || pathname.startsWith('/dashboard/admin') || pathname.startsWith('/instructor')
+  const isUnavailableFeature = pathname === '/feature-unavailable'
 
   // Authentication and marketing pages should stay lightweight. These widgets
   // load chatbot/notification bundles and may poll session APIs even though the
   // visitor has not entered the LMS yet.
-  if (isPublicEntry) return null
+  if (isPublicEntry || isAdminSurface || isUnavailableFeature) return null
 
   return (
     <>

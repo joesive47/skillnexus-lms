@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { 
   Users, BookOpen, Award, Settings, BarChart, 
-  MessageSquare, FileText, CreditCard, Folder, Building2,
-  Video, GraduationCap, Mic, Package, Brain, Menu, X, Tags, Activity, TrendingUp
+  MessageSquare, FileText, CreditCard, Folder,
+  GraduationCap, Mic, Package, Brain, Menu, X, Tags, Activity, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LogoutButton } from '@/components/auth/logout-button';
@@ -28,8 +28,6 @@ const menuItems = [
   { icon: Mic, label: 'Voice Assignments', href: '/dashboard/admin/voice-assignments' },
   { icon: CreditCard, label: 'Payments', href: '/dashboard/admin/payments' },
   { icon: Folder, label: 'Files', href: '/dashboard/admin/files' },
-  { icon: Video, label: 'Live Sessions', href: '/dashboard/admin/live-sessions' },
-  { icon: Building2, label: 'Enterprise', href: '/enterprise/dashboard' },
   { icon: Settings, label: 'Settings', href: '/dashboard/admin/settings' },
 ];
 
@@ -68,7 +66,7 @@ export function AdminSidebar() {
             </div>
             <div>
               <h2 className="font-bold text-lg">Admin Panel</h2>
-              <p className="text-xs text-gray-500">SkillNexus LMS</p>
+              <p className="text-xs text-gray-500">upPowerSkill LMS</p>
             </div>
           </div>
 
