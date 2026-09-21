@@ -19,6 +19,7 @@ export function SidebarNav({ outline, courseId }: SidebarNavProps) {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState('')
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
+  const [locallyCompletedLessonIds, setLocallyCompletedLessonIds] = useState<Set<string>>(new Set())
 
   // Load collapsed state from localStorage
   useEffect(() => {
@@ -26,6 +27,28 @@ export function SidebarNav({ outline, courseId }: SidebarNavProps) {
     if (saved) {
       setCollapsedSections(new Set(JSON.parse(saved)))
     }
+    setLocallyCompletedLessonIds(new Set())
+  }, [courseId])
+
+  // A quiz result is already stored on the server when this event fires. Keep
+  // the result screen mounted and update only the classroom navigation, so a
+  // learner can continue immediately without reloading the whole route.
+  useEffect(() => {
+    const handleLessonCompleted = (event: Event) => {
+      const detail = (event as CustomEvent<{ courseId?: string; lessonId?: string }>).detail
+      const lessonId = detail?.lessonId
+      if (detail?.courseId !== courseId || !lessonId) return
+
+      setLocallyCompletedLessonIds(current => {
+        if (current.has(lessonId)) return current
+        const next = new Set(current)
+        next.add(lessonId)
+        return next
+      })
+    }
+
+    window.addEventListener('skillnexus:lesson-completed', handleLessonCompleted)
+    return () => window.removeEventListener('skillnexus:lesson-completed', handleLessonCompleted)
   }, [courseId])
 
   // Save collapsed state to localStorage
@@ -40,8 +63,30 @@ export function SidebarNav({ outline, courseId }: SidebarNavProps) {
     localStorage.setItem(`skillnexus:sidebar:${courseId}`, JSON.stringify([...newCollapsed]))
   }
 
+  const displaySections = locallyCompletedLessonIds.size === 0
+    ? outline.sections
+    : (() => {
+        const completedLessonIds = new Set(
+          outline.sections.flatMap(section =>
+            section.lessons.filter(lesson => lesson.isCompleted).map(lesson => lesson.id)
+          )
+        )
+        locallyCompletedLessonIds.forEach(lessonId => completedLessonIds.add(lessonId))
+        let hasIncompletePredecessor = false
+
+        return outline.sections.map(section => ({
+          ...section,
+          lessons: section.lessons.map(lesson => {
+            const isCompleted = completedLessonIds.has(lesson.id)
+            const isLocked = hasIncompletePredecessor
+            if (!isCompleted) hasIncompletePredecessor = true
+            return { ...lesson, isCompleted, isLocked }
+          })
+        }))
+      })()
+
   // Filter lessons based on search
-  const filteredSections = outline.sections.map(section => ({
+  const filteredSections = displaySections.map(section => ({
     ...section,
     lessons: section.lessons.filter(lesson =>
       lesson.title.toLowerCase().includes(searchQuery.toLowerCase())

@@ -132,10 +132,12 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
         setShowResults(true)
 
         submittedRef.current = true
-        // Refresh the classroom shell after persisting the result so the next
-        // lesson unlocks without a browser refresh. The current result stays
-        // visible because this client component retains its local state.
-        window.setTimeout(() => router.refresh(), 0)
+        // Do not refresh the route here: a route refresh can remount this
+        // component and discard the just-rendered result. The sidebar listens
+        // for this local event and unlocks the next lesson in place instead.
+        window.dispatchEvent(new CustomEvent('skillnexus:lesson-completed', {
+          detail: { courseId, lessonId }
+        }))
 
         // Certificate issuance is retried independently by the dialog. Score
         // feedback must never wait for that secondary operation.
@@ -320,7 +322,7 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
                 onClick={handleSubmit}
                 disabled={!answers[currentQ.id] || isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
+                {isSubmitting ? 'กำลังตรวจคำตอบ…' : 'ส่งคำตอบและตรวจคะแนน'}
               </Button>
             ) : (
               <Button
@@ -331,6 +333,11 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
               </Button>
             )}
           </div>
+          {isSubmitting && (
+            <p className="text-center text-sm text-muted-foreground" role="status">
+              กำลังบันทึกและตรวจคำตอบ กรุณารอสักครู่ ไม่ต้องกดซ้ำ
+            </p>
+          )}
         </CardContent>
       </Card>
 
