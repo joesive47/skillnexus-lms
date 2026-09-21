@@ -9,6 +9,7 @@ import {
   Video, GraduationCap, Mic, Package, Brain, Menu, X, Tags, Activity, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LogoutButton } from '@/components/auth/logout-button';
 
 const menuItems = [
   { icon: BarChart, label: 'Dashboard', href: '/dashboard/admin' },
@@ -56,11 +57,11 @@ export function AdminSidebar() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 overflow-y-auto z-40 transition-transform duration-300",
+        "fixed top-0 left-0 flex h-full w-64 flex-col overflow-hidden bg-white border-r border-gray-200 z-40 transition-transform duration-300",
         "lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6">
+        <div className="flex h-full flex-col p-6">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
               A
@@ -71,7 +72,7 @@ export function AdminSidebar() {
             </div>
           </div>
 
-          <nav className="space-y-1">
+          <nav className="flex-1 space-y-1 overflow-y-auto">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -94,6 +95,10 @@ export function AdminSidebar() {
               );
             })}
           </nav>
+
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <LogoutButton className="w-full justify-start px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700" />
+          </div>
         </div>
       </aside>
     </>
