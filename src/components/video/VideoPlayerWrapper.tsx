@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { SecureVideoPlayer } from './SecureVideoPlayer'
 import { updateLessonProgress } from '@/lib/course-progress'
@@ -29,6 +30,7 @@ export function VideoPlayerWrapper({
   isFinalExam = false,
   nextLesson,
 }: VideoPlayerWrapperProps) {
+  const router = useRouter()
   const completionAnnouncedRef = useRef(initialCompleted)
   const [isCompleted, setIsCompleted] = useState(initialCompleted)
 
@@ -47,6 +49,10 @@ export function VideoPlayerWrapper({
         toast.success('ผ่านเกณฑ์การเรียนวิดีโอแล้ว', {
           description: 'ระบบตรวจสอบเวลาเรียนและบันทึกความก้าวหน้าเรียบร้อย',
         })
+        // Refresh the server-rendered classroom layout once, after the API has
+        // confirmed completion. This updates locks and checkmarks immediately
+        // without interrupting the learner or requiring a browser refresh.
+        window.setTimeout(() => router.refresh(), 0)
       }
       return completed
     } catch (error) {
