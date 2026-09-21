@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Award, Calendar, FileText, Download, ShieldCheck } from 'lucide-react'
+import { Award, Calendar, FileText, Download, ShieldCheck, Library } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { verifyCertificateSignature } from '@/lib/certificate-signature'
@@ -162,8 +162,9 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard">
-                Back to Dashboard
+              <Link href="/dashboard/certificates">
+                <Library className="w-4 h-4 mr-2" />
+                คลังใบประกาศของฉัน
               </Link>
             </Button>
           </div>

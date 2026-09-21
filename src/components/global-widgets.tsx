@@ -4,6 +4,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import { usePathname } from 'next/navigation'
+import { StudentJourneyNavigation } from '@/components/layout/student-journey-navigation'
 
 const UnifiedChatWidget = dynamic(
   () => import('@/components/chatbot/UnifiedChatWidget').catch((err) => {
@@ -36,6 +37,8 @@ export default function GlobalWidgets() {
 
   return (
     <>
+      <StudentJourneyNavigation />
+
       {/* Notification Center - Fixed Position Top Right */}
       <div className="fixed top-4 right-4 z-[9999]">
         <Suspense fallback={null}>

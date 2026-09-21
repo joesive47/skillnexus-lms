@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Award, Download, Calendar, Eye, Share2, Star, Palette } from "lucide-react"
+import { Award, Download, Calendar, ExternalLink, Star } from "lucide-react"
 import Link from "next/link"
 
 export default async function CertificatesPage() {
@@ -36,10 +36,10 @@ export default async function CertificatesPage() {
             <Award className="w-7 h-7 text-white sm:w-10 sm:h-10" />
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3 sm:text-4xl sm:mb-4">
-            ใบประกาศนียบัตรของฉัน
+            คลังใบประกาศของฉัน
           </h1>
           <p className="text-sm text-muted-foreground max-w-2xl mx-auto sm:text-lg">
-            ใบประกาศนียบัตรที่คุณได้รับจากการเรียนจบหลักสูตรต่างๆ พร้อมการยืนยันความถูกต้อง
+            จัดการใบประกาศที่ได้รับ เปิดฉบับจริง ดาวน์โหลด PDF หรือแชร์ลิงก์สำหรับตรวจสอบได้จากที่เดียว
           </p>
           <div className="flex items-center justify-center flex-wrap gap-3 mt-4 sm:gap-4 sm:mt-6">
             <Badge variant="secondary" className="px-4 py-1.5 text-sm sm:text-lg sm:px-6 sm:py-2">
@@ -50,14 +50,6 @@ export default async function CertificatesPage() {
               <Star className="w-3.5 h-3.5 mr-1.5 sm:w-4 sm:h-4 sm:mr-2" />
               ยืนยันแล้ว
             </Badge>
-          </div>
-          <div className="mt-4 sm:mt-6">
-            <Link href="/dashboard/certificates/templates">
-              <Button variant="outline" size="sm" className="sm:size-lg">
-                <Palette className="w-4 h-4 mr-2" />
-                ดูเทมเพลตใบประกาศ
-              </Button>
-            </Link>
           </div>
         </div>
 
@@ -83,7 +75,8 @@ export default async function CertificatesPage() {
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-8">
             {certificates.map((certificate) => (
               <Card key={certificate.id} className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-                {/* Certificate Preview */}
+                {/* A lightweight collection card; the full, shareable document
+                    lives on /certificates/{certificateNumber}. */}
                 <div className="relative h-36 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-4 sm:h-48 sm:p-6">
                   <div className="absolute inset-0 bg-black/10" />
                   <div className="relative z-10 h-full flex flex-col justify-between text-white">
@@ -97,7 +90,7 @@ export default async function CertificatesPage() {
                       </Badge>
                     </div>
                     <div>
-                      <div className="text-xs opacity-80 mb-0.5">Certificate of Completion</div>
+                      <div className="text-xs opacity-80 mb-0.5">Verified learning credential</div>
                       <div className="text-sm font-bold leading-tight sm:text-lg">{certificate.course.title}</div>
                     </div>
                   </div>
@@ -117,20 +110,20 @@ export default async function CertificatesPage() {
                   </p>
                   <div className="flex items-center justify-between text-xs text-muted-foreground bg-gray-50 p-2 rounded-lg sm:p-3">
                     <span>เลขที่:</span>
-                    <span className="font-mono font-semibold">{certificate.id.slice(-8).toUpperCase()}</span>
+                    <span className="font-mono font-semibold break-all text-right">{certificate.certificateNumber}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <Link href={`/api/certificates/${certificate.id}/download`} className="flex-1">
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-xs sm:text-sm" size="sm">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-xs sm:text-sm" size="sm">
+                      <a href={`/api/certificates/download/${certificate.certificateNumber}`} download>
                         <Download className="w-3.5 h-3.5 mr-1.5" />
-                        ดาวน์โหลด
-                      </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" className="px-2.5 sm:px-3">
-                      <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        ดาวน์โหลด PDF
+                      </a>
                     </Button>
-                    <Button variant="outline" size="sm" className="px-2.5 sm:px-3">
-                      <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <Button variant="outline" asChild size="sm" className="text-xs sm:text-sm">
+                      <Link href={`/certificates/${certificate.certificateNumber}`}>
+                        <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+                        เปิดฉบับจริง
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
