@@ -8,7 +8,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const user = await requireUser()
     const { courseId } = await params
     const progress = await getCourseProgress(user.id, courseId)
-    const certificate = await prisma.certificate.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } })
+    const [certificate, course] = await Promise.all([
+      prisma.certificate.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
+      prisma.course.findUnique({ where: { id: courseId }, select: { hasCertificate: true } }),
+    ])
     const finalExam = progress.lessons.find(lesson => lesson.isFinalExam) || null
     return NextResponse.json({
       progress: { completedLessons: progress.completedLessons, totalLessons: progress.totalLessons,
@@ -16,7 +19,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       lessons: progress.lessons,
       finalExam: finalExam ? { id: finalExam.id, title: finalExam.title, completed: finalExam.completed, passed: finalExam.completed } : null,
       certificate,
-      canIssueCertificate: progress.isComplete && !certificate,
+      hasCertificate: course?.hasCertificate === true,
+      canIssueCertificate: course?.hasCertificate === true && progress.isComplete && !certificate,
     })
   } catch (error) {
     return NextResponse.json({ error: publicError(error) }, { status: error instanceof AccessError ? error.status : 500 })

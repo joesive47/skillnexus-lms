@@ -27,7 +27,7 @@ export default async function InstructorEditCoursePage({ params }: EditCoursePag
       where: { id: courseId },
       select: {
         id: true, title: true, description: true,
-        published: true, price: true, imageUrl: true, categoryId: true,
+        published: true, hasCertificate: true, price: true, imageUrl: true, categoryId: true,
         lessons: {
           select: {
             id: true, title: true, order: true, lessonType: true,

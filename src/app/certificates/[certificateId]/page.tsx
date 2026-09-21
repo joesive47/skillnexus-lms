@@ -135,7 +135,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
           {/* Action Buttons */}
           <div className="flex justify-center gap-4 mt-8">
             <Button variant="outline" asChild>
-              <a href={`/api/certificates/${certificate.certificateNumber}/download`} download>
+              <a href={`/api/certificates/download/${certificate.certificateNumber}`} download>
                 <Download className="w-4 h-4 mr-2" />
                 Download HTML
               </a>

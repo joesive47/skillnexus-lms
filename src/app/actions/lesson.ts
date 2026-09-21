@@ -2,13 +2,18 @@
 
 import { requireSelf, requireAdmin, requireEnrollment, requireLessonAccess, publicError } from '@/lib/access-control'
 import { recordVideoProgress, lessonCompleted } from '@/lib/learning-evidence'
-import { issueVerifiedCertificate } from '@/lib/issue-certificate'
+import { issueCertificateOnCompletion, issueVerifiedCertificate } from '@/lib/issue-certificate'
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { isValidYouTubeID } from '@/lib/video'
 
 export async function updateLessonProgress(userId: string, lessonId: string, watchTime: number) {
-  try { return { success: true, ...await recordVideoProgress(userId, lessonId, watchTime) } }
+  try {
+    const result = await recordVideoProgress(userId, lessonId, watchTime)
+    const lesson = result.completed ? await prisma.lesson.findUnique({ where: { id: lessonId }, select: { courseId: true } }) : null
+    const certificate = lesson ? await issueCertificateOnCompletion(userId, lesson.courseId) : null
+    return { success: true, ...result, certificate }
+  }
   catch (error) { return { success: false, error: publicError(error) } }
 }
 

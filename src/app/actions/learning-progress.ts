@@ -4,6 +4,7 @@ import { requireUser, requireLessonAccess, publicError } from '@/lib/access-cont
 import { recordVideoProgress } from '@/lib/learning-evidence'
 import { saveScormProgress } from '@/lib/scorm-progress-secure'
 import { submitQuizSession } from '@/lib/quiz-session'
+import { issueCertificateOnCompletion } from '@/lib/issue-certificate'
 
 export interface VideoProgressUpdate {
   lessonId: string; courseId: string; watchTime: number; totalTime: number
@@ -14,8 +15,9 @@ export async function updateVideoProgress(data: VideoProgressUpdate) {
     const user = await requireUser()
     await requireLessonAccess(user.id, data.lessonId, data.courseId)
     const result = await recordVideoProgress(user.id, data.lessonId, data.watchTime)
+    const certificate = result.completed ? await issueCertificateOnCompletion(user.id, data.courseId) : null
     revalidatePath('/courses/' + data.courseId)
-    return { success: true, progress: result.progressPercentage, completed: result.completed, status: result.completed ? 'COMPLETED' : 'IN_PROGRESS' }
+    return { success: true, progress: result.progressPercentage, completed: result.completed, status: result.completed ? 'COMPLETED' : 'IN_PROGRESS', certificate }
   } catch (error) { return { success: false, error: publicError(error) } }
 }
 export interface ScormProgressUpdate {
@@ -25,8 +27,9 @@ export async function updateScormProgress(data: ScormProgressUpdate) {
   try {
     const user = await requireUser()
     const result = await saveScormProgress(user.id, data.lessonId, data.cmiData, data.courseId)
+    const certificate = result.completed ? await issueCertificateOnCompletion(user.id, data.courseId) : null
     revalidatePath('/courses/' + data.courseId)
-    return { success: true, completed: result.completed, status: result.status }
+    return { success: true, completed: result.completed, status: result.status, certificate }
   } catch (error) { return { success: false, error: publicError(error) } }
 }
 export interface QuizSubmission {
@@ -36,7 +39,8 @@ export interface QuizSubmission {
 export async function submitQuiz(data: QuizSubmission) {
   try {
     const result = await submitQuizSession(data.quizId, data.lessonId || '', data.answers, data.attemptId)
+    const certificate = result.passed ? await issueCertificateOnCompletion((await requireUser()).id, data.courseId) : null
     revalidatePath('/courses/' + data.courseId)
-    return { ...result, correctCount: result.correctAnswers }
+    return { ...result, correctCount: result.correctAnswers, certificate }
   } catch (error) { return { success: false as const, error: publicError(error) } }
 }

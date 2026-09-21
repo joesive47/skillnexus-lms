@@ -104,8 +104,8 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
         setQuizResults(result)
         setShowResults(true)
         
-        // 🎓 ถ้าเป็น Final Exam และผ่าน → แสดง Certificate Dialog
-        if (isFinalExam && result.passed) {
+        // Show success only after the server has created a real certificate.
+        if (isFinalExam && result.passed && result.certificate) {
           setTimeout(() => {
             setShowCertificateDialog(true)
           }, 1000) // รอ 1 วินาทีให้เห็นผลคะแนนก่อน

@@ -24,8 +24,8 @@ export async function createCourseWithScorm(formData: FormData) {
       return { success: false, error: 'Authentication required' }
     }
 
-    if (session.user.role !== 'ADMIN') {
-      return { success: false, error: 'Admin access required' }
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
+      return { success: false, error: 'Admin or Teacher access required' }
     }
 
     const title = formData.get('title') as string
@@ -33,6 +33,7 @@ export async function createCourseWithScorm(formData: FormData) {
     const priceStr = formData.get('price') as string
     const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
+    const hasCertificate = formData.get('hasCertificate') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
     const mainCategoryId = String(formData.get('mainCategoryId') || '')
@@ -100,6 +101,7 @@ export async function createCourseWithScorm(formData: FormData) {
           description: validatedFields.description,
           price: price,
           published: validatedFields.published || false,
+          hasCertificate,
           imageUrl,
           categoryId,
         },
@@ -194,8 +196,8 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
       return { success: false, error: 'Authentication required' }
     }
 
-    if (session.user.role !== 'ADMIN') {
-      return { success: false, error: 'Admin access required' }
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'TEACHER') {
+      return { success: false, error: 'Admin or Teacher access required' }
     }
 
     const title = formData.get('title') as string
@@ -203,6 +205,7 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
     const priceStr = formData.get('price') as string
     const price = priceStr && priceStr !== '' ? Math.round(parseFloat(priceStr)) : 0
     const published = formData.get('published') === 'on'
+    const hasCertificate = formData.get('hasCertificate') === 'on'
     const imageFile = formData.get('image') as File
     const lessonsData = formData.get('lessons') as string
     const mainCategoryId = String(formData.get('mainCategoryId') || '')
@@ -275,6 +278,7 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
       description: validatedFields.description,
       price: price,
       published: validatedFields.published,
+      hasCertificate,
       imageUrl: imageUrl,
       categoryId,
     }

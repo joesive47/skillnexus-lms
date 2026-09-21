@@ -39,6 +39,9 @@ export async function requirePreviousLessons(userId: string, lessonId: string) {
 }
 
 export async function requireCertificateEligibility(userId: string, courseId: string) {
+  const course = await prisma.course.findUnique({ where: { id: courseId }, select: { hasCertificate: true } })
+  if (!course) throw new AccessError('Course not found', 404)
+  if (!course.hasCertificate) throw new AccessError('Certificate is not enabled for this course', 409)
   const progress = await getCourseProgress(userId, courseId)
   if (!progress.isComplete) throw new AccessError('Complete all lessons and pass all required quizzes before requesting a certificate', 409)
   return progress

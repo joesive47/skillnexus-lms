@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { AccessError, publicError, requireUser, requireLessonAccess } from '@/lib/access-control'
 import { recordVideoProgress, lessonCompleted } from '@/lib/learning-evidence'
+import { issueCertificateOnCompletion } from '@/lib/issue-certificate'
 import { validateVideoProgressEvidence } from '@/lib/video-presence'
 type Context = { params: Promise<{ courseId: string; lessonId: string }> }
 export async function POST(req: NextRequest, { params }: Context) {
@@ -18,7 +19,8 @@ export async function POST(req: NextRequest, { params }: Context) {
       await recordVideoProgress(user.id, lessonId, body.watchTime, evidence)
     }
     const watchHistory = await prisma.watchHistory.findUnique({ where: { userId_lessonId: { userId: user.id, lessonId } } })
-    return NextResponse.json({ success: true, watchHistory, completed: !!watchHistory?.completed, message: 'Progress saved' })
+    const certificate = watchHistory?.completed ? await issueCertificateOnCompletion(user.id, courseId) : null
+    return NextResponse.json({ success: true, watchHistory, completed: !!watchHistory?.completed, certificate, message: 'Progress saved' })
   } catch (error) { return NextResponse.json({ error: publicError(error) }, { status: error instanceof AccessError ? error.status : 500 }) }
 }
 export async function GET(_req: NextRequest, { params }: Context) {

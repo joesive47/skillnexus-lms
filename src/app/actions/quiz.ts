@@ -1,9 +1,10 @@
 'use server'
 
 import { startQuizSession, submitQuizSession } from '@/lib/quiz-session'
-import { publicError, requireAdmin } from '@/lib/access-control'
+import { publicError, requireAdmin, requireUser } from '@/lib/access-control'
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { issueCertificateOnCompletion } from '@/lib/issue-certificate'
 import { auth } from '@/auth'
 import { UserRole } from '@/lib/types'
 import { z } from 'zod'
@@ -266,8 +267,13 @@ export async function updateQuizSettings(
 export async function submitQuizAttempt(quizId: string, lessonId: string, answers: Record<string, string>, attemptId?: string) {
   try {
     const result = await submitQuizSession(quizId, lessonId, answers, attemptId)
+    const [user, lesson] = await Promise.all([
+      requireUser(),
+      prisma.lesson.findUnique({ where: { id: lessonId }, select: { courseId: true } }),
+    ])
+    const certificate = result.passed && lesson ? await issueCertificateOnCompletion(user.id, lesson.courseId) : null
     revalidatePath('/dashboard')
-    return result
+    return { ...result, certificate }
   } catch (error) { return { success: false as const, error: publicError(error) } }
 }
 
@@ -308,4 +314,3 @@ export async function getQuizForStudent(quizId: string, lessonId?: string) {
   try { return await startQuizSession(quizId, lessonId) }
   catch (error) { return { success: false as const, error: publicError(error) } }
 }
-

@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { title, price, description, published, imageUrl, lessons } = body
+    const { title, price, description, published, hasCertificate, imageUrl, lessons } = body
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
         price: price || 0,
         description,
         published: published || false,
+        hasCertificate: hasCertificate === true,
         imageUrl,
       }
     })
@@ -63,7 +64,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { id, title, price, description, published, imageUrl, lessons } = body
+    const { id, title, price, description, published, hasCertificate, imageUrl, lessons } = body
 
     if (!id || !title) {
       return NextResponse.json({ error: 'ID and title are required' }, { status: 400 })
@@ -77,6 +78,7 @@ export async function PUT(request: NextRequest) {
         price: price || 0,
         description,
         published: published || false,
+        hasCertificate: hasCertificate === true,
         imageUrl,
       }
     })

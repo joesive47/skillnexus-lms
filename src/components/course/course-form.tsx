@@ -119,7 +119,7 @@ function LessonPreviewModal({ lesson, quiz, onClose }: { lesson: Lesson, quiz?: 
   )
 }
 
-export function CourseForm({ course, mode = 'create', categories = [] }: CourseFormProps) {
+export function CourseForm({ course, mode = 'create', categories = [], redirectPath }: CourseFormProps) {
   const initialMainCategory = categories.find((category) =>
     category.id === course?.categoryId || category.children?.some((child) => child.id === course?.categoryId)
   )
@@ -396,12 +396,16 @@ export function CourseForm({ course, mode = 'create', categories = [] }: CourseF
       if (result.success) {
         setSuccess(`Course ${mode === 'create' ? 'created' : 'updated'} successfully!`)
         toast.success(`Course ${mode === 'create' ? 'created' : 'updated'} successfully!`)
-        
+
+        const destination = redirectPath || '/dashboard/admin/courses'
         if (mode === 'edit') {
-          window.location.reload()
+          setTimeout(() => {
+            router.push(destination)
+            router.refresh()
+          }, 1000)
         } else {
           setTimeout(() => {
-            router.push('/dashboard/admin/courses')
+            router.push(destination)
             router.refresh()
           }, 1500)
         }
@@ -539,7 +543,7 @@ export function CourseForm({ course, mode = 'create', categories = [] }: CourseF
                 <Label htmlFor="hasCertificate" className="font-medium cursor-pointer flex items-center gap-1.5">
                   <span>🏆</span> มีใบรับรอง (Certificate)
                 </Label>
-                <p className="text-xs text-gray-500 mt-0.5">ผู้เรียนที่ผ่านเกณฑ์จะได้รับใบรับรองอัตโนมัติ</p>
+                <p className="text-xs text-gray-500 mt-0.5">บันทึกการตั้งค่านี้กับหลักสูตร และออกใบรับรองเมื่อผู้เรียนผ่านทุกเกณฑ์</p>
               </div>
             </div>
           </div>

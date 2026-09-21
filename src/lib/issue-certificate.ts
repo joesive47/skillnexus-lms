@@ -29,3 +29,17 @@ export async function issueVerifiedCertificate(userId: string, courseId: string,
     return certificate
   })
 }
+
+/**
+ * Attempt automatic issuance after a learning event. A course without the
+ * certificate option, or a course that is not yet complete, is not an error
+ * for progress-saving endpoints.
+ */
+export async function issueCertificateOnCompletion(userId: string, courseId: string) {
+  try {
+    return await issueVerifiedCertificate(userId, courseId)
+  } catch (error) {
+    if (error instanceof AccessError && error.status === 409) return null
+    throw error
+  }
+}

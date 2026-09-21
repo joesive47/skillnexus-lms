@@ -11,8 +11,11 @@ export async function generateCertificate(courseId: string) {
   if (!session?.user?.id) redirect('/login')
   try {
     const certificate = await issueVerifiedCertificate(session.user.id, courseId)
-    return { success: true, certificateId: certificate.verificationToken }
-  } catch { return { success: false, error: 'Complete all course requirements before requesting a certificate' } }
+    return { success: true, certificateNumber: certificate.certificateNumber }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to issue certificate'
+    return { success: false, error: message }
+  }
 }
 
 export async function getCourseProgress(userId: string, courseId: string) {

@@ -118,7 +118,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const existingCertificate = isEnrolled && isStudent
     ? await prisma.certificate.findUnique({
         where: { userId_courseId: { userId: session.user.id, courseId } },
-        select: { id: true },
+        select: { certificateNumber: true },
       })
     : null
   return (
@@ -187,11 +187,11 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   ) : (
                     <Button disabled className="w-full sm:w-auto">ยังไม่มีบทเรียน</Button>
                   )}
-                  {isStudent && (
+                  {isStudent && course.hasCertificate && (
                     <CertificateButton
                       courseId={courseId}
                       completionPercentage={progressPercentage}
-                      existingCertificateId={existingCertificate?.id}
+                      existingCertificateNumber={existingCertificate?.certificateNumber}
                     />
                   )}
                   <Button variant="outline" asChild className="w-full sm:w-auto">

@@ -94,11 +94,11 @@ export function CourseProgressBar({
                 🎉 คุณได้รับใบรับรองแล้ว!
               </p>
               <p className="text-sm text-yellow-700">
-                รหัสยืนยัน: {certificate.verificationCode}
+                เลขที่ใบรับรอง: {certificate.certificateNumber}
               </p>
             </div>
             <a
-              href={`/certificates/${certificate.id}`}
+              href={`/certificates/${certificate.certificateNumber}`}
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
             >
               ดูใบรับรอง
@@ -121,7 +121,7 @@ export function CourseProgressBar({
               </p>
             </div>
             <a
-              href={`/courses/${courseId}/certificate`}
+              href={`/courses/${courseId}`}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
             >
               รับใบรับรอง

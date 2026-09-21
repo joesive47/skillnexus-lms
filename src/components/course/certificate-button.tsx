@@ -10,13 +10,13 @@ import { toast } from 'sonner'
 interface CertificateButtonProps {
   courseId: string
   completionPercentage: number
-  existingCertificateId?: string
+  existingCertificateNumber?: string
 }
 
 export function CertificateButton({ 
   courseId, 
   completionPercentage, 
-  existingCertificateId 
+  existingCertificateNumber
 }: CertificateButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -28,7 +28,7 @@ export function CertificateButton({
       
       if (result.success) {
         toast.success('ออกใบประกาศนียบัตรสำเร็จ!')
-        router.push(`/certificates/${result.certificateId}`)
+        if (result.certificateNumber) router.push(`/certificates/${result.certificateNumber}`)
       } else {
         toast.error(result.error || 'เกิดข้อผิดพลาด')
       }
@@ -40,10 +40,10 @@ export function CertificateButton({
   }
 
   // ถ้ามีใบประกาศนียบัตรแล้ว
-  if (existingCertificateId) {
+  if (existingCertificateNumber) {
     return (
       <Button 
-        onClick={() => router.push(`/certificates/${existingCertificateId}`)}
+        onClick={() => router.push(`/certificates/${existingCertificateNumber}`)}
         className="w-full"
       >
         <Award className="w-4 h-4 mr-2" />

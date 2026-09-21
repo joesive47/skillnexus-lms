@@ -24,8 +24,12 @@ export async function GET(_request: NextRequest, { params }: Context) {
     const user = await requireUser()
     const { courseId } = await params
     const progress = await getCourseProgress(user.id, courseId)
-    const certificate = await prisma.certificate.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } })
-    return NextResponse.json({ progress, certificate, canIssueCertificate: progress.isComplete && !certificate })
+    const [certificate, course] = await Promise.all([
+      prisma.certificate.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
+      prisma.course.findUnique({ where: { id: courseId }, select: { hasCertificate: true } }),
+    ])
+    return NextResponse.json({ progress, certificate, hasCertificate: course?.hasCertificate === true,
+      canIssueCertificate: course?.hasCertificate === true && progress.isComplete && !certificate })
   } catch (error) {
     return NextResponse.json({ error: publicError(error) }, { status: error instanceof AccessError ? error.status : 500 })
   }
