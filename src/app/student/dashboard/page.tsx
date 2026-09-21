@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Award, BookOpen, Brain, Clock, Route, TrendingUp } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { LogoutButton } from '@/components/auth/logout-button';
+import { getCourseProgress } from '@/lib/learning-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,9 +76,15 @@ export default async function StudentDashboard() {
     prisma.watchHistory.aggregate({ where: { userId }, _sum: { watchTime: true } }),
   ]);
 
+  // Read the canonical calculation so older watch history remains accurate even
+  // when a course has not yet received a denormalized progress summary.
+  const canonicalProgress = new Map(await Promise.all(enrollments.map(async (enrollment) => [
+    enrollment.course.id,
+    await getCourseProgress(userId, enrollment.course.id).catch(() => null),
+  ] as const)))
   const courseProgress = enrollments.map((enrollment) => ({
     ...enrollment,
-    progress: clampPercent(enrollment.course.progressSummaries[0]?.progressPercent ?? 0),
+    progress: clampPercent(canonicalProgress.get(enrollment.course.id)?.percentage ?? enrollment.course.progressSummaries[0]?.progressPercent ?? 0),
   }));
   const averageProgress = courseProgress.length
     ? Math.round(courseProgress.reduce((sum, enrollment) => sum + enrollment.progress, 0) / courseProgress.length)

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { BookOpen, Clock, Award } from 'lucide-react'
 import Link from 'next/link'
+import { getCourseProgress } from '@/lib/learning-evidence'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,9 +41,13 @@ export default async function StudentCoursesPage() {
       orderBy: { createdAt: 'desc' },
     })
 
+    const canonicalProgress = new Map(await Promise.all(enrollments.map(async (enrollment) => [
+      enrollment.course.id,
+      await getCourseProgress(userId, enrollment.course.id).catch(() => null),
+    ] as const)))
     const coursesWithProgress = enrollments.map((e) => ({
       ...e,
-      progress: Math.min(100, Math.max(0, Math.round(e.course.progressSummaries[0]?.progressPercent ?? 0))),
+      progress: Math.min(100, Math.max(0, Math.round(canonicalProgress.get(e.course.id)?.percentage ?? e.course.progressSummaries[0]?.progressPercent ?? 0))),
     }))
 
     const completed = coursesWithProgress.filter((e) => e.progress >= 100)
