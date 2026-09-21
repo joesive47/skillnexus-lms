@@ -118,7 +118,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
   doc.setFontSize(9)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(71, 85, 105)
-  doc.text('DATE ISSUED', 80, infoY, { align: 'center' })
+  doc.text('ISSUED AT (ICT)', 80, infoY, { align: 'center' })
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(15, 23, 42)

@@ -11,12 +11,14 @@ interface CertificateButtonProps {
   courseId: string
   completionPercentage: number
   existingCertificateNumber?: string
+  canIssue?: boolean
 }
 
 export function CertificateButton({ 
   courseId, 
   completionPercentage, 
-  existingCertificateNumber
+  existingCertificateNumber,
+  canIssue = completionPercentage >= 100,
 }: CertificateButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -53,7 +55,7 @@ export function CertificateButton({
   }
 
   // ถ้าเรียนจบแล้ว
-  if (completionPercentage >= 100) {
+  if (canIssue) {
     return (
       <Button 
         onClick={handleGenerateCertificate}
@@ -74,7 +76,7 @@ export function CertificateButton({
   return (
     <Button disabled className="w-full">
       <Award className="w-4 h-4 mr-2" />
-      เรียนจบเพื่อรับใบประกาศนียบัตร ({completionPercentage}%)
+      เรียนและผ่านแบบทดสอบให้ครบเพื่อรับใบประกาศนียบัตร ({completionPercentage}%)
     </Button>
   )
 }

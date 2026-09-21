@@ -13,14 +13,23 @@ export async function issueVerifiedCertificate(userId: string, courseId: string,
   if (!signingKey) throw new AccessError('Certificate signing is not configured', 503)
   return prisma.$transaction(async tx => {
     await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`
+    const baseUrl = (process.env.NEXT_PUBLIC_URL || process.env.AUTH_URL || 'https://www.uppowerskill.com').replace(/\/$/, '')
     const existing = await tx.certificate.findUnique({ where: { userId_courseId: { userId, courseId } },
       include: { course: { select: { title: true } }, user: { select: { name: true, email: true } } } })
-    if (existing) return existing
+    if (existing) {
+      const qrCodeUrl = await QRCode.toDataURL(`${baseUrl}/certificates/verify/${existing.verificationToken}`)
+      return tx.certificate.update({
+        where: { id: existing.id },
+        data: { qrCodeUrl },
+        include: { course: { select: { title: true } }, user: { select: { name: true, email: true } } },
+      })
+    }
     const verificationToken = randomBytes(24).toString('hex')
     const certificateNumber = `CERT-${randomBytes(12).toString('hex').toUpperCase()}`
     const evidence = { userId, courseId, certificateNumber, verificationToken, bardData }
-    const baseUrl = process.env.NEXT_PUBLIC_URL || process.env.AUTH_URL || 'http://127.0.0.1:3001'
-    const qrCodeUrl = await QRCode.toDataURL(`${baseUrl}/api/bard-certificates/verify/${verificationToken}`)
+    // The QR code opens the public verifier for this signed course certificate,
+    // not the unrelated BARD verification endpoint.
+    const qrCodeUrl = await QRCode.toDataURL(`${baseUrl}/certificates/verify/${verificationToken}`)
     const certificate = await tx.certificate.create({ data: { userId, courseId, certificateNumber, verificationToken, bardData, qrCodeUrl,
       digitalSignature: signCertificate(evidence, signingKey) },
       include: { course: { select: { title: true } }, user: { select: { name: true, email: true } } } })

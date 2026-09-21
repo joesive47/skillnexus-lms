@@ -187,6 +187,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                       courseId={courseId}
                       completionPercentage={progressPercentage}
                       existingCertificateNumber={existingCertificate?.certificateNumber}
+                      canIssue={progressData?.isComplete === true}
                     />
                   )}
                   <Button variant="outline" asChild className="w-full sm:w-auto">

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, XCircle, AlertCircle, Calendar, Shield, Award, User } from 'lucide-react'
 import Link from 'next/link'
+import { verifyCertificateSignature } from '@/lib/certificate-signature'
 
 interface VerifyPageProps {
   params: Promise<{
@@ -13,6 +14,67 @@ interface VerifyPageProps {
 
 export default async function VerifyCertificatePage({ params }: VerifyPageProps) {
   const { code } = await params
+
+  // Primary course-certificate flow: QR codes created by the student learning
+  // journey carry this signed token. Verify both database status and HMAC.
+  const signedCertificate = await prisma.certificate.findUnique({
+    where: { verificationToken: code },
+    include: {
+      user: { select: { name: true, email: true } },
+      course: { select: { title: true } },
+    },
+  })
+
+  if (signedCertificate) {
+    const isExpired = signedCertificate.expiresAt && signedCertificate.expiresAt < new Date()
+    const signatureValid = verifyCertificateSignature(signedCertificate)
+    const isValid = signedCertificate.status === 'ACTIVE' && !isExpired && signatureValid
+    const issuedAt = new Intl.DateTimeFormat('th-TH', {
+      dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Bangkok',
+    }).format(signedCertificate.issuedAt)
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12">
+        <div className="container mx-auto px-4">
+          <Card className="mx-auto max-w-2xl shadow-xl">
+            <CardHeader className={isValid ? 'bg-green-50' : 'bg-red-50'}>
+              <CardTitle className="flex items-center gap-3">
+                {isValid ? <CheckCircle2 className="h-8 w-8 text-green-600" /> : <XCircle className="h-8 w-8 text-red-600" />}
+                <span className={isValid ? 'text-green-700' : 'text-red-700'}>
+                  {isValid ? '✓ ใบรับรองของแท้และยังใช้งานได้' : '✗ ใบรับรองไม่สามารถยืนยันได้'}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-7">
+              <div className="text-center">
+                <Award className="mx-auto mb-3 h-14 w-14 text-blue-600" />
+                <p className="text-sm text-muted-foreground">upPowerSkill · Certificate of Completion</p>
+              </div>
+              <dl className="grid gap-4 rounded-lg border bg-white p-5 sm:grid-cols-2">
+                <div><dt className="text-xs font-medium uppercase text-muted-foreground">ผู้เรียน</dt><dd className="mt-1 font-semibold">{signedCertificate.user.name || signedCertificate.user.email}</dd></div>
+                <div><dt className="text-xs font-medium uppercase text-muted-foreground">หลักสูตร</dt><dd className="mt-1 font-semibold">{signedCertificate.course.title}</dd></div>
+                <div><dt className="text-xs font-medium uppercase text-muted-foreground">ออกให้เมื่อ</dt><dd className="mt-1">{issuedAt} น. (ICT)</dd></div>
+                <div><dt className="text-xs font-medium uppercase text-muted-foreground">เลขที่ใบรับรอง</dt><dd className="mt-1 break-all font-mono text-sm">{signedCertificate.certificateNumber}</dd></div>
+              </dl>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium"><Shield className="h-4 w-4" />รหัสตรวจสอบ</div>
+                <code className="mt-2 block break-all rounded bg-white px-3 py-2 text-xs">{code}</code>
+              </div>
+              <p className={`text-sm ${isValid ? 'text-green-700' : 'text-red-700'}`}>
+                {isValid
+                  ? 'ตรวจสอบกับฐานข้อมูลและลายเซ็นดิจิทัลของ upPowerSkill แล้ว'
+                  : signedCertificate.status !== 'ACTIVE'
+                    ? 'ใบรับรองนี้ถูกระงับหรือเพิกถอนแล้ว'
+                    : isExpired
+                      ? 'ใบรับรองนี้หมดอายุแล้ว'
+                      : 'ลายเซ็นดิจิทัลไม่ตรงกับข้อมูลที่ออกใบรับรอง'}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   // Try CourseCertificate first
   const certificate = await prisma.courseCertificate.findUnique({

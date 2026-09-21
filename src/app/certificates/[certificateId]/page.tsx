@@ -2,9 +2,11 @@ import prisma from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Award, Calendar, User, FileText, Download, Share } from 'lucide-react'
+import { Award, Calendar, FileText, Download, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { verifyCertificateSignature } from '@/lib/certificate-signature'
+import QRCode from 'qrcode'
 
 interface CertificatePageProps {
   params: Promise<{
@@ -40,6 +42,14 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
   if (!certificate) {
     notFound()
   }
+  const isExpired = certificate.expiresAt && certificate.expiresAt < new Date()
+  const isValid = certificate.status === 'ACTIVE' && !isExpired && verifyCertificateSignature(certificate)
+  const issuedAt = new Intl.DateTimeFormat('th-TH', {
+    dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Bangkok',
+  }).format(certificate.issuedAt)
+  const verifyUrl = `/certificates/verify/${certificate.verificationToken}`
+  const baseUrl = (process.env.NEXT_PUBLIC_URL || process.env.AUTH_URL || 'https://www.uppowerskill.com').replace(/\/$/, '')
+  const qrCodeUrl = await QRCode.toDataURL(`${baseUrl}${verifyUrl}`)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12">
@@ -83,11 +93,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                     <Calendar className="w-6 h-6 mx-auto mb-2 text-gray-600" />
                     <p className="text-sm text-muted-foreground">Issue Date</p>
                     <p className="font-medium">
-                      {new Date(certificate.issuedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {issuedAt} น. (ICT)
                     </p>
                   </div>
                   
@@ -101,9 +107,9 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                 </div>
 
                 <div className="space-y-4">
-                  <Badge variant="secondary" className="text-lg px-4 py-2">
+                  <Badge variant={isValid ? 'secondary' : 'destructive'} className="text-lg px-4 py-2">
                     <Award className="w-4 h-4 mr-2" />
-                    Verified Certificate
+                    {isValid ? 'Verified Certificate' : 'Verification Required'}
                   </Badge>
                   
                   <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
@@ -111,6 +117,11 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                     all course requirements and assessments. This achievement demonstrates 
                     proficiency in the subject matter and commitment to continuous learning.
                   </p>
+                </div>
+
+                <div className="mx-auto w-fit rounded-lg border bg-white p-3 text-center">
+                  <img src={qrCodeUrl} alt="QR code for certificate verification" className="mx-auto h-32 w-32" />
+                  <Link href={verifyUrl} className="mt-2 block text-xs text-blue-700 hover:underline">สแกน QR หรือกดเพื่อตรวจสอบ</Link>
                 </div>
 
                 {/* Signature Section */}
@@ -137,15 +148,14 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
             <Button variant="outline" asChild>
               <a href={`/api/certificates/download/${certificate.certificateNumber}`} download>
                 <Download className="w-4 h-4 mr-2" />
-                Download HTML
+                ดาวน์โหลด PDF
               </a>
             </Button>
-            <Button variant="outline" onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/certificates/${certificate.certificateNumber}`)
-              alert('ลิงก์ใบประกาศนียบัตรถูกคัดลอกแล้ว!')
-            }}>
-              <Share className="w-4 h-4 mr-2" />
-              Share Certificate
+            <Button variant="outline" asChild>
+              <Link href={verifyUrl}>
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                ตรวจสอบความถูกต้อง
+              </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard">
@@ -166,7 +176,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                 <div className="flex justify-center gap-4 text-xs text-muted-foreground">
                   <span>Issued by: SkillNexus LMS</span>
                   <span>•</span>
-                  <span>Verification ID: {certificate.certificateNumber}</span>
+                  <span>Verification ID: {certificate.verificationToken}</span>
                   <span>•</span>
                   <span>Blockchain Verified</span>
                 </div>

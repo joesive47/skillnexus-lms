@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { generateCertificatePDF } from '@/lib/pdf-generator'
 import { AccessError, publicError, requireUser } from '@/lib/access-control'
+import QRCode from 'qrcode'
 
 export async function GET(
   req: NextRequest,
@@ -29,16 +30,22 @@ export async function GET(
     }
 
     const bardData = certificate.bardData ? JSON.parse(certificate.bardData) : {}
+    const baseUrl = (process.env.NEXT_PUBLIC_URL || process.env.AUTH_URL || 'https://www.uppowerskill.com').replace(/\/$/, '')
+    const qrCodeUrl = await QRCode.toDataURL(`${baseUrl}/certificates/verify/${certificate.verificationToken}`)
     const pdfBuffer = await generateCertificatePDF({
       userName: certificate.user.name || 'Student',
       courseName: certificate.course.title,
       certificateNumber: certificate.certificateNumber,
-      issuedDate: new Date(certificate.issuedAt).toLocaleDateString('en-US', {
+      issuedDate: new Date(certificate.issuedAt).toLocaleString('en-GB', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Bangkok',
       }),
-      bardData
+      bardData,
+      qrCodeUrl,
     })
 
     return new NextResponse(pdfBuffer, {
