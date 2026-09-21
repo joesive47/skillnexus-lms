@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { scormService } from '@/lib/scorm-service'
 import { join } from 'path'
 import { promises as fs } from 'fs'
-import { resolveCourseCategory } from '@/lib/course-categories'
+import { resolveCourseCategory, resolveUpdatedCourseCategory } from '@/lib/course-categories'
 
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -252,15 +252,19 @@ export async function updateCourseWithScorm(id: string, formData: FormData) {
       price: price,
       published,
     })
-    const categoryId = await resolveCourseCategory(mainCategoryId, requestedCategoryId || undefined)
-
     // Get current course data to preserve existing imageUrl
     const currentCourse = await prisma.course.findUnique({
       where: { id },
-      select: { imageUrl: true }
+      select: { imageUrl: true, categoryId: true }
     })
+    if (!currentCourse) return { success: false, error: 'Course not found' }
+    const categoryId = await resolveUpdatedCourseCategory(
+      currentCourse.categoryId,
+      mainCategoryId,
+      requestedCategoryId || undefined
+    )
 
-    let imageUrl: string | undefined = currentCourse?.imageUrl || undefined
+    let imageUrl: string | undefined = currentCourse.imageUrl || undefined
     
     // Only update image if a new file is provided
     if (imageFile && imageFile.size > 0) {

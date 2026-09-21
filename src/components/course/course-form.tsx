@@ -123,6 +123,7 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
   const initialMainCategory = categories.find((category) =>
     category.id === course?.categoryId || category.children?.some((child) => child.id === course?.categoryId)
   )
+  const currentCategoryUnavailable = Boolean(course?.categoryId && !initialMainCategory)
   const [mainCategoryId, setMainCategoryId] = useState(initialMainCategory?.id || '')
   const [categoryId, setCategoryId] = useState(
     initialMainCategory?.children?.some((child) => child.id === course?.categoryId) ? course?.categoryId || '' : ''
@@ -447,7 +448,7 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="mainCategoryId">หมวดหมู่หลัก *</Label>
+              <Label htmlFor="mainCategoryId">หมวดหมู่หลัก{mode === 'create' ? ' *' : ''}</Label>
               <Select
                 name="mainCategoryId"
                 value={mainCategoryId}
@@ -455,7 +456,7 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
                   setMainCategoryId(value)
                   setCategoryId('')
                 }}
-                required
+                required={mode === 'create'}
               >
                 <SelectTrigger id="mainCategoryId">
                   <SelectValue placeholder="เลือกหมวดหมู่หลัก" />
@@ -475,7 +476,7 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
                 value={categoryId}
                 onValueChange={setCategoryId}
                 disabled={!selectedMainCategory?.children?.length}
-                required={Boolean(selectedMainCategory?.children?.length)}
+                required={mode === 'create' && Boolean(selectedMainCategory?.children?.length)}
               >
                 <SelectTrigger id="categoryId">
                   <SelectValue placeholder={selectedMainCategory?.children?.length ? 'เลือกหมวดหมู่ย่อย' : 'ไม่มีหมวดหมู่ย่อย'} />
@@ -488,6 +489,12 @@ export function CourseForm({ course, mode = 'create', categories = [], redirectP
               </Select>
             </div>
           </div>
+
+          {mode === 'edit' && currentCategoryUnavailable && (
+            <p className="text-sm text-amber-700">
+              หมวดหมู่เดิมไม่ได้อยู่ในรายการที่เปิดใช้งาน ระบบจะเก็บค่าเดิมไว้เมื่อบันทึก หากต้องการเปลี่ยนหมวดหมู่ โปรดเลือกหมวดหมู่หลักใหม่
+            </p>
+          )}
 
           {/* Price */}
           <div className="space-y-2">

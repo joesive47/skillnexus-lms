@@ -26,3 +26,16 @@ export async function resolveCourseCategory(mainCategoryId: string, categoryId?:
   }
   return categoryId
 }
+
+// Editing a legacy course must not require its category to remain active.  This
+// lets an administrator change unrelated fields (for example certificate
+// eligibility) while still validating a category whenever they choose a new one.
+export async function resolveUpdatedCourseCategory(
+  currentCategoryId: string | null,
+  mainCategoryId: string,
+  categoryId?: string
+) {
+  if (!mainCategoryId) return currentCategoryId
+
+  return resolveCourseCategory(mainCategoryId, categoryId)
+}
