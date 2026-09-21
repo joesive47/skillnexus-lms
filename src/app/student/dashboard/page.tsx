@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Award, BookOpen, Brain, Clock, Route, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Brain, Clock, TrendingUp } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { getCourseProgress } from '@/lib/learning-evidence';
@@ -31,7 +31,7 @@ export default async function StudentDashboard() {
   if (!session?.user || session.user.role !== 'STUDENT') redirect('/login');
 
   const userId = session.user.id;
-  const [enrollments, certificates, pathEnrollments, skillAssessments, studyTime] = await Promise.all([
+  const [enrollments, certificates, skillAssessments, studyTime] = await Promise.all([
     prisma.enrollment.findMany({
       where: { userId },
       include: {
@@ -53,20 +53,6 @@ export default async function StudentDashboard() {
       where: { userId, status: 'ACTIVE' },
       include: { course: { select: { title: true } } },
       orderBy: { issuedAt: 'desc' },
-    }),
-    prisma.learningPathEnrollment.findMany({
-      where: { userId },
-      include: {
-        path: {
-          include: {
-            steps: {
-              orderBy: { order: 'asc' },
-              include: { completions: { where: { userId }, select: { id: true } } },
-            },
-          },
-        },
-      },
-      orderBy: { lastAccessAt: 'desc' },
     }),
     prisma.skillAssessment.findMany({
       where: { userId },
@@ -95,7 +81,7 @@ export default async function StudentDashboard() {
       <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">Student Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your learning progress, credentials, paths, and skill set in one place.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Your learning progress, credentials, and skill set in one place.</p>
         </div>
         <div className="self-start sm:self-auto"><LogoutButton /></div>
       </div>
@@ -129,18 +115,6 @@ export default async function StudentDashboard() {
                 <Link href={`/api/certificates/download/${certificate.certificateNumber}`} className="shrink-0 text-sm text-primary hover:underline">Download</Link>
               </div>
             )) : <p className="text-sm text-muted-foreground">Complete an eligible course to earn your first certificate.</p>}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="flex items-center gap-2"><Route className="h-5 w-5" /> Learning Paths</CardTitle><Link href="/learning-paths" className="text-sm text-primary hover:underline">Explore paths</Link></CardHeader>
-          <CardContent className="space-y-4">
-            {pathEnrollments.length ? pathEnrollments.slice(0, 4).map((enrollment) => {
-              const completedSteps = enrollment.path.steps.filter((step) => step.completions.length > 0).length;
-              const progress = enrollment.path.steps.length ? clampPercent((completedSteps / enrollment.path.steps.length) * 100) : clampPercent(enrollment.progress);
-              const nextStep = enrollment.path.steps.find((step) => step.completions.length === 0);
-              return <div key={enrollment.id} className="rounded-lg border p-3"><div className="mb-2 flex items-center justify-between gap-3"><span className="font-medium">{enrollment.path.title}</span><span className="text-sm">{progress}%</span></div><Progress value={progress} className="mb-2 h-2" /><p className="text-xs text-muted-foreground">{nextStep ? `Next: ${nextStep.title}` : 'Path completed'} · {completedSteps}/{enrollment.path.steps.length} steps</p></div>;
-            }) : <p className="text-sm text-muted-foreground">You have not joined a learning path yet.</p>}
           </CardContent>
         </Card>
 
