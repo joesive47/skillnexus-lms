@@ -2,6 +2,8 @@
 *.log
 *.md
 !README.md
+# Required by Next.js output tracing while preparing the public SCORM assets.
+!public/scorm-samples-info.md
 .env.local
 .env.development
 .env.sqlite
