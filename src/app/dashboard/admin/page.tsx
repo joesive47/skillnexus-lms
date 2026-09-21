@@ -14,6 +14,15 @@ export default async function AdminDashboard() {
 
   const adminModules = [
     {
+      title: "Learning Intelligence",
+      description: "กราฟ สถิติ และจุดที่ต้องเฝ้าดูจากข้อมูลจริง อัปเดตอัตโนมัติ",
+      icon: BarChart3,
+      href: "/dashboard/admin/analytics",
+      gradient: "from-cyan-500 to-violet-600",
+      bgGradient: "from-cyan-50 to-violet-100",
+      count: "LIVE"
+    },
+    {
       title: "จัดการผู้ใช้",
       description: "จัดการบัญชีผู้ใช้และสิทธิ์การเข้าถึง",
       icon: Users,
