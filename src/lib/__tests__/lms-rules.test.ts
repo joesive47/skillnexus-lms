@@ -32,8 +32,8 @@ describe('central LMS completion rules', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     prismaMock.lesson.findMany.mockResolvedValue([
-      { id: 'lesson-1', title: 'One', lessonType: 'VIDEO', isFinalExam: false, module: { id: 'm1', title: 'Module', order: 1 } },
-      { id: 'lesson-2', title: 'Final', lessonType: 'VIDEO', isFinalExam: true, module: { id: 'm1', title: 'Module', order: 1 } },
+      { id: 'lesson-1', title: 'One', order: 1, lessonType: 'VIDEO', isFinalExam: false, duration: 100, durationMin: 0, requiredPct: 80, requiredCompletionPercentage: 80, module: { id: 'm1', title: 'Module', order: 1 } },
+      { id: 'lesson-2', title: 'Final', order: 2, lessonType: 'VIDEO', isFinalExam: true, duration: 100, durationMin: 0, requiredPct: 80, requiredCompletionPercentage: 80, module: { id: 'm1', title: 'Module', order: 1 } },
     ])
     prismaMock.course.findUnique.mockResolvedValue({ hasCertificate: true })
     prismaMock.lesson.findUnique.mockImplementation(({ where }: { where: { id: string } }) => Promise.resolve({
@@ -59,6 +59,23 @@ describe('central LMS completion rules', () => {
   it('blocks a certificate when a required course quiz is not passed', async () => {
     prismaMock.studentSubmission.findMany.mockResolvedValue([])
     await expect(requireCertificateEligibility('user-1', 'course-1')).rejects.toMatchObject({ status: 409 })
+  })
+
+  it('uses partial verified watch time for course progress and resumes the first unfinished lesson', async () => {
+    prismaMock.watchHistory.findUnique
+      .mockResolvedValueOnce({ completed: false, watchTime: 50, totalTime: 100, updatedAt: new Date() })
+      .mockResolvedValueOnce({ completed: true, watchTime: 100, totalTime: 100, updatedAt: new Date() })
+    prismaMock.watchHistory.findMany.mockResolvedValue([
+      { lessonId: 'lesson-1', completed: false, watchTime: 50, totalTime: 100, updatedAt: new Date() },
+      { lessonId: 'lesson-2', completed: true, watchTime: 100, totalTime: 100, updatedAt: new Date() },
+    ])
+
+    await expect(getCourseProgress('user-1', 'course-1')).resolves.toMatchObject({
+      completedLessons: 1,
+      percentage: 75,
+      nextLessonId: 'lesson-1',
+      isComplete: false,
+    })
   })
 
   it('blocks a certificate when the course has not enabled certificates', async () => {

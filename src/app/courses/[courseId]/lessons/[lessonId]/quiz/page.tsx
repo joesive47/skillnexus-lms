@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { QuizClient } from '@/components/quiz/quiz-client'
+import { requirePreviousLessons } from '@/lib/learning-evidence'
 
 interface QuizPageProps {
   params: Promise<{ courseId: string; lessonId: string }>
@@ -48,6 +49,14 @@ export default async function QuizPage({ params }: QuizPageProps) {
   const hasAccess = enrollment || session.user.role === 'ADMIN' || session.user.role === 'TEACHER'
   if (!hasAccess) {
     redirect(`/courses/${courseId}`)
+  }
+
+  if (session.user.role === 'STUDENT') {
+    try {
+      await requirePreviousLessons(session.user.id, lessonId)
+    } catch {
+      redirect(`/courses/${courseId}`)
+    }
   }
 
   // Pass only serializable primitive data + isFinalExam flag

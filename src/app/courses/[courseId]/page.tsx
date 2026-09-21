@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { CourseImage } from '@/components/ui/course-image'
 import { CourseProgressCard } from '@/components/course/CourseProgressCard'
 import { CourseProgressBar } from '@/components/course/CourseProgressBar'
-import { getCourseProgress } from '@/app/actions/video'
+import { getCourseProgress } from '@/lib/learning-evidence'
 import { LessonProgressIndicator } from '@/components/lesson/LessonProgressIndicator'
 import { PurchaseButton } from '@/components/course/purchase-button'
 import { CertificateButton } from '@/components/course/certificate-button'
@@ -103,16 +103,11 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const isStudent = session.user.role === 'STUDENT'
 
   // Get detailed progress data
-  const progressData = isEnrolled ? await getCourseProgress(session.user.id, courseId) : null
-
-  // Calculate basic progress for display
-  const allLessons = course.modules.flatMap(m => m.lessons)
-  const completedLessons = allLessons.filter(l =>
-    l.watchHistory.some(wh => wh.completed)
-  )
-  const progressPercentage = allLessons.length > 0
-    ? Math.round((completedLessons.length / allLessons.length) * 100)
-    : 0
+  const progressData = isEnrolled && isStudent
+    ? await getCourseProgress(session.user.id, courseId)
+    : null
+  const progressPercentage = progressData?.percentage ?? 0
+  const resumeLessonId = progressData?.nextLessonId || firstLesson?.id
 
   // Check existing certificate
   const existingCertificate = isEnrolled && isStudent
@@ -176,12 +171,12 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
               {isEnrolled ? (
                 <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:flex-wrap">
-                  {firstLesson ? (
+                  {resumeLessonId ? (
                     <Button asChild className="w-full sm:w-auto">
-                      <Link href={`/courses/${courseId}/lessons/${firstLesson.id}`}>
+                      <Link href={`/courses/${courseId}/lessons/${resumeLessonId}`}>
                         {session.user.role === 'ADMIN' || session.user.role === 'TEACHER'
                           ? "Preview Course"
-                          : progressPercentage > 0 ? "เรียนต่อ" : "เริ่มเรียน"}
+                          : progressPercentage >= 100 ? "ทบทวนบทเรียน" : progressPercentage > 0 ? "เรียนต่อ" : "เริ่มเรียน"}
                       </Link>
                     </Button>
                   ) : (
@@ -252,7 +247,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
               completedLessons={progressData.completedLessons}
               totalVideoDuration={progressData.totalVideoDuration}
               watchedDuration={progressData.watchedDuration}
-              courseName={progressData.courseName}
+              courseName={course.title}
+              progressPercentage={progressData.percentage}
             />
           )}
           
@@ -270,7 +266,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
                       {module.lessons.map((lesson) => {
                         const watchHistory = lesson.watchHistory[0]
                         const isCompleted = watchHistory?.completed || false
-                        const watchProgress = watchHistory?.watchTime || 0
+                        const watchProgress = watchHistory?.totalTime
+                          ? (watchHistory.watchTime / watchHistory.totalTime) * 100
+                          : 0
                         
                         return (
                           <div key={lesson.id} className="space-y-2">

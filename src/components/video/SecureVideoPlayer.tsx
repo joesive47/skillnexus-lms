@@ -242,6 +242,10 @@ export function SecureVideoPlayer({
     return () => {
       disposed = true
       if (intervalRef.current) clearInterval(intervalRef.current)
+      // Persist the most recent position as the learner leaves this lesson. The
+      // regular heartbeat keeps an audit trail during playback; this closes the
+      // final gap so a learner resumes from the latest verified position.
+      void sendHeartbeat()
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('blur', handleBlur)
       playerRef.current?.destroy?.()

@@ -50,14 +50,23 @@ export async function requireCertificateEligibility(userId: string, courseId: st
 /** Canonical LMS completion calculation used by progress, completion and certificates. */
 export async function getCourseProgress(userId: string, courseId: string) {
   await requireEnrollment(userId, courseId)
-  const [lessons, quizzes] = await Promise.all([
+  const [unorderedLessons, quizzes] = await Promise.all([
     prisma.lesson.findMany({
       where: { courseId },
-      select: { id: true, title: true, lessonType: true, isFinalExam: true, module: { select: { id: true, title: true, order: true } } },
+      select: {
+        id: true, title: true, order: true, lessonType: true, isFinalExam: true,
+        duration: true, durationMin: true, requiredPct: true, requiredCompletionPercentage: true,
+        module: { select: { id: true, title: true, order: true } },
+      },
       orderBy: [{ moduleId: 'asc' }, { order: 'asc' }],
     }),
     prisma.quiz.findMany({ where: { courseId }, select: { id: true } }),
   ])
+  const lessons = unorderedLessons.sort((left, right) => {
+    const leftModuleOrder = left.module?.order ?? Number.MAX_SAFE_INTEGER
+    const rightModuleOrder = right.module?.order ?? Number.MAX_SAFE_INTEGER
+    return leftModuleOrder - rightModuleOrder || left.order - right.order
+  })
   if (!lessons.length) throw new AccessError('Course has no lessons', 409)
   const [completionFlags, submissions, histories] = await Promise.all([
     Promise.all(lessons.map(lesson => lessonCompleted(userId, lesson.id))),
@@ -69,16 +78,30 @@ export async function getCourseProgress(userId: string, courseId: string) {
   const lessonProgress = lessons.map((lesson, index) => {
     const history = historyByLesson.get(lesson.id)
     const completed = completionFlags[index]
-    return { ...lesson, completed, watchTime: history?.watchTime || 0, totalTime: history?.totalTime || 0,
-      progressPercent: completed ? 100 : history?.totalTime ? Math.min(99, Math.round(history.watchTime / history.totalTime * 100)) : 0,
+    const totalTime = history?.totalTime || lesson.duration || (lesson.durationMin || 0) * 60
+    const watchTime = Math.min(history?.watchTime || 0, totalTime || Number.MAX_SAFE_INTEGER)
+    const progressPercent = completed
+      ? 100
+      : totalTime > 0
+        ? Math.min(99, Math.round(watchTime / totalTime * 100))
+        : 0
+    return { ...lesson, completed, watchTime, totalTime, progressPercent,
       lastWatched: history?.updatedAt || null }
   })
   const completedLessons = lessonProgress.filter(lesson => lesson.completed).length
   const finalExamPassed = lessonProgress.filter(lesson => lesson.isFinalExam).every(lesson => lesson.completed)
   const allQuizzesPassed = quizzes.every(quiz => passedQuizIds.has(quiz.id))
-  const percentage = Math.round(completedLessons / lessons.length * 100)
+  const percentage = Math.round(lessonProgress.reduce((total, lesson) => total + lesson.progressPercent, 0) / lessons.length)
+  const videoLessons = lessonProgress.filter(lesson => lesson.lessonType === 'VIDEO')
+  const totalVideoDuration = videoLessons.reduce((total, lesson) => total + lesson.totalTime, 0)
+  const watchedDuration = videoLessons.reduce((total, lesson) => total + lesson.watchTime, 0)
+  const nextLesson = lessonProgress.find(lesson => !lesson.completed) || null
   return { completedLessons, totalLessons: lessons.length, percentage, finalExamPassed, allQuizzesPassed,
-    isComplete: completedLessons === lessons.length && finalExamPassed && allQuizzesPassed, lessons: lessonProgress }
+    isComplete: completedLessons === lessons.length && finalExamPassed && allQuizzesPassed,
+    nextLessonId: nextLesson?.id || null,
+    totalVideoDuration,
+    watchedDuration,
+    lessons: lessonProgress }
 }
 
 export async function recordVideoProgress(userId: string, lessonId: string, reportedTime: number, rawEvidence?: VideoProgressEvidence) {

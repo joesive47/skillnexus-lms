@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
+import Link from 'next/link'
+import { useRef, useState } from 'react'
 import { SecureVideoPlayer } from './SecureVideoPlayer'
 import { updateLessonProgress } from '@/lib/course-progress'
 import type { VideoProgressEvidence } from '@/lib/video-presence'
@@ -15,6 +16,7 @@ interface VideoPlayerWrapperProps {
   initialCompleted?: boolean
   requiredWatchPercentage?: number
   isFinalExam?: boolean
+  nextLesson?: { href: string; title: string }
 }
 
 export function VideoPlayerWrapper({
@@ -25,8 +27,10 @@ export function VideoPlayerWrapper({
   initialCompleted = false,
   requiredWatchPercentage = 85,
   isFinalExam = false,
+  nextLesson,
 }: VideoPlayerWrapperProps) {
   const completionAnnouncedRef = useRef(initialCompleted)
+  const [isCompleted, setIsCompleted] = useState(initialCompleted)
 
   const handleHeartbeat = async (watchedTime: number, totalTime: number, evidence: VideoProgressEvidence) => {
     try {
@@ -39,6 +43,7 @@ export function VideoPlayerWrapper({
       const completed = !!(result.watchHistory?.completed || result.courseComplete)
       if (completed && !completionAnnouncedRef.current) {
         completionAnnouncedRef.current = true
+        setIsCompleted(true)
         toast.success('ผ่านเกณฑ์การเรียนวิดีโอแล้ว', {
           description: 'ระบบตรวจสอบเวลาเรียนและบันทึกความก้าวหน้าเรียบร้อย',
         })
@@ -69,8 +74,16 @@ export function VideoPlayerWrapper({
       />
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>🔒 ป้องกันการข้ามวิดีโอและบังคับความเร็ว 1x</span>
-        <span>เวลาเรียนจะหยุดเมื่อออกจากหน้าจอ</span>
+        <span>ตำแหน่งเรียนบันทึกอัตโนมัติ และหยุดนับเวลาเมื่อออกจากหน้าจอ</span>
       </div>
+      {isCompleted && nextLesson && (
+        <Link
+          href={nextLesson.href}
+          className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+        >
+          เรียนบทถัดไป: {nextLesson.title}
+        </Link>
+      )}
     </div>
   )
 }

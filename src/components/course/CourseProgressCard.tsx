@@ -10,6 +10,7 @@ interface CourseProgressCardProps {
   totalVideoDuration?: number
   watchedDuration?: number
   courseName: string
+  progressPercentage?: number
 }
 
 export function CourseProgressCard({
@@ -17,9 +18,11 @@ export function CourseProgressCard({
   completedLessons,
   totalVideoDuration = 0,
   watchedDuration = 0,
-  courseName
+  courseName,
+  progressPercentage,
 }: CourseProgressCardProps) {
   const completionPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
+  const displayedProgress = progressPercentage ?? completionPercentage
   const watchPercentage = totalVideoDuration > 0 ? (watchedDuration / totalVideoDuration) * 100 : 0
 
   const formatDuration = (seconds: number) => {
@@ -37,8 +40,8 @@ export function CourseProgressCard({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>ความคืบหน้าการเรียน</span>
-          <Badge variant={completionPercentage === 100 ? "default" : "secondary"}>
-            {completionPercentage.toFixed(0)}%
+          <Badge variant={displayedProgress === 100 ? "default" : "secondary"}>
+            {displayedProgress.toFixed(0)}%
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -48,7 +51,7 @@ export function CourseProgressCard({
             <span>บทเรียนที่เสร็จสิ้น</span>
             <span>{completedLessons}/{totalLessons} บทเรียน</span>
           </div>
-          <Progress value={completionPercentage} className="h-2" />
+          <Progress value={displayedProgress} className="h-2" />
         </div>
 
         {totalVideoDuration > 0 && (
@@ -64,7 +67,7 @@ export function CourseProgressCard({
           </div>
         )}
 
-        {completionPercentage === 100 && (
+        {displayedProgress === 100 && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <p className="text-green-800 text-sm font-medium">
               🎉 ยินดีด้วย! คุณเรียนจบคอร์ส "{courseName}" แล้ว

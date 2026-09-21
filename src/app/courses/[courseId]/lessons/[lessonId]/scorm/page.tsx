@@ -5,6 +5,7 @@ import { ScormWithVideoCheck } from '@/components/scorm/scorm-with-video-check'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { requirePreviousLessons } from '@/lib/learning-evidence'
 
 interface ScormLessonPageProps {
   params: Promise<{
@@ -33,6 +34,9 @@ export default async function ScormLessonPage({ params }: ScormLessonPageProps) 
   if (!lesson) {
     redirect('/courses')
   }
+  if (lesson.courseId !== courseId) {
+    redirect(`/courses/${courseId}`)
+  }
 
   // Check if user is enrolled
   const enrollment = await prisma.enrollment.findUnique({
@@ -46,6 +50,14 @@ export default async function ScormLessonPage({ params }: ScormLessonPageProps) 
 
   if (!enrollment && session.user.role !== 'ADMIN') {
     redirect(`/courses/${courseId}`)
+  }
+
+  if (session.user.role === 'STUDENT') {
+    try {
+      await requirePreviousLessons(session.user.id, lessonId)
+    } catch {
+      redirect(`/courses/${courseId}`)
+    }
   }
 
   if (!lesson.scormPackage) {

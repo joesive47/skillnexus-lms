@@ -14,6 +14,7 @@ import { ScormFullscreenWrapper } from '@/components/scorm/scorm-fullscreen-wrap
 import Link from 'next/link'
 import { ProgressIndicator } from '@/components/learning-flow'
 import { LayoutDashboard } from 'lucide-react'
+import { requirePreviousLessons } from '@/lib/learning-evidence'
 
 interface LessonPageProps {
   params: Promise<{ courseId: string; lessonId: string }>
@@ -92,6 +93,17 @@ export default async function LessonPage({ params }: LessonPageProps) {
     redirect(`/courses/${courseId}`)
   }
 
+  // Students progress through the course in sequence. The server action also
+  // enforces this rule, but checking before rendering prevents deep links from
+  // exposing a locked lesson.
+  if (session.user.role === 'STUDENT') {
+    try {
+      await requirePreviousLessons(session.user.id, lessonId)
+    } catch {
+      redirect(`/courses/${courseId}`)
+    }
+  }
+
   const watchHistory = lesson.watchHistory[0]
   const youtubeId = extractYouTubeID(lesson.youtubeUrl || '')
 
@@ -108,6 +120,16 @@ export default async function LessonPage({ params }: LessonPageProps) {
     }
   })
   const nodeProgress = learningNode?.progress[0]
+  const orderedCourseLessons = (await prisma.lesson.findMany({
+    where: { courseId },
+    select: { id: true, title: true, order: true, module: { select: { order: true } } },
+  })).sort((left, right) => {
+    const leftModuleOrder = left.module?.order ?? Number.MAX_SAFE_INTEGER
+    const rightModuleOrder = right.module?.order ?? Number.MAX_SAFE_INTEGER
+    return leftModuleOrder - rightModuleOrder || left.order - right.order
+  })
+  const currentLessonIndex = orderedCourseLessons.findIndex(item => item.id === lesson.id)
+  const nextLesson = currentLessonIndex >= 0 ? orderedCourseLessons[currentLessonIndex + 1] : null
 
   // If SCORM lesson, use fullscreen layout
   if (lesson.lessonType === 'SCORM' && lesson.scormPackage) {
@@ -187,6 +209,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
               initialProgress={watchHistory?.watchTime || 0}
               initialCompleted={watchHistory?.completed || false}
               requiredWatchPercentage={lesson.requiredCompletionPercentage || 80}
+              nextLesson={nextLesson ? {
+                href: `/courses/${courseId}/lessons/${nextLesson.id}`,
+                title: nextLesson.title || 'บทเรียนถัดไป',
+              } : undefined}
             />
           ) : lesson.lessonType === 'INTERACTIVE' && lesson.launchUrl ? (
             <InteractivePlayer

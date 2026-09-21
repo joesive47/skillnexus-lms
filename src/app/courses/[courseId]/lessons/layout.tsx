@@ -4,6 +4,7 @@ import { SidebarNav } from '@/components/classroom/sidebar-nav'
 import { TopBar } from '@/components/classroom/top-bar'
 import { redirect } from 'next/navigation'
 import { extractYouTubeID } from '@/lib/youtube'
+import { getCourseProgress } from '@/lib/learning-evidence'
 
 interface ClassroomLayoutProps {
   children: React.ReactNode
@@ -57,23 +58,38 @@ export default async function ClassroomLayout({ children, params }: ClassroomLay
     }
   })
 
+  const learnerProgress = session.user.role === 'STUDENT'
+    ? await getCourseProgress(session.user.id, courseId).catch(() => null)
+    : null
+  const progressByLesson = new Map(learnerProgress?.lessons.map(lesson => [lesson.id, lesson]) || [])
+  const lessonSequence = [
+    ...course.modules.flatMap(module => module.lessons.map(lesson => lesson.id)),
+    ...lessonsWithoutModule.map(lesson => lesson.id),
+  ]
+  const isLessonLocked = (lessonId: string) => {
+    if (session.user.role !== 'STUDENT') return false
+    const position = lessonSequence.indexOf(lessonId)
+    return position > 0 && lessonSequence.slice(0, position).some(id => !progressByLesson.get(id)?.completed)
+  }
+
   // Transform modules
   const sections = course.modules.map(module => ({
     id: module.id,
     title: module.title,
     order: module.order,
-    lessons: module.lessons.map((lesson) => {
-      const watchHistory = lesson.watchHistory[0]
+      lessons: module.lessons.map((lesson) => {
+        const watchHistory = lesson.watchHistory[0]
+        const progress = progressByLesson.get(lesson.id)
       
-      return {
+        return {
         id: lesson.id,
         title: lesson.title || `Lesson ${lesson.order}`,
         type: lesson.lessonType as 'VIDEO' | 'QUIZ' | 'SCORM' | 'INTERACTIVE',
         order: lesson.order,
         youtubeId: extractYouTubeID(lesson.youtubeUrl || '') || undefined,
-        isLocked: false,
-        isCompleted: watchHistory?.completed || false,
-        progress: watchHistory?.watchTime || 0
+        isLocked: isLessonLocked(lesson.id),
+        isCompleted: progress?.completed ?? watchHistory?.completed ?? false,
+        progress: progress?.watchTime ?? watchHistory?.watchTime ?? 0
       }
     })
   }))
@@ -86,6 +102,7 @@ export default async function ClassroomLayout({ children, params }: ClassroomLay
       order: 999,
       lessons: lessonsWithoutModule.map((lesson) => {
         const watchHistory = lesson.watchHistory[0]
+        const progress = progressByLesson.get(lesson.id)
         
         return {
           id: lesson.id,
@@ -93,9 +110,9 @@ export default async function ClassroomLayout({ children, params }: ClassroomLay
           type: lesson.lessonType as 'VIDEO' | 'QUIZ' | 'SCORM' | 'INTERACTIVE',
           order: lesson.order,
           youtubeId: extractYouTubeID(lesson.youtubeUrl || '') || undefined,
-          isLocked: false,
-          isCompleted: watchHistory?.completed || false,
-          progress: watchHistory?.watchTime || 0
+          isLocked: isLessonLocked(lesson.id),
+          isCompleted: progress?.completed ?? watchHistory?.completed ?? false,
+          progress: progress?.watchTime ?? watchHistory?.watchTime ?? 0
         }
       })
     })
