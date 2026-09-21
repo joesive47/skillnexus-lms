@@ -171,6 +171,11 @@
   },
   "overrides": {
     "sharp": "$sharp",
-    "protobufjs": "^7.6.3"
+    "protobufjs": "^7.6.3",
+    "@humanfs/node": "0.17.0",
+    "fflate": "0.8.3",
+    "next": {
+      "postcss": "8.5.26"
+    }
   }
 }

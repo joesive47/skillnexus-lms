@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Award, Calendar, FileText, Download, ShieldCheck, Library } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { auth } from '@/auth'
 import { verifyCertificateSignature } from '@/lib/certificate-signature'
 import QRCode from 'qrcode'
 
@@ -37,7 +38,7 @@ async function getCertificate(certificateId: string) {
 
 export default async function CertificatePage({ params }: CertificatePageProps) {
   const { certificateId } = await params
-  const certificate = await getCertificate(certificateId)
+  const [certificate, session] = await Promise.all([getCertificate(certificateId), auth()])
 
   if (!certificate) {
     notFound()
@@ -50,6 +51,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
   const verifyUrl = `/certificates/verify/${certificate.verificationToken}`
   const baseUrl = (process.env.NEXT_PUBLIC_URL || process.env.AUTH_URL || 'https://www.uppowerskill.com').replace(/\/$/, '')
   const qrCodeUrl = await QRCode.toDataURL(`${baseUrl}${verifyUrl}`)
+  const hasStudentLibrary = session?.user?.role === 'STUDENT'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12">
@@ -67,7 +69,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                 Certificate of Completion
               </CardTitle>
               <p className="text-blue-100">
-                SkillNexus Learning Management System
+                upPowerSkill Learning Platform
               </p>
             </CardHeader>
             
@@ -129,7 +131,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                   <div className="flex justify-between items-end max-w-md mx-auto">
                     <div className="text-center">
                       <div className="w-32 h-px bg-gray-400 mb-2"></div>
-                      <p className="text-sm font-medium">SkillNexus</p>
+                      <p className="text-sm font-medium">upPowerSkill</p>
                       <p className="text-xs text-muted-foreground">Learning Platform</p>
                     </div>
                     <div className="text-center">
@@ -162,9 +164,9 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/certificates">
+              <Link href={hasStudentLibrary ? '/dashboard/certificates' : '/courses'}>
                 <Library className="w-4 h-4 mr-2" />
-                คลังใบประกาศของฉัน
+                {hasStudentLibrary ? 'คลังใบประกาศของฉัน' : 'ดูหลักสูตร'}
               </Link>
             </Button>
           </div>
@@ -179,11 +181,11 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                   Visit our verification portal or contact us for authentication.
                 </p>
                 <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-                  <span>Issued by: SkillNexus LMS</span>
+                  <span>Issued by: upPowerSkill LMS</span>
                   <span>•</span>
                   <span>Verification ID: {certificate.verificationToken}</span>
                   <span>•</span>
-                  <span>Blockchain Verified</span>
+                  <span>Digitally signed &amp; database verified</span>
                 </div>
               </div>
             </CardContent>

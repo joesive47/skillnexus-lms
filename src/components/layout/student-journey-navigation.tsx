@@ -18,9 +18,10 @@ export function StudentJourneyNavigation() {
   const isStudent = session?.user?.role === 'STUDENT'
   const isPublicEntry = pathname === '/' || pathname === '/login' || pathname === '/register'
   const isStudentDashboard = pathname === '/student/dashboard'
+  const usesStudentSidebar = pathname.startsWith('/student/')
   const isClassroom = /^\/courses\/[^/]+\/lessons(?:\/|$)/.test(pathname)
 
-  if (status !== 'authenticated' || !isStudent || isPublicEntry || isStudentDashboard) {
+  if (status !== 'authenticated' || !isStudent || isPublicEntry || isStudentDashboard || usesStudentSidebar) {
     return null
   }
 

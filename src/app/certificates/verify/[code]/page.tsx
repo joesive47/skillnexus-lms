@@ -143,7 +143,7 @@ export default async function VerifyCertificatePage({ params }: VerifyPageProps)
               <div className="text-center pb-4 border-b">
                 <Award className="h-16 w-16 mx-auto mb-4 text-blue-600" />
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">Certificate of Completion</h2>
-                <p className="text-gray-500">SkillNexus Learning Management System</p>
+                <p className="text-gray-500">upPowerSkill Learning Platform</p>
               </div>
 
               <div className="bg-blue-50 rounded-lg p-6">
@@ -198,7 +198,7 @@ export default async function VerifyCertificatePage({ params }: VerifyPageProps)
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
                       <p className="font-semibold text-green-900">Verified & Valid</p>
-                      <p className="text-sm text-green-700 mt-1">This certificate is authentic and was issued by SkillNexus.</p>
+                      <p className="text-sm text-green-700 mt-1">This certificate is authentic and was issued by upPowerSkill.</p>
                     </div>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ export default async function VerifyCertificatePage({ params }: VerifyPageProps)
 
               {isValid ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-sm text-green-800">✓ This certificate is valid and was issued by SkillNexus.</p>
+                  <p className="text-sm text-green-800">✓ This certificate is valid and was issued by upPowerSkill.</p>
                 </div>
               ) : (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">

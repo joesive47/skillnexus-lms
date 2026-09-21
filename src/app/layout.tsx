@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://skillnexus.vercel.app'),
+  metadataBase: new URL('https://www.uppowerskill.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'upPowerSkill - AI-Powered Learning Management System',
     description: 'แพลตฟอร์มการเรียนรู้ที่ขับเคลื่อนด้วย AI ระดับองค์กร',
-    url: 'https://skillnexus.vercel.app',
+    url: 'https://www.uppowerskill.com',
     siteName: 'upPowerSkill',
     images: [
       {
@@ -51,9 +51,6 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  verification: {
-    google: 'your-google-verification-code',
   },
 }
 

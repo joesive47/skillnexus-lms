@@ -29,6 +29,8 @@ const NotificationCenter = dynamic(
 export default function GlobalWidgets() {
   const pathname = usePathname()
   const isPublicEntry = pathname === '/' || pathname === '/login' || pathname === '/register'
+  const isPublicCertificate = pathname.startsWith('/certificates/')
+  const isSkillAssessment = pathname.startsWith('/skills-assessment')
 
   // Authentication and marketing pages should stay lightweight. These widgets
   // load chatbot/notification bundles and may poll session APIs even though the
@@ -39,26 +41,32 @@ export default function GlobalWidgets() {
     <>
       <StudentJourneyNavigation />
 
-      {/* Notification Center - Fixed Position Top Right */}
-      <div className="fixed top-4 right-4 z-[9999]">
-        <Suspense fallback={null}>
-          <NotificationCenter />
-        </Suspense>
-      </div>
+      {!isPublicCertificate && (
+        <>
+          {/* Notification Center - Fixed Position Top Right */}
+          <div className="fixed top-4 right-4 z-[9999]">
+            <Suspense fallback={null}>
+              <NotificationCenter />
+            </Suspense>
+          </div>
 
-      {/* Skill Assessment Button - Fixed Position */}
-      <Link
-        href="/skills-assessment"
-        className="fixed bottom-6 right-24 z-[9998] w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
-        title="ทดสอบทักษะ"
-      >
-        <span className="text-xl">🎯</span>
-      </Link>
+          {/* Do not show a second link while the learner is already on this page. */}
+          {!isSkillAssessment && (
+            <Link
+              href="/skills-assessment"
+              className="fixed bottom-6 right-24 z-[9998] w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
+              title="ทดสอบทักษะ"
+            >
+              <span className="text-xl">🎯</span>
+            </Link>
+          )}
 
-      {/* Chatbot Widget - Always visible */}
-      <Suspense fallback={null}>
-        <UnifiedChatWidget />
-      </Suspense>
+          {/* Chatbot Widget - Available inside the LMS, not on public verification pages. */}
+          <Suspense fallback={null}>
+            <UnifiedChatWidget />
+          </Suspense>
+        </>
+      )}
     </>
   )
 }

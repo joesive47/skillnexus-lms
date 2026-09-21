@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
   BookOpen, Award, TrendingUp, Search,
-  Users, Target, Home, Menu, X, GraduationCap,
+  Home, Menu, X, GraduationCap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,9 +14,7 @@ const menuItems = [
   { icon: BookOpen,   label: 'หลักสูตรของฉัน',   href: '/student/courses' },
   { icon: Search,     label: 'ค้นหาหลักสูตร',    href: '/courses' },
   { icon: Award,      label: 'ใบรับรอง',         href: '/dashboard/certificates' },
-  { icon: Target,     label: 'เส้นทางการเรียน',  href: '/learning-paths' },
   { icon: TrendingUp, label: 'ประเมินทักษะ',      href: '/skills-assessment' },
-  { icon: Users,      label: 'กลุ่มเรียน',        href: '/social-learning' },
 ];
 
 export function StudentSidebar() {
