@@ -25,7 +25,7 @@ export default function WelcomePage() {
       let targetPath = '/dashboard' // Default for STUDENT
 
       if (role === 'ADMIN') {
-        targetPath = '/admin/dashboard'
+        targetPath = '/dashboard/admin'
       } else if (role === 'TEACHER') {
         targetPath = '/teacher/dashboard'
       }

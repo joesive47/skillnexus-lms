@@ -110,7 +110,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
   return (
     <div className="container mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold">Learner Care Report</h1>
         <LogoutButton />
       </div>
       

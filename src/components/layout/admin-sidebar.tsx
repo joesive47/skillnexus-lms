@@ -11,12 +11,13 @@ import {
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { icon: BarChart, label: 'Dashboard', href: '/admin/dashboard' },
+  { icon: BarChart, label: 'Dashboard', href: '/dashboard/admin' },
   { icon: Users, label: 'Users', href: '/dashboard/admin/users' },
   { icon: BookOpen, label: 'Courses', href: '/dashboard/admin/courses' },
   { icon: Tags, label: 'Course Categories', href: '/dashboard/admin/course-categories' },
   { icon: Activity, label: 'Course Analytics', href: '/admin/course-analytics' },
   { icon: TrendingUp, label: 'Learning Intelligence', href: '/dashboard/admin/analytics' },
+  { icon: Users, label: 'Learner Care', href: '/admin/dashboard' },
   { icon: FileText, label: 'Quizzes', href: '/dashboard/admin/quizzes' },
   { icon: Package, label: 'SCORM', href: '/dashboard/admin/scorm' },
   { icon: Award, label: 'Certifications', href: '/admin/certifications' },
