@@ -1,4 +1,6 @@
 import { jsPDF } from 'jspdf'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 interface CertificateData {
   userName: string
@@ -7,6 +9,30 @@ interface CertificateData {
   issuedDate: string
   bardData?: string
   qrCodeUrl?: string
+}
+
+const certificateAsset = (filename: string) => join(process.cwd(), 'public', filename)
+
+function registerCertificateFont(doc: jsPDF) {
+  try {
+    const fontData = readFileSync(certificateAsset('fonts/NotoSansThai-Variable.ttf')).toString('base64')
+    doc.addFileToVFS('NotoSansThai-Variable.ttf', fontData)
+    doc.addFont('NotoSansThai-Variable.ttf', 'NotoSansThai', 'normal', 'Identity-H')
+    return 'NotoSansThai'
+  } catch (error) {
+    console.error('Certificate Thai font could not be loaded:', error)
+    return 'helvetica'
+  }
+}
+
+function loadAuthorizedSeal() {
+  try {
+    const seal = readFileSync(certificateAsset('branding/uppowerskill-authorized-seal-320.png')).toString('base64')
+    return `data:image/png;base64,${seal}`
+  } catch (error) {
+    console.error('Certificate authorization seal could not be loaded:', error)
+    return null
+  }
 }
 
 export async function generateCertificatePDF(data: CertificateData): Promise<ArrayBuffer> {
@@ -18,6 +44,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
 
   const W = 297 // A4 landscape width
   const H = 210 // A4 landscape height
+  const contentFont = registerCertificateFont(doc)
 
   // ── Background gradient simulation ──────────────────────────────
   doc.setFillColor(245, 248, 255)
@@ -51,11 +78,11 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
   // ── Logo area ────────────────────────────────────────────────────
   doc.setFontSize(11)
   doc.setTextColor(30, 64, 175)
-  doc.setFont('helvetica', 'bold')
+  doc.setFont(contentFont, 'normal')
   doc.text('upPowerSkill', W / 2, 26, { align: 'center' })
 
   doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(100, 116, 139)
   doc.text('AI-Powered Learning Platform', W / 2, 32, { align: 'center' })
 
@@ -66,19 +93,19 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
 
   // ── Main title ───────────────────────────────────────────────────
   doc.setFontSize(28)
-  doc.setFont('helvetica', 'bold')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(30, 64, 175)
   doc.text('Certificate of Completion', W / 2, 55, { align: 'center' })
 
   // ── Subtitle ─────────────────────────────────────────────────────
   doc.setFontSize(11)
-  doc.setFont('helvetica', 'normal')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(100, 116, 139)
   doc.text('This is to certify that', W / 2, 66, { align: 'center' })
 
   // ── Recipient name ───────────────────────────────────────────────
   doc.setFontSize(26)
-  doc.setFont('helvetica', 'bold')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(15, 23, 42) // slate-900
 
   // Underline effect
@@ -91,13 +118,13 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
 
   // ── Course label ─────────────────────────────────────────────────
   doc.setFontSize(11)
-  doc.setFont('helvetica', 'normal')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(100, 116, 139)
   doc.text('has successfully completed the course', W / 2, 95, { align: 'center' })
 
   // ── Course name ──────────────────────────────────────────────────
   doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(30, 64, 175)
 
   // Word wrap for long course names
@@ -119,7 +146,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(71, 85, 105)
   doc.text('ISSUED AT (ICT)', 80, infoY, { align: 'center' })
-  doc.setFont('helvetica', 'normal')
+  doc.setFont(contentFont, 'normal')
   doc.setFontSize(10)
   doc.setTextColor(15, 23, 42)
   doc.text(data.issuedDate, 80, infoY + 6, { align: 'center' })
@@ -136,16 +163,17 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Arr
 
   // Signature area (right)
   doc.setFontSize(9)
-  doc.setFont('helvetica', 'bold')
+  doc.setFont(contentFont, 'normal')
   doc.setTextColor(71, 85, 105)
   doc.text('AUTHORIZED BY', W - 80, infoY, { align: 'center' })
-  doc.setDrawColor(100, 116, 139)
-  doc.setLineWidth(0.4)
-  doc.line(W - 110, infoY + 8, W - 50, infoY + 8)
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8)
-  doc.setTextColor(100, 116, 139)
-  doc.text('upPowerSkill Team', W - 80, infoY + 13, { align: 'center' })
+  const authorizedSeal = loadAuthorizedSeal()
+  if (authorizedSeal) {
+    doc.addImage(authorizedSeal, 'PNG', W - 89, infoY + 2, 18, 18)
+    doc.setFont(contentFont, 'normal')
+    doc.setFontSize(7.5)
+    doc.setTextColor(71, 85, 105)
+    doc.text('upPowerSkill', W - 80, infoY + 24, { align: 'center' })
+  }
 
   // ── QR code (if available) ───────────────────────────────────────
   if (data.qrCodeUrl && data.qrCodeUrl.startsWith('data:image')) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,6 +54,8 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
     }>
   } | null>(null)
   const router = useRouter()
+  const submissionRef = useRef<Promise<void> | null>(null)
+  const submittedRef = useRef(false)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
   useEffect(() => {
     if (!quiz.expiresAt || showResults) return
@@ -79,10 +81,7 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
     }
   }
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true)
-    
-    try {
+  const submitOnce = async () => {
       const response = await fetch('/api/quiz/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,28 +93,66 @@ export function QuizComponent({ quiz, lessonId, courseId, userId, isFinalExam = 
         })
       })
 
+      const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        const failure = await response.json()
-        throw new Error(failure.error || 'Failed to submit quiz')
+        const error = new Error(
+          payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
+            ? payload.error
+            : 'Failed to submit quiz'
+        ) as Error & { status?: number }
+        error.status = response.status
+        throw error
       }
-      if (response.ok) {
-        const result = await response.json()
+      return payload
+  }
+
+  const handleSubmit = async () => {
+    // A quiz session is idempotent on the server. Retain one in-flight request
+    // in the browser too, so one click always owns the submission.
+    if (submittedRef.current || submissionRef.current) return
+    setIsSubmitting(true)
+
+    const submission = (async () => {
+      try {
+        let result: any
+        try {
+          result = await submitOnce()
+        } catch (error) {
+          const status = error instanceof Error && 'status' in error ? Number(error.status) : null
+          if (status !== null && status < 500) throw error
+          // A completed database transaction can outlive a transient response
+          // failure. Retry once with the same attempt ID and immediately read
+          // its idempotent result instead of asking the learner to click again.
+          await new Promise(resolve => window.setTimeout(resolve, 350))
+          result = await submitOnce()
+        }
+        if (!result || typeof result !== 'object') throw new Error('Quiz result was not returned')
         setScore(result.score)
         setQuizResults(result)
         setShowResults(true)
-        
-        // Show success only after the server has created a real certificate.
-        if (isFinalExam && result.passed && result.certificate) {
+
+        submittedRef.current = true
+        // Refresh the classroom shell after persisting the result so the next
+        // lesson unlocks without a browser refresh. The current result stays
+        // visible because this client component retains its local state.
+        window.setTimeout(() => router.refresh(), 0)
+
+        // Certificate issuance is retried independently by the dialog. Score
+        // feedback must never wait for that secondary operation.
+        if (isFinalExam && result.passed) {
           setTimeout(() => {
             setShowCertificateDialog(true)
           }, 1000) // รอ 1 วินาทีให้เห็นผลคะแนนก่อน
         }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to submit quiz')
+      } finally {
+        setIsSubmitting(false)
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to submit quiz')
-    } finally {
-      setIsSubmitting(false)
-    }
+    })()
+    submissionRef.current = submission
+    await submission
+    submissionRef.current = null
   }
 
   const currentQ = quiz.questions[currentQuestion]

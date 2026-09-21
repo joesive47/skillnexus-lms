@@ -94,6 +94,10 @@ const nextConfig = {
   }),
   ...(process.env.NODE_ENV === 'production' && {
     outputFileTracingRoot: process.cwd(),
+    outputFileTracingIncludes: {
+      '/api/certificates/download/[id]': ['./public/fonts/NotoSansThai-Variable.ttf', './public/branding/uppowerskill-authorized-seal-320.png'],
+      '/api/certificates/[certificateId]/download': ['./public/fonts/NotoSansThai-Variable.ttf', './public/branding/uppowerskill-authorized-seal-320.png'],
+    },
   }),
 }
 

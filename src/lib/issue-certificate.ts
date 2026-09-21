@@ -49,6 +49,10 @@ export async function issueCertificateOnCompletion(userId: string, courseId: str
     return await issueVerifiedCertificate(userId, courseId)
   } catch (error) {
     if (error instanceof AccessError && error.status === 409) return null
-    throw error
+    // Certificates are a follow-up to a completed learning event. A temporary
+    // signing, QR, or storage failure must never discard the learner's score
+    // or make the quiz appear to require another submission.
+    console.error('Automatic certificate issuance was deferred:', error)
+    return null
   }
 }

@@ -133,9 +133,13 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                       <p className="text-xs text-muted-foreground">Learning Platform</p>
                     </div>
                     <div className="text-center">
-                      <div className="w-32 h-px bg-gray-400 mb-2"></div>
-                      <p className="text-sm font-medium">Authorized Signature</p>
-                      <p className="text-xs text-muted-foreground">Certificate Authority</p>
+                      <img
+                        src="/branding/uppowerskill-authorized-seal-320.png"
+                        alt="upPowerSkill authorized seal"
+                        className="mx-auto mb-1 h-16 w-16 object-contain"
+                      />
+                      <p className="text-sm font-medium">Authorized by upPowerSkill</p>
+                      <p className="text-xs text-muted-foreground">Digital Certificate Authority</p>
                     </div>
                   </div>
                 </div>
