@@ -38,6 +38,7 @@ export function ScormPlayer({
   const [extractionError, setExtractionError] = useState<string | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const blobUrlsRef = useRef<string[]>([])
+  const cmiDataRef = useRef<Record<string, string>>({})
 
   // Extract ZIP if packagePath is a .zip file
   useEffect(() => {
@@ -183,6 +184,25 @@ export function ScormPlayer({
       if (response.ok) {
         const data = await response.json()
         if (data.progress) {
+          try {
+            const stored = typeof data.progress.cmiData === 'string'
+              ? JSON.parse(data.progress.cmiData)
+              : data.progress.cmiData
+            if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
+              cmiDataRef.current = Object.fromEntries(
+                Object.entries(stored).flatMap(([key, value]) =>
+                  typeof value === 'string' || typeof value === 'number'
+                    ? [[key, String(value)]]
+                    : []
+                )
+              )
+            }
+          } catch {
+            // Older SCORM records may contain malformed legacy CMI JSON.
+            cmiDataRef.current = {}
+          }
+          cmiDataRef.current['cmi.core.lesson_status'] ||= data.progress.completionStatus || 'incomplete'
+          cmiDataRef.current['cmi.core.score.raw'] ||= data.progress.scoreRaw?.toString() || ''
           setProgress(data.progress.scoreRaw || 0)
           setCompletionStatus(data.progress.completionStatus || 'incomplete')
           setScore(data.progress.scoreRaw)
@@ -193,7 +213,7 @@ export function ScormPlayer({
     }
   }
 
-  async function saveProgress(cmiData: any) {
+  async function saveProgress(cmiData: Record<string, string>) {
     try {
       await fetch('/api/scorm/progress', {
         method: 'POST',
@@ -213,9 +233,10 @@ export function ScormPlayer({
         setProgress(parseFloat(cmiData['cmi.score.raw']))
       }
 
-      if (cmiData['cmi.completion_status']) {
-        setCompletionStatus(cmiData['cmi.completion_status'])
-        if (cmiData['cmi.completion_status'] === 'completed') {
+      const completion = cmiData['cmi.completion_status'] || cmiData['cmi.core.lesson_status']
+      if (completion) {
+        setCompletionStatus(completion)
+        if (completion === 'completed' || completion === 'passed') {
           // Handle completion internally
           console.log('SCORM lesson completed!')
           onComplete?.()
@@ -236,26 +257,28 @@ export function ScormPlayer({
       // Provide SCORM API to the content
       iframe.API = {
         LMSInitialize: () => 'true',
-        LMSFinish: () => 'true',
         LMSGetValue: (element: string) => {
-          // Return stored values based on element
-          switch (element) {
-            case 'cmi.completion_status':
-              return completionStatus
-            case 'cmi.score.raw':
-              return score?.toString() || ''
-            default:
-              return ''
-          }
+          if (element in cmiDataRef.current) return cmiDataRef.current[element]
+          if (element === 'cmi.completion_status') return completionStatus
+          if (element === 'cmi.score.raw') return score?.toString() || ''
+          return ''
         },
         LMSSetValue: (element: string, value: string) => {
-          // Handle setting values
-          const cmiData: any = {}
-          cmiData[element] = value
-          saveProgress(cmiData)
+          // A SCORM player sets several fields before it commits. Keep the
+          // complete CMI snapshot locally, then persist that atomic snapshot
+          // on LMSCommit/LMSFinish so concurrent field writes cannot erase a
+          // completed status or score.
+          cmiDataRef.current[element] = String(value)
           return 'true'
         },
-        LMSCommit: () => 'true',
+        LMSCommit: () => {
+          void saveProgress({ ...cmiDataRef.current })
+          return 'true'
+        },
+        LMSFinish: () => {
+          void saveProgress({ ...cmiDataRef.current })
+          return 'true'
+        },
         LMSGetLastError: () => '0',
         LMSGetErrorString: () => '',
         LMSGetDiagnostic: () => ''
