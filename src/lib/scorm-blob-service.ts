@@ -226,12 +226,23 @@ export class ScormService {
           const metadata = manifest.metadata?.[0] || {}
           const organizations = manifest.organizations?.[0] || {}
           const resources = manifest.resources?.[0] || {}
+          const textValue = (value: unknown): string | null => {
+            if (typeof value === 'string') return value.trim() || null
+            if (Array.isArray(value)) return textValue(value[0])
+            if (value && typeof value === 'object' && '_' in value) {
+              return textValue((value as { _: unknown })._)
+            }
+            return null
+          }
+          const title = textValue(
+            metadata['lom:lom']?.[0]?.['lom:general']?.[0]?.['lom:title']?.[0]?.['lom:string']?.[0]
+          )
+          const version = textValue(metadata.schemaversion?.[0]) || manifest.$?.version || '1.2'
 
           const scormManifest: ScormManifest = {
             identifier: manifest.$?.identifier || 'unknown',
-            title: metadata['lom:lom']?.[0]?.['lom:general']?.[0]?.['lom:title']?.[0]?.['lom:string']?.[0] || 
-                   manifest.$?.identifier || 'SCORM Package',
-            version: manifest.$?.version || '1.2',
+            title: title || manifest.$?.identifier || 'SCORM Package',
+            version,
             organizations,
             resources
           }
