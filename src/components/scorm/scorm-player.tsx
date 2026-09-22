@@ -56,13 +56,13 @@ export function ScormPlayer({
       try {
         setIsLoading(true)
         setExtractionError(null)
-        const response = await fetch(`/api/learning-content/${lessonId}/launch`, { cache: 'no-store' })
+        const response = await fetch(`/learning-content/${lessonId}/launch`, { cache: 'no-store' })
         const data = await response.json()
         if (!response.ok || typeof data.launchPath !== 'string') {
           throw new Error(data.error || 'Failed to prepare SCORM package')
         }
         const launchPath = data.launchPath.split('/').map(encodeURIComponent).join('/')
-        if (!cancelled) setExtractedUrl(`/api/learning-content/${lessonId}/asset/${launchPath}`)
+        if (!cancelled) setExtractedUrl(`/learning-content/${lessonId}/asset/${launchPath}`)
       } catch (error) {
         console.error('Error extracting SCORM package:', error)
         if (!cancelled) {
@@ -86,7 +86,7 @@ export function ScormPlayer({
 
   async function loadProgress() {
     try {
-      const response = await fetch(`/api/learning-progress/scorm?lessonId=${lessonId}&userId=${userId}`)
+      const response = await fetch(`/learning-progress/scorm?lessonId=${lessonId}&userId=${userId}`)
       if (response.ok) {
         const data = await response.json()
         if (data.progress) {
@@ -121,7 +121,7 @@ export function ScormPlayer({
 
   async function saveProgress(cmiData: Record<string, string>) {
     try {
-      await fetch('/api/learning-progress/scorm', {
+      await fetch('/learning-progress/scorm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
