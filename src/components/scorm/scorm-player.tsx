@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import JSZip from 'jszip'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -37,11 +36,13 @@ export function ScormPlayer({
   const [extractedUrl, setExtractedUrl] = useState<string | null>(null)
   const [extractionError, setExtractionError] = useState<string | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const blobUrlsRef = useRef<string[]>([])
   const cmiDataRef = useRef<Record<string, string>>({})
 
-  // Extract ZIP if packagePath is a .zip file
+  // Serve archive assets from the LMS origin rather than asking the browser
+  // to download and unpack a ZIP. This preserves relative URLs in SCORM
+  // content and avoids browser filters that block binary archive requests.
   useEffect(() => {
+    let cancelled = false
     const isZipFile = packagePath.endsWith('.zip')
     
     if (!isZipFile) {
@@ -51,128 +52,32 @@ export function ScormPlayer({
       return
     }
 
-    // Extract ZIP from Vercel Blob Storage
-    async function extractScormPackage() {
+    async function prepareScormPackage() {
       try {
         setIsLoading(true)
         setExtractionError(null)
-
-        // Download via the LMS so Vercel Blob CORS/CSP policies cannot block
-        // a signed-in learner from opening an otherwise valid package.
-        const response = await fetch(`/api/learning-content/${lessonId}`, { cache: 'no-store' })
-        if (!response.ok) throw new Error('Failed to download SCORM package')
-        
-        const arrayBuffer = await response.arrayBuffer()
-        const zip = await JSZip.loadAsync(arrayBuffer)
-
-        // Find imsmanifest.xml to get launch file
-        const manifestFile = zip.file('imsmanifest.xml')
-        let launchFile = 'index.html' // default
-
-        if (manifestFile) {
-          const manifestContent = await manifestFile.async('string')
-          const parser = new DOMParser()
-          const xmlDoc = parser.parseFromString(manifestContent, 'text/xml')
-          const resourceElement = xmlDoc.querySelector('resource[href]')
-          if (resourceElement) {
-            launchFile = resourceElement.getAttribute('href') || 'index.html'
-          }
+        const response = await fetch(`/api/learning-content/${lessonId}/launch`, { cache: 'no-store' })
+        const data = await response.json()
+        if (!response.ok || typeof data.launchPath !== 'string') {
+          throw new Error(data.error || 'Failed to prepare SCORM package')
         }
-
-        // Extract all files and create blob URLs
-        const fileMap = new Map<string, string>()
-        const promises: Promise<void>[] = []
-
-        zip.forEach((relativePath, file) => {
-          if (!file.dir) {
-            const promise = file.async('blob').then((blob) => {
-              // Determine MIME type
-              let mimeType = 'application/octet-stream'
-              if (relativePath.endsWith('.html')) mimeType = 'text/html'
-              else if (relativePath.endsWith('.js')) mimeType = 'text/javascript'
-              else if (relativePath.endsWith('.css')) mimeType = 'text/css'
-              else if (relativePath.endsWith('.json')) mimeType = 'application/json'
-              else if (relativePath.endsWith('.xml')) mimeType = 'application/xml'
-              else if (relativePath.endsWith('.png')) mimeType = 'image/png'
-              else if (relativePath.endsWith('.jpg') || relativePath.endsWith('.jpeg')) mimeType = 'image/jpeg'
-              else if (relativePath.endsWith('.gif')) mimeType = 'image/gif'
-              else if (relativePath.endsWith('.svg')) mimeType = 'image/svg+xml'
-
-              const blobWithType = new Blob([blob], { type: mimeType })
-              const url = URL.createObjectURL(blobWithType)
-              fileMap.set(relativePath, url)
-              blobUrlsRef.current.push(url)
-            })
-            promises.push(promise)
-          }
-        })
-
-        await Promise.all(promises)
-
-        // Get launch URL
-        const launchUrl = fileMap.get(launchFile)
-        if (!launchUrl) {
-          throw new Error(`Launch file not found: ${launchFile}`)
-        }
-
-        // Inject base tag to handle relative URLs
-        const htmlBlob = await fetch(launchUrl).then(r => r.blob())
-        const htmlText = await htmlBlob.text()
-        
-        // Create modified HTML with base tag and file map
-        const modifiedHtml = htmlText.replace(
-          /<head>/i,
-          `<head>
-          <script>
-            // Map relative URLs to blob URLs
-            const fileMap = ${JSON.stringify(Object.fromEntries(fileMap))};
-            
-            // Override fetch to use blob URLs
-            const originalFetch = window.fetch;
-            window.fetch = function(url, options) {
-              if (typeof url === 'string' && fileMap[url]) {
-                return originalFetch(fileMap[url], options);
-              }
-              return originalFetch(url, options);
-            };
-
-            // Override XMLHttpRequest
-            const OriginalXHR = window.XMLHttpRequest;
-            window.XMLHttpRequest = function() {
-              const xhr = new OriginalXHR();
-              const originalOpen = xhr.open;
-              xhr.open = function(method, url, ...args) {
-                if (typeof url === 'string' && fileMap[url]) {
-                  url = fileMap[url];
-                }
-                return originalOpen.call(this, method, url, ...args);
-              };
-              return xhr;
-            };
-          </script>`
-        )
-
-        const modifiedBlob = new Blob([modifiedHtml], { type: 'text/html' })
-        const modifiedUrl = URL.createObjectURL(modifiedBlob)
-        blobUrlsRef.current.push(modifiedUrl)
-
-        setExtractedUrl(modifiedUrl)
-        setIsLoading(false)
+        const launchPath = data.launchPath.split('/').map(encodeURIComponent).join('/')
+        if (!cancelled) setExtractedUrl(`/api/learning-content/${lessonId}/asset/${launchPath}`)
       } catch (error) {
         console.error('Error extracting SCORM package:', error)
-        setExtractionError(error instanceof Error ? error.message : 'Failed to extract SCORM package')
-        setIsLoading(false)
+        if (!cancelled) {
+          setExtractionError(error instanceof Error ? error.message : 'Failed to extract SCORM package')
+          setIsLoading(false)
+        }
       }
     }
 
-    extractScormPackage()
+    void prepareScormPackage()
 
-    // Cleanup blob URLs on unmount
     return () => {
-      blobUrlsRef.current.forEach(url => URL.revokeObjectURL(url))
-      blobUrlsRef.current = []
+      cancelled = true
     }
-  }, [packagePath])
+  }, [packagePath, lessonId])
 
   useEffect(() => {
     // Load existing progress
@@ -181,7 +86,7 @@ export function ScormPlayer({
 
   async function loadProgress() {
     try {
-      const response = await fetch(`/api/scorm/progress?lessonId=${lessonId}&userId=${userId}`)
+      const response = await fetch(`/api/learning-progress/scorm?lessonId=${lessonId}&userId=${userId}`)
       if (response.ok) {
         const data = await response.json()
         if (data.progress) {
@@ -216,7 +121,7 @@ export function ScormPlayer({
 
   async function saveProgress(cmiData: Record<string, string>) {
     try {
-      await fetch('/api/scorm/progress', {
+      await fetch('/api/learning-progress/scorm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
