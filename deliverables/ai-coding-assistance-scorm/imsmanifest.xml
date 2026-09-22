@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="UPS_AI_CODING_ASSISTANCE_001" version="1.0"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+    <lom:lom xmlns:lom="http://ltsc.ieee.org/xsd/LOM">
+      <lom:general>
+        <lom:title>
+          <lom:string language="th">AI Coding Assistance: เปลี่ยนแนวคิดเป็นนวัตกรรมด้วย AI</lom:string>
+        </lom:title>
+      </lom:general>
+    </lom:lom>
+  </metadata>
+  <organizations default="UPS_AI_CODING_ASSISTANCE_ORG">
+    <organization identifier="UPS_AI_CODING_ASSISTANCE_ORG">
+      <title>AI Coding Assistance: เปลี่ยนแนวคิดเป็นนวัตกรรมด้วย AI</title>
+      <item identifier="UPS_AI_CODING_ASSISTANCE_ITEM" identifierref="UPS_AI_CODING_ASSISTANCE_SCO">
+        <title>AI Coding Assistance Interactive Lesson</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="UPS_AI_CODING_ASSISTANCE_SCO" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
+    </resource>
+  </resources>
+</manifest>
