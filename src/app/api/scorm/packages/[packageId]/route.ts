@@ -3,16 +3,15 @@ import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { promises as fs } from 'fs'
 import { join } from 'path'
+import { AccessError, publicError, requireEnrollment, requireUser } from '@/lib/access-control'
+import { requirePreviousLessons } from '@/lib/learning-evidence'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ packageId: string }> }
 ) {
   try {
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const user = await requireUser()
 
     const { packageId } = await params
 
@@ -34,12 +33,31 @@ export async function GET(
       return NextResponse.json({ error: 'SCORM package not found' }, { status: 404 })
     }
 
+    if (request.nextUrl.searchParams.get('content') === 'archive') {
+      if (user.role !== 'ADMIN' && user.role !== 'TEACHER') {
+        await requireEnrollment(user.id, scormPackage.lesson.courseId)
+        await requirePreviousLessons(user.id, scormPackage.lesson.id)
+      }
+      const sourceUrl = new URL(scormPackage.packagePath)
+      if (sourceUrl.protocol !== 'https:' || !sourceUrl.hostname.endsWith('.blob.vercel-storage.com')) {
+        throw new AccessError('SCORM package storage is not supported', 409)
+      }
+      const source = await fetch(sourceUrl, { cache: 'no-store' })
+      if (!source.ok || !source.body) throw new AccessError('SCORM package is unavailable', 502)
+      return new NextResponse(source.body, {
+        headers: {
+          'Content-Type': source.headers.get('content-type') || 'application/zip',
+          'Cache-Control': 'private, no-store',
+        },
+      })
+    }
+
     return NextResponse.json({ package: scormPackage })
   } catch (error) {
     console.error('Error fetching SCORM package:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch SCORM package' },
-      { status: 500 }
+      { error: publicError(error) },
+      { status: error instanceof AccessError ? error.status : 500 }
     )
   }
 }

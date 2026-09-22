@@ -59,7 +59,11 @@ export async function importQuizFromExcel(formData: FormData) {
     // Parse Excel file
     console.log('📖 Reading Excel file...')
     const buffer = await excelFile.arrayBuffer()
-    const workbook = XLSX.read(buffer)
+    // SheetJS treats a raw CSV buffer as a legacy single-byte string in some
+    // runtimes. Decode CSV explicitly as UTF-8 so Thai text remains intact.
+    const workbook = excelFile.name.toLowerCase().endsWith('.csv')
+      ? XLSX.read(new TextDecoder('utf-8').decode(buffer), { type: 'string' })
+      : XLSX.read(buffer)
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = XLSX.utils.sheet_to_json(worksheet) as any[]
     console.log('✅ Excel parsed, rows:', data.length)

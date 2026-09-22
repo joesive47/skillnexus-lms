@@ -59,7 +59,7 @@ export function ScormPlayer({
 
         // Download via the LMS so Vercel Blob CORS/CSP policies cannot block
         // a signed-in learner from opening an otherwise valid package.
-        const response = await fetch(`/api/scorm/packages/${lessonId}/download`, { cache: 'no-store' })
+        const response = await fetch(`/api/scorm/packages/${lessonId}?content=archive`, { cache: 'no-store' })
         if (!response.ok) throw new Error('Failed to download SCORM package')
         
         const arrayBuffer = await response.arrayBuffer()

@@ -1,12 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { FormEvent, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2, Edit, Plus, Search } from "lucide-react"
-import { deleteUser, updateUserCredits } from "@/app/actions/user-actions"
+import { createUser, deleteUser, updateUserCredits } from "@/app/actions/user-actions"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface User {
   id: string
@@ -26,10 +35,15 @@ interface UserManagementProps {
 }
 
 export default function UserManagement({ users: initialUsers }: UserManagementProps) {
+  const router = useRouter()
   const [users, setUsers] = useState(initialUsers)
   const [searchTerm, setSearchTerm] = useState("")
   const [editingCredits, setEditingCredits] = useState<string | null>(null)
   const [newCredits, setNewCredits] = useState("")
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const [createError, setCreateError] = useState("")
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "STUDENT" as "STUDENT" | "TEACHER" })
 
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -63,6 +77,28 @@ export default function UserManagement({ users: initialUsers }: UserManagementPr
     }
   }
 
+  const handleCreateUser = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setCreateError("")
+    setIsCreating(true)
+
+    try {
+      const result = await createUser(newUser)
+      if (!result.success) {
+        setCreateError(result.error || "ไม่สามารถเพิ่มผู้ใช้ได้")
+        return
+      }
+
+      setNewUser({ name: "", email: "", password: "", role: "STUDENT" })
+      setIsCreateOpen(false)
+      router.refresh()
+    } catch {
+      setCreateError("ไม่สามารถเพิ่มผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง")
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   const getRoleBadge = (role: string) => {
     const variants = {
       ADMIN: "destructive",
@@ -71,7 +107,7 @@ export default function UserManagement({ users: initialUsers }: UserManagementPr
     
     return (
       <Badge variant={variants[role as keyof typeof variants] || "secondary"}>
-        {role === "ADMIN" ? "ผู้ดูแลระบบ" : "นักเรียน"}
+        {role === "ADMIN" ? "ผู้ดูแลระบบ" : role === "TEACHER" ? "ผู้สอน" : "นักเรียน"}
       </Badge>
     )
   }
@@ -91,11 +127,75 @@ export default function UserManagement({ users: initialUsers }: UserManagementPr
             />
           </div>
         </div>
-        <Button>
+        <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           เพิ่มผู้ใช้
         </Button>
       </div>
+
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>เพิ่มผู้ใช้ใหม่</DialogTitle>
+            <DialogDescription>
+              สร้างบัญชีนักเรียนหรือผู้สอน พร้อมรหัสผ่านชั่วคราวที่ส่งต่อให้เจ้าของบัญชีอย่างปลอดภัย
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={handleCreateUser}>
+            <div className="space-y-2">
+              <label htmlFor="new-user-name" className="text-sm font-medium">ชื่อที่แสดง</label>
+              <Input
+                id="new-user-name"
+                value={newUser.name}
+                onChange={(event) => setNewUser({ ...newUser, name: event.target.value })}
+                autoComplete="name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="new-user-email" className="text-sm font-medium">อีเมล</label>
+              <Input
+                id="new-user-email"
+                type="email"
+                value={newUser.email}
+                onChange={(event) => setNewUser({ ...newUser, email: event.target.value })}
+                autoComplete="email"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="new-user-password" className="text-sm font-medium">รหัสผ่านชั่วคราว</label>
+              <Input
+                id="new-user-password"
+                type="password"
+                value={newUser.password}
+                onChange={(event) => setNewUser({ ...newUser, password: event.target.value })}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+              <p className="text-xs text-muted-foreground">อย่างน้อย 8 ตัวอักษร และต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ ตัวเลข และสัญลักษณ์</p>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="new-user-role" className="text-sm font-medium">บทบาท</label>
+              <select
+                id="new-user-role"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={newUser.role}
+                onChange={(event) => setNewUser({ ...newUser, role: event.target.value as "STUDENT" | "TEACHER" })}
+              >
+                <option value="STUDENT">นักเรียน</option>
+                <option value="TEACHER">ผู้สอน</option>
+              </select>
+            </div>
+            {createError && <p className="text-sm text-destructive" role="alert">{createError}</p>}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>ยกเลิก</Button>
+              <Button type="submit" disabled={isCreating}>{isCreating ? "กำลังสร้าง..." : "สร้างผู้ใช้"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
