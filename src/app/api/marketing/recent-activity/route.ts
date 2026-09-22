@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -18,13 +16,11 @@ export async function GET() {
     }));
 
     return NextResponse.json(activities);
-  } catch (error) {
+  } catch {
     return NextResponse.json([
       { name: 'สมชาย ใจดี', action: 'เพิ่งลงทะเบียนคอร์ส "Web Development"', time: '5 นาทีที่แล้ว' },
       { name: 'สมหญิง รักเรียน', action: 'ได้รับใบประกาศนียบัตร', time: '10 นาทีที่แล้ว' },
     ]);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

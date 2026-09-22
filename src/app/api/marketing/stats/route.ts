@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -18,14 +16,12 @@ export async function GET() {
       courses,
       certificates,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       visitors: 50000,
       members: 1000,
       courses: 50,
       certificates: 500,
     });
-  } finally {
-    await prisma.$disconnect();
   }
 }

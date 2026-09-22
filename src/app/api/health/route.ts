@@ -19,6 +19,10 @@ export async function GET() {
       database: {
         status: dbHealth.status,
         latency: dbHealth.latency,
+        // Do not expose provider errors, connection strings, or topology from a
+        // public endpoint. Detailed timing remains available to server-side
+        // monitoring through checkDatabaseHealth().
+        message: dbHealth.status === 'unhealthy' ? 'Database unavailable' : dbHealth.message,
       },
       timestamp: new Date().toISOString(),
     }

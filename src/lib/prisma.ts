@@ -42,14 +42,14 @@ const createPrismaClient = () => {
   }
 }
 
+// Serverless instances can be reused for many requests. Keep one client for the
+// lifetime of the Node.js process so a warm instance does not open a new database
+// connection for every module reload or route import.
 const prisma = globalForPrisma.prisma ?? createPrismaClient()
+globalForPrisma.prisma = prisma
 
 // Database connection happens automatically on first query
 // Removed eager connection to prevent build-time hangs
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
 
 // Graceful shutdown
 if (typeof window === 'undefined') {

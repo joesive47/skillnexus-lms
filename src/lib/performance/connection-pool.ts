@@ -1,5 +1,9 @@
 // Database Connection Pool Manager
-import { PrismaClient } from '@prisma/client';
+//
+// Prisma owns the underlying pool. Re-export the shared application client so
+// performance helpers do not create a second independent pool.
+import sharedPrisma from '../prisma';
+import type { PrismaClient } from '@prisma/client';
 
 class ConnectionPool {
   private static instance: PrismaClient;
@@ -8,28 +12,7 @@ class ConnectionPool {
 
   static getInstance(): PrismaClient {
     if (!this.instance) {
-      this.instance = new PrismaClient({
-        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-        datasources: {
-          db: {
-            url: process.env.DATABASE_URL
-          }
-        }
-      });
-
-      // Connection lifecycle hooks
-      this.instance.$use(async (params, next) => {
-        const before = Date.now();
-        const result = await next(params);
-        const after = Date.now();
-        
-        // Log slow queries
-        if (after - before > 1000) {
-          console.warn(`Slow query detected: ${params.model}.${params.action} took ${after - before}ms`);
-        }
-        
-        return result;
-      });
+      this.instance = sharedPrisma;
     }
 
     return this.instance;
@@ -51,5 +34,5 @@ class ConnectionPool {
   }
 }
 
-export const prisma = ConnectionPool.getInstance();
+export const prisma = sharedPrisma;
 export default ConnectionPool;
